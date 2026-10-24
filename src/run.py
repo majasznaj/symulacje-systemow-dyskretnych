@@ -29,6 +29,7 @@ def main():
     ap.add_argument("--seed", type=int, default=config.SEED)
     ap.add_argument("--log-every", type=int, default=0, help="log tekstowy: co N-ta ciężarówka")
     ap.add_argument("--log-days", default="", help="log tekstowy: wszystkie ciężarówki z dni miesiąca, np. 1,2 albo 3-5")
+    ap.add_argument("--diagnose", action="store_true", help="diagnostyka grafu, przypięć i zniszczeń (bez symulacji)")
     a = ap.parse_args()
 
     if a.prepare_data:
@@ -61,6 +62,10 @@ def main():
         gdf = toy.make_toy_damage() if a.toy else damage.load_unosat()
         damage.apply_damage(G, damage.filter_as_of(gdf, a.damage_as_of))
     routes = network.compute_routes(G, crossing_nodes, hub_nodes)
+    if a.diagnose:
+        import diagnose
+        diagnose.report(G, crossing_nodes, hub_nodes, routes, config.OUTPUT / (a.month + ("_toy" if a.toy else "")))
+        return
 
     # --- symulacja (krok 6) i raport (krok 7) ---
     trace = []
