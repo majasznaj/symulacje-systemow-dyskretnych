@@ -61,7 +61,7 @@ OVERPASS_URLS = [
 
 # --- zniszczenia (UNOSAT) ---
 USE_DAMAGE = True
-DAMAGE_AS_OF = None        # None = wszystkie punkty; albo np. "2024-03-31" (filtr po SensorDate)
+DAMAGE_AS_OF = "2024-03-31"        # None = wszystkie punkty; albo np. "2024-03-31" (filtr po SensorDate)
 DAMAGE_CELL_M = 500        # bok oczka siatki zliczającej zniszczenia
 DAMAGE_PENALTY = 0.02      # koszt = długość * (1 + PENALTY * zniszczenia^EXPONENT)
 DAMAGE_EXPONENT = 2
