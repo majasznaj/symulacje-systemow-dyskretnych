@@ -27,6 +27,8 @@ def main():
     ap.add_argument("--no-damage", action="store_true")
     ap.add_argument("--damage-as-of", default=config.DAMAGE_AS_OF)
     ap.add_argument("--seed", type=int, default=config.SEED)
+    ap.add_argument("--log-every", type=int, default=0, help="log tekstowy: co N-ta ciężarówka")
+    ap.add_argument("--log-days", default="", help="log tekstowy: wszystkie ciężarówki z dni miesiąca, np. 1,2 albo 3-5")
     a = ap.parse_args()
 
     if a.prepare_data:
@@ -61,9 +63,19 @@ def main():
     routes = network.compute_routes(G, crossing_nodes, hub_nodes)
 
     # --- symulacja (krok 6) i raport (krok 7) ---
-    log = sim.run_simulation(trucks, routes, shares, month=a.month, seed=a.seed)
+    trace = []
+    log = sim.run_simulation(trucks, routes, shares, month=a.month, seed=a.seed, trace_every=a.log_every,
+                            trace_days=sim.parse_days(a.log_days), trace_lines=trace)
     outdir = config.OUTPUT / (a.month + ("_toy" if a.toy else ""))
     outdir.mkdir(parents=True, exist_ok=True)
+    if trace:
+        trace.sort(key=lambda s: (s[1:13]))  # chronologicznie (dz.DD GG:MM)
+        (outdir / "sim_log.txt").write_text("\n".join(trace), encoding="utf-8")
+        print(f"\n--- LOG SYMULACJI ({len(trace)} linii, pełny w {outdir / 'sim_log.txt'}) ---")
+        print("\n".join(trace[:150]))
+        if len(trace) > 150:
+            print(f"... (jeszcze {len(trace) - 150} linii w pliku)")
+  
     log.to_csv(outdir / "truck_log.csv", index=False)
     q, h = report.summarize(log)
     q.to_csv(outdir / "summary_crossings.csv"); h.to_csv(outdir / "summary_hubs.csv")
