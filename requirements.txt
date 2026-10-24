@@ -1,0 +1,9 @@
+osmnx>=2.0
+geopandas
+pyogrio
+networkx
+simpy
+pandas
+openpyxl
+matplotlib
+numpy
