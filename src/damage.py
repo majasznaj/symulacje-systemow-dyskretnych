@@ -39,13 +39,17 @@ def describe_unosat(gdf):
     for col in [c for c in gdf.columns if c.startswith("Main_Damage_Site_Class")]:
         print(f"\n{col}:\n{gdf[col].value_counts(dropna=False).to_string()}")
 
+def first_dates(gdf):
+    """Data pierwszego zdjęcia każdego punktu = najwcześniejsza z kolumn SensorDate, SensorDate_2, ..."""
+    cols = [c for c in gdf.columns if c.startswith("SensorDate")]
+    d = pd.concat([pd.to_datetime(gdf[c], errors="coerce", utc=True) for c in cols], axis=1)
+    return d.min(axis=1)
 
 def filter_as_of(gdf, as_of):
-    """Zostawia punkty, których pierwsze zdjęcie (SensorDate) jest nie późniejsze niż as_of."""
+    """Zostawia punkty, które były już zauważone na zdjęciu nie późniejszym niż as_of."""
     if as_of is None:
         return gdf
-    d = pd.to_datetime(gdf["SensorDate"], errors="coerce")
-    kept = gdf[d <= pd.Timestamp(as_of)]
+    kept = gdf[first_dates(gdf) <= pd.Timestamp(as_of, tz="UTC")]
     print(f"Zniszczenia na {as_of}: {len(kept)} z {len(gdf)} punktów")
     return kept
 
