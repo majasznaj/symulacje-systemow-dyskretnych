@@ -1,5 +1,4 @@
-"""Krok 2: graf dróg Strefy Gazy (pobranie raz, zapis do pliku) i trasy A*."""
-import math
+"""Krok 2: graf dróg Strefy Gazy (pobranie raz, zapis do pliku) i trasy (D* Lite)."""
 import networkx as nx
 import geopandas as gpd
 import osmnx as ox
@@ -25,7 +24,7 @@ def build_graph(path=None, network_type="drive"):
                     G = ox.graph_from_place("Gaza Strip", network_type=network_type)
                 else:
                     G = ox.graph_from_bbox(bbox=config.GAZA_BBOX, network_type=network_type)
-                G = ox.truncate.largest_component(G, strongly=True)
+                G = ox.truncate.largest_component(G, strongly=config.GRAPH_STRONGLY_CONNECTED)
                 path.parent.mkdir(parents=True, exist_ok=True)
                 ox.save_graphml(G, path)
                 print(f"Zapisano {path} ({len(G.nodes)} węzłów, {len(G.edges)} krawędzi)")
@@ -65,25 +64,31 @@ def _best_edge(G, u, v, weight):
     return min(G[u][v].values(), key=lambda d: d.get(weight, d["length"]))
 
 
-def compute_routes(G, crossing_nodes, hub_nodes):
-    """Trasa A* dla każdej pary (przejście, hub). Zniszczenia są statyczne, więc liczymy raz.
+def compute_routes(G, crossing_nodes, hub_nodes, router):
+    """Trasy bazowe (stan dróg w chwili wywołania) dla każdej pary (przejście, hub) z pól D* Lite.
 
-    Zwraca {(przejście, hub): {km, minutes, shortest_km, detour_km}}.
+    Zwraca {(przejście, hub): {path, edge_min, edge_km, km, minutes, shortest_km, detour_km}}.
+    shortest_km to najkrótsza trasa bez zniszczeń i blokad (też D* Lite, z kosztem = długość).
     """
-    def heuristic(a, b):  # odległość w linii prostej (metry) nie przekracza kosztu
-        return math.hypot(G.nodes[a]["x"] - G.nodes[b]["x"], G.nodes[a]["y"] - G.nodes[b]["y"])
-
+    import router as router_mod
+    length_router = router_mod.FieldRouter(G, hub_nodes, next(iter(crossing_nodes.values())),
+                                           cost_fn=router_mod.length_cost)
     routes = {}
     for c, u in crossing_nodes.items():
-        for h, v in hub_nodes.items():
-            path = nx.astar_path(G, u, v, heuristic=heuristic, weight="cost")
-            shortest = nx.astar_path(G, u, v, heuristic=heuristic, weight="length")
-            km = minutes = 0.0
-            for a, b in zip(path[:-1], path[1:]):
-                e = _best_edge(G, a, b, "cost")
-                km += e["length"] / 1000
-                minutes += e["time_min"]
-            short_km = sum(_best_edge(G, a, b, "length")["length"] for a, b in zip(shortest[:-1], shortest[1:])) / 1000
-            routes[(c, h)] = {"km": km, "minutes": minutes, "shortest_km": short_km,
-                              "detour_km": km - short_km, "path": path}
+        for h in hub_nodes:
+            path = router.plan(h, u)
+            edge_min, edge_km = [], []
+            a = u
+            for b in path:
+                dt, dkm = router.edge(a, b)
+                edge_min.append(dt); edge_km.append(dkm)
+                a = b
+            short = length_router.plan(h, u)
+            a, short_km = u, 0.0
+            for b in short:
+                short_km += length_router.edge(a, b)[1]
+                a = b
+            routes[(c, h)] = {"path": [u] + path, "edge_min": edge_min, "edge_km": edge_km,
+                              "km": sum(edge_km), "minutes": sum(edge_min),
+                              "shortest_km": short_km, "detour_km": sum(edge_km) - short_km}
     return routes

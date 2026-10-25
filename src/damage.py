@@ -2,7 +2,7 @@
 import glob
 import math
 import zipfile
-from collections import Counter
+from collections import Counter, defaultdict
 
 import geopandas as gpd
 import osmnx as ox
@@ -39,11 +39,13 @@ def describe_unosat(gdf):
     for col in [c for c in gdf.columns if c.startswith("Main_Damage_Site_Class")]:
         print(f"\n{col}:\n{gdf[col].value_counts(dropna=False).to_string()}")
 
+
 def first_dates(gdf):
     """Data pierwszego zdjęcia każdego punktu = najwcześniejsza z kolumn SensorDate, SensorDate_2, ..."""
     cols = [c for c in gdf.columns if c.startswith("SensorDate")]
     d = pd.concat([pd.to_datetime(gdf[c], errors="coerce", utc=True) for c in cols], axis=1)
     return d.min(axis=1)
+
 
 def filter_as_of(gdf, as_of):
     """Zostawia punkty, które były już zauważone na zdjęciu nie późniejszym niż as_of."""
@@ -63,29 +65,59 @@ def set_base_weights(G):
         d["time_min"] = d["length"] / v
 
 
-def apply_damage(G, damage_gdf):
-    """Zlicza punkty w oczkach siatki i wpisuje do krawędzi damage, cost i time_min.
+class DamageModel:
+    """Zniszczenia UNOSAT na krawędziach grafu, z możliwością dokładania nowych punktów w trakcie symulacji.
 
-    Dla krawędzi bierzemy maksimum zliczeń z oczek, przez które przechodzi (jak w waszym notebooku).
+    Dla krawędzi bierzemy maksimum zliczeń z oczek siatki, przez które przechodzi (jak w waszym notebooku).
+    Dla każdej krawędzi pamiętamy jej oczka, a dla każdego oczka jego krawędzie, więc nowa fala punktów
+    przelicza tylko krawędzie, których to dotyczy.
     """
-    cell = config.DAMAGE_CELL_M
-    pts = damage_gdf.to_crs(G.graph["crs"])
-    counts = Counter(zip((pts.geometry.x // cell).astype(int), (pts.geometry.y // cell).astype(int)))
-    edges = ox.graph_to_gdfs(G, nodes=False)
-    v_free = config.TRUCK_SPEED_KMH * 1000 / 60
-    v_min = config.MIN_SPEED_KMH * 1000 / 60
-    hit = 0
-    for (u, v, k), geom, length in zip(edges.index, edges.geometry, edges["length"]):
-        n = max(2, int(length // (cell / 2)) + 2)
-        dmg = 0
-        for i in range(n):
-            p = geom.interpolate(i / (n - 1), normalized=True)
-            dmg = max(dmg, counts.get((int(p.x // cell), int(p.y // cell)), 0))
+
+    def __init__(self, G, gdf):
+        self.G = G
+        self.cell = config.DAMAGE_CELL_M
+        self.counts = Counter()
+        self.edge_cells, self.cell_edges = {}, defaultdict(list)
+        edges = ox.graph_to_gdfs(G, nodes=False)
+        for (u, v, k), geom, length in zip(edges.index, edges.geometry, edges["length"]):
+            n = max(2, int(length // (self.cell / 2)) + 2)
+            cells = set()
+            for i in range(n):
+                p = geom.interpolate(i / (n - 1), normalized=True)
+                cells.add((int(p.x // self.cell), int(p.y // self.cell)))
+            self.edge_cells[(u, v, k)] = cells
+            for c in cells:
+                self.cell_edges[c].append((u, v, k))
+        changed = self.add_points(gdf)
+        hit = sum(1 for (u, v, k) in self.edge_cells if G[u][v][k]["damage"] > 0)
+        print(f"Zniszczenia nałożone: {hit} z {len(self.edge_cells)} krawędzi przechodzi przez oczka ze zniszczeniami")
+
+    def _refresh(self, u, v, k):
+        dmg = max((self.counts.get(c, 0) for c in self.edge_cells[(u, v, k)]), default=0)
+        d = self.G[u][v][k]
+        length = d["length"]
+        v_free = config.TRUCK_SPEED_KMH * 1000 / 60
+        v_min = config.MIN_SPEED_KMH * 1000 / 60
         mult = min(config.MAX_COST_MULTIPLIER, 1 + config.DAMAGE_PENALTY * dmg ** config.DAMAGE_EXPONENT)
-        speed = max(v_min, v_free / (1 + config.SLOWDOWN_PER_DAMAGE * dmg))
-        d = G[u][v][k]
         d["damage"] = int(dmg)
         d["cost"] = length * mult
-        d["time_min"] = length / speed
-        hit += dmg > 0
-    print(f"Zniszczenia nałożone: {hit} z {len(edges)} krawędzi przechodzi przez oczka ze zniszczeniami")
+        d["time_min"] = length / max(v_min, v_free / (1 + config.SLOWDOWN_PER_DAMAGE * dmg))
+
+    def add_points(self, gdf):
+        """Dokłada punkty zniszczeń. Zwraca zbiór par (u, v), których koszt się zmienił."""
+        if len(gdf) == 0:
+            return set()
+        pts = gdf.to_crs(self.G.graph["crs"])
+        new = Counter(zip((pts.geometry.x // self.cell).astype(int), (pts.geometry.y // self.cell).astype(int)))
+        self.counts.update(new)
+        touched = set()
+        for cell in new:
+            touched.update(self.cell_edges.get(cell, ()))
+        for (u, v, k) in touched:
+            self._refresh(u, v, k)
+        return {(u, v) for (u, v, k) in touched}
+
+
+def apply_damage(G, damage_gdf):
+    """Wersja jednorazowa (bez fal w czasie)."""
+    return DamageModel(G, damage_gdf)

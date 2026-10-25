@@ -52,6 +52,7 @@ HUB_RULES = [
 ]
 
 # --- graf drogowy ---
+GRAPH_STRONGLY_CONNECTED = True   # False = zostaw największą słabo spójną składową (nie gubi miast za jednokierunkową luką)
 GAZA_BBOX = (34.20, 31.21, 34.57, 31.60)   # (zachód, południe, wschód, północ), awaryjnie
 OVERPASS_URLS = [
     "https://overpass-api.de/api",
@@ -61,7 +62,8 @@ OVERPASS_URLS = [
 
 # --- zniszczenia (UNOSAT) ---
 USE_DAMAGE = True
-DAMAGE_AS_OF = "2024-03-31"        # None = wszystkie punkty; albo np. "2024-03-31" (filtr po SensorDate)
+DAMAGE_AS_OF = None        # None = tryb dynamiczny: stan na 1. dzień miesiąca + fale UNOSAT z tego miesiąca
+                           # w dniach zdjęć; data np. "2024-03-31" = stały stan na ten dzień, bez fal
 DAMAGE_CELL_M = 500        # bok oczka siatki zliczającej zniszczenia
 DAMAGE_PENALTY = 0.02      # koszt = długość * (1 + PENALTY * zniszczenia^EXPONENT)
 DAMAGE_EXPONENT = 2
@@ -77,3 +79,7 @@ OPEN_HOURS = (8, 18)        # Excel ma tylko datę; godzinę wjazdu losujemy z t
 CLEARANCE_MIN = (15, 35)    # odprawa: rozkład jednostajny, minuty (wartości z waszego notebooka)
 DEFAULT_LANES = 4           # liczba równoległych stanowisk odprawy
 LANES = {"Kerem Shalom": 8, "Rafah": 6}
+
+# --- dynamika (ZAŁOŻENIA) ---
+STUCK_WAIT_MIN = 15         # ciężarówka bez drogi do hubu sprawdza ponownie co tyle minut
+BLOCK_HOURS = 12            # domyślny czas trwania blokady z --block-main
