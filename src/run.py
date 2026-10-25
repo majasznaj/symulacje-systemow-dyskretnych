@@ -1,10 +1,10 @@
 """Uruchamianie M1.
 
-Kolejność pierwszego razu (np. w Colabie):
-  python run.py --prepare-data      # krok 3 i 4: Excel -> data/processed
-  python run.py --build-graph       # krok 2: graf z Overpass -> data/processed/gaza_drive.graphml
-  python run.py --describe-unosat   # krok 5: diagnostyka kolumn SensorDate
-  python run.py                     # kroki 5-7: cała symulacja
+Kolejność:
+  python run.py --prepare-data      # Excel -> data/processed
+  python run.py --build-graph       # graf z Overpass -> data/processed/gaza_drive.graphml
+  python run.py --describe-unosat   # diagnostyka kolumn SensorDate
+  python run.py                     # cała symulacja
 Test kodu bez sieci i bez UNOSAT: python run.py --toy
 """
 import argparse
