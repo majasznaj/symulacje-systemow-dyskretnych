@@ -21,22 +21,24 @@ GRAPH_FILE = DATA_PROC / "gaza_drive.graphml"
 MONTH = "2024-03"   # miesiąc z Excela, który odtwarzamy
 SEED = 42
 
-# --- przejścia graniczne i huby (współrzędne z waszego notebooka, bez źródła) ---
+# --- przejścia graniczne i huby (WGS84) ---
+# Stan weryfikacji: [W] współrzędne sprawdzone na stronie źródła, [P] pochodzi z PDF Logistics Cluster, [?] bez źródła.
 CROSSINGS = {
-    "Kerem Shalom": (31.2215, 34.2706),
-    "Rafah": (31.2484, 34.2592),
-    "Kissufim": (31.3736, 34.3758),
-    "Gate 96": (31.4395, 34.4125),
-    "JLOTS": (31.4820, 34.4030),
-    "Erez": (31.5414, 34.4908),
-    "Western Erez": (31.5640, 34.4710),
+    "Kerem Shalom": (31.2208, 34.2706),     # [W] Wikipedia: 31°13′15″N 34°16′14″E
+    "Rafah": (31.2486, 34.2592),            # [W] Wikipedia: 31°14′55″N 34°15′33″E
+    "Kissufim": (31.3736, 34.3758),         # [?] z notebooka, bez źródła
+    "Gate 96": (31.4395, 34.4125),          # [?] z notebooka, bez źródła
+    "JLOTS": (31.4820, 34.4030),            # [?] z notebooka, bez źródła (tymczasowe molo)
+    "Erez": (31.5582, 34.5447),             # [W] Wikipedia: 31°33′29.52″N 34°32′41″E (poprzednio 31.5414, 34.4908, ok. 5 km obok)
+    "Western Erez": (31.5640, 34.4710),     # [?] z notebooka, bez źródła
 }
+# Huby to punkty orientacyjne (magazyn albo obóz UNRWA jako przybliżenie okolicy dystrybucji), nie dokładne adresy.
 HUBS = {
-    "Hub_Rafah": (31.2870, 34.2420),
-    "Hub_Khan_Younis": (31.3462, 34.3039),
-    "Hub_Deir_al_Balah": (31.4183, 34.3519),
-    "Hub_Gaza_City": (31.5080, 34.4510),
-    "Hub_North_Jabalia": (31.5350, 34.4820),
+    "Hub_Rafah": (31.2979, 34.2723),        # [P] Logistics Cluster, Rafah Transit hub I (dokument z 2009; zamiennik: hub II 31.3007, 34.2752)
+    "Hub_Khan_Younis": (31.3508, 34.2883),  # [?] obóz Khan Yunis wg Gemini (31°21′03″N 34°17′18″E), strona Wikipedii nie podaje współrzędnych
+    "Hub_Deir_al_Balah": (31.4258, 34.3406),  # [W] Wikipedia, obóz Deir al-Balah: 31°25′33″N 34°20′26″E
+    "Hub_Gaza_City": (31.5080, 34.4510),    # [?] z notebooka (zamiennik: Logistics Cluster Gaza City 31.5033, 34.4751)
+    "Hub_North_Jabalia": (31.5372, 34.4964),  # [W] Wikipedia, obóz Jabalia: 31°32′14″N 34°29′47″E
 }
 # nazwa w Excelu (Received) -> nazwa w CROSSINGS
 CROSSING_ALIASES = {"Rafah Crossing": "Rafah"}
@@ -56,6 +58,13 @@ HUB_RULES = [
 ]
 
 # --- graf drogowy ---
+# Typy dróg: filtr osmnx "drive" odrzuca m.in. service (podjazdy, boczne uliczki) i track (drogi polne). W Strefie wiele
+# realnych dróg ma właśnie te tagi, więc wpuszczamy je (ROAD_EXCLUDED to lista z "drive" bez service i track).
+USE_EXTRA_ROAD_TYPES = True   # False = zwykłe "drive" jak dotąd
+ROAD_EXCLUDED = ("abandoned|bridleway|bus_guideway|construction|corridor|cycleway|elevator|escalator|footway|no|path|"
+                 "pedestrian|planned|platform|proposed|raceway|razed|rest_area|services|steps")
+# Wolniejsze typy dróg: prędkość swobodna = TRUCK_SPEED_KMH * współczynnik (ZAŁOŻENIA, brak danych)
+ROAD_SPEED_FACTOR = {"service": 0.6, "living_street": 0.6, "track": 0.4}
 GRAPH_STRONGLY_CONNECTED = True   # False = zostaw największą słabo spójną składową (nie gubi miast za jednokierunkową luką)
 GAZA_BBOX = (34.20, 31.21, 34.57, 31.60)   # (zachód, południe, wschód, północ), awaryjnie
 OVERPASS_URLS = [
@@ -81,9 +90,20 @@ SLOWDOWN_PER_DAMAGE = 1 / 150   # prędkość = SPEED / (1 + SLOWDOWN * zniszcze
 
 # --- przejścia: kolejka (ZAŁOŻENIA) ---
 OPEN_HOURS = (8, 18)        # Excel ma tylko datę; godzinę wjazdu losujemy z tego okna
-CLEARANCE_MIN = (15, 35)    # odprawa: rozkład jednostajny, minuty (wartości z waszego notebooka)
+# Odprawa (G w notacji Kendalla). "uniform": rozkład jednostajny CLEARANCE_MIN; "erlang": Erlang(k) o średniej SERVICE_MEAN_MIN.
+# Obie wartości średniej są takie same (25 min), więc zmiana rozkładu nie zmienia średniego obciążenia stanowisk.
+SERVICE_DIST = "erlang"
+CLEARANCE_MIN = (15, 35)    # dla "uniform" (wartości z waszego notebooka)
+SERVICE_MEAN_MIN = 25.0     # dla "erlang" (ZAŁOŻENIE)
+ERLANG_K = 3                # kształt: im większe, tym bardziej równy czas odprawy (k=1 to rozkład wykładniczy)
+# Pojemność strefy przejścia (K w notacji Kendalla): ile ciężarówek naraz stoi w kolejce lub jest odprawianych.
+# Pełna strefa = ciężarówka czeka na drodze przed nią (nikt nie znika). ZAŁOŻENIE, brak danych.
+ZONE_CAPACITY = {"Kerem Shalom": 60, "Rafah": 40}
+DEFAULT_ZONE_CAPACITY = 40
 DEFAULT_LANES = 4           # liczba równoległych stanowisk odprawy
 LANES = {"Kerem Shalom": 8, "Rafah": 6}
+
+UNLOAD_MIN = (0.0, 0.0)     # czas rozładunku w hubie, minuty (ZAŁOŻENIE; 0 = jak dotąd, bez modelu tłumu)
 
 # --- dynamika (ZAŁOŻENIA) ---
 STUCK_GIVE_UP_H = 72         # ciężarówka bez drogi do hubu czeka tyle godzin, potem rezygnuje (delivered=False)

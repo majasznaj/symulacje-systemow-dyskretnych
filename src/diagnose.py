@@ -8,6 +8,7 @@ import osmnx as ox
 import pandas as pd
 
 import config
+import damage
 
 
 def _km(lat1, lon1, lat2, lon2):
@@ -51,12 +52,15 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir):
     rows = []
     for (c, h), r in routes.items():
         straight = _km(*config.CROSSINGS[c], *config.HUBS[h])
+        # czas tej samej trasy bez zniszczeń (z uwzględnieniem wolniejszych typów dróg)
+        base_min = sum(min(d["length"] / (v_free * 1000 / 60 * damage.speed_factor(d)) for d in G[a][b].values())
+                       for a, b in zip(r["path"], r["path"][1:]))
         rows.append({"przejście": c, "hub": h, "linia_prosta_km": round(straight, 1),
                      "najkrótsza_km": round(r["shortest_km"], 1),
                      "najkr/prosta": round(r["shortest_km"] / straight, 2),
                      "trasa_km": round(r["km"], 1), "czas_min": round(r["minutes"]),
-                     "czas_bez_zniszczeń_min": round(r["shortest_km"] / v_free * 60),
-                     "spowolnienie_x": round(r["minutes"] / (r["shortest_km"] / v_free * 60), 1)})
+                     "czas_bez_zniszczeń_min": round(base_min),
+                     "spowolnienie_x": round(r["minutes"] / base_min, 1)})
     pairs = pd.DataFrame(rows)
     print(pairs.to_string(index=False))
     pairs.to_csv(outdir / "diagnoza_pary.csv", index=False)
@@ -66,7 +70,8 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir):
     dmg = edges["damage"]
     print("liczba punktów UNOSAT w oczku (max po krawędzi): "
           + ", ".join(f"p{q}={dmg.quantile(q / 100):.0f}" for q in (10, 25, 50, 75, 90, 99)) + f", max={dmg.max():.0f}")
-    slow = edges["time_min"] / (edges["length"] / (v_free * 1000 / 60))
+    sf = edges["highway"].map(lambda h: damage.speed_factor({"highway": h}))
+    slow = edges["time_min"] / (edges["length"] / (v_free * 1000 / 60 * sf))
     sat = config.TRUCK_SPEED_KMH / config.MIN_SPEED_KMH
     print(f"krawędzie bez zniszczeń: {(dmg == 0).mean():.0%}")
     print(f"czas przejazdu >= 2x: {(slow >= 2).mean():.0%}; >= 4x: {(slow >= 4).mean():.0%}; "

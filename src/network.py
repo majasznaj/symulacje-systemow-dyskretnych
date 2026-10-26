@@ -7,6 +7,16 @@ from shapely.geometry import Point
 import config
 
 
+def road_filter():
+    """Filtr Overpass: jak 'drive' z osmnx, ale z drogami service i track. None = zwykłe 'drive'."""
+    if not config.USE_EXTRA_ROAD_TYPES:
+        return None
+    return ('["highway"]["area"!~"yes"]["access"!~"private"]'
+            f'["highway"!~"{config.ROAD_EXCLUDED}"]'
+            '["motor_vehicle"!~"no"]["motorcar"!~"no"]'
+            '["service"!~"emergency_access|parking|parking_aisle|private"]')
+
+
 def build_graph(path=None, network_type="drive"):
     """Pobiera sieć dróg z Overpass i zapisuje do pliku. Uruchamiasz RAZ (python run.py --build-graph)."""
     path = path or config.GRAPH_FILE
@@ -21,9 +31,9 @@ def build_graph(path=None, network_type="drive"):
             try:
                 print(f"Pobieram graf: {url} ({how})...")
                 if how == "place":
-                    G = ox.graph_from_place("Gaza Strip", network_type=network_type)
+                    G = ox.graph_from_place("Gaza Strip", network_type=network_type, custom_filter=road_filter())
                 else:
-                    G = ox.graph_from_bbox(bbox=config.GAZA_BBOX, network_type=network_type)
+                    G = ox.graph_from_bbox(bbox=config.GAZA_BBOX, network_type=network_type, custom_filter=road_filter())
                 G = ox.truncate.largest_component(G, strongly=config.GRAPH_STRONGLY_CONNECTED)
                 path.parent.mkdir(parents=True, exist_ok=True)
                 ox.save_graphml(G, path)

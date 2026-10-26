@@ -10,7 +10,8 @@ import config
 def summarize(log):
     done = log[log["delivered"]]
     q = log.groupby("crossing").agg(
-        trucks=("truck_id", "size"), queue_mean_min=("queue_min", "mean"),
+        trucks=("truck_id", "size"), queue_mean_min=("queue_min", "mean"), outside_mean_min=("outside_min", "mean"),
+        outside_share=("outside_min", lambda s: (s > 0).mean()),
         queue_p95_min=("queue_min", lambda s: s.quantile(0.95)), queue_max_min=("queue_min", "max"),
     )
     h = done.groupby("hub").agg(
@@ -41,11 +42,14 @@ def checks(trucks, log):
     start_service = log["arrival_min"] + log["queue_min"]
     res.append(("czasy kolejek są nieujemne, a dojazd kończy się po odprawie",
                 bool((log["queue_min"] >= -1e-9).all() and (log["done_min"] >= log["cleared_min"] - 1e-9).all())))
-    ok = True
+    ok = zone_ok = True
     for c, g in log.groupby("crossing"):
         peak = _max_concurrent(start_service[g.index], g["cleared_min"])
         ok &= peak <= config.LANES.get(c, config.DEFAULT_LANES)
+        in_zone = _max_concurrent(g["zone_entry_min"], g["cleared_min"])
+        zone_ok &= in_zone <= config.ZONE_CAPACITY.get(c, config.DEFAULT_ZONE_CAPACITY)
     res.append(("na żadnym przejściu nie obsługiwano naraz więcej ciężarówek niż stanowisk", bool(ok)))
+    res.append(("w żadnej strefie przejścia nie było naraz więcej ciężarówek niż jej pojemność K", bool(zone_ok)))
     last_queue = log.sort_values("cleared_min").groupby("crossing").tail(50).groupby("crossing")["queue_min"].mean()
     res.append(("kolejki nie rosną bez końca (ostatnie 50 ciężarówek na przejściu czeka < 60 min)",
                 bool((last_queue < 60).all())))

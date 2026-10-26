@@ -63,12 +63,20 @@ def filter_as_of(gdf, as_of):
     return kept
 
 
+def speed_factor(d):
+    """Mnożnik prędkości swobodnej zależny od typu drogi (najwolniejszy typ, gdy krawędź ma kilka tagów)."""
+    hw = d.get("highway")
+    hw = hw if isinstance(hw, list) else [hw]
+    return min((config.ROAD_SPEED_FACTOR.get(h, 1.0) for h in hw), default=1.0)
+
+
 def set_base_weights(G):
     """Bez zniszczeń: czas = długość / prędkość, koszt dla routera = czas [min]."""
     v = config.TRUCK_SPEED_KMH * 1000 / 60  # m/min
     for _, _, _, d in G.edges(keys=True, data=True):
         d["damage"] = 0
-        d["time_min"] = d["length"] / v
+        d["speed_factor"] = speed_factor(d)
+        d["time_min"] = d["length"] / (v * d["speed_factor"])
         d["cost"] = d["time_min"]
 
 
@@ -103,8 +111,8 @@ class DamageModel:
         dmg = max((self.counts.get(c, 0) for c in self.edge_cells[(u, v, k)]), default=0)
         d = self.G[u][v][k]
         length = d["length"]
-        v_free = config.TRUCK_SPEED_KMH * 1000 / 60
-        v_min = config.MIN_SPEED_KMH * 1000 / 60
+        v_free = config.TRUCK_SPEED_KMH * 1000 / 60 * speed_factor(d)
+        v_min = min(config.MIN_SPEED_KMH * 1000 / 60, v_free)
         # jeden wzór: ciężarówka jedzie wolniej, a router dostaje ten sam czas (plus opcjonalna kara za ryzyko)
         d["damage"] = int(dmg)
         d["time_min"] = length / max(v_min, v_free / (1 + config.SLOWDOWN_PER_DAMAGE * dmg))
