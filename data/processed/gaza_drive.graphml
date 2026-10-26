@@ -21,7 +21,7 @@
 <key id="d2" for="graph" attr.name="crs" attr.type="string"/>
 <key id="d1" for="graph" attr.name="created_with" attr.type="string"/>
 <key id="d0" for="graph" attr.name="created_date" attr.type="string"/>
-<graph edgedefault="directed"><data key="d0">2026-10-25 08:41:24</data>
+<graph edgedefault="directed"><data key="d0">2026-10-26 12:10:23</data>
 <data key="d1">OSMnx 2.1.1</data>
 <data key="d2">epsg:4326</data>
 <data key="d3">True</data>
@@ -74174,7 +74174,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
-  <data key="d10">['Haifa', 'Barbara']</data>
+  <data key="d10">['Barbara', 'Haifa']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">124.73887195794379</data>
@@ -77325,7 +77325,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">133.43344454981576</data>
   <data key="d14">LINESTRING (34.5176227 31.5572379, 34.5174021 31.5570544, 34.5173587 31.5569986, 34.5173252 31.5569136, 34.5179213 31.5564699, 34.5180169 31.5564017)</data>
@@ -77745,7 +77745,7 @@
 </edge>
 <edge source="503994677" target="504000790" id="0">
   <data key="d8">[1019651500, 41243591]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -80364,7 +80364,7 @@
 <edge source="503996243" target="503999854" id="0">
   <data key="d8">[41245408, 41243084]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
@@ -82629,7 +82629,7 @@
   <data key="d8">[41244035, 41244923]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['20', '50']</data>
+  <data key="d16">['50', '20']</data>
   <data key="d10">شارع العودة</data>
   <data key="d11">False</data>
   <data key="d17">12</data>
@@ -82661,7 +82661,7 @@
   <data key="d8">[41244405, 41243487]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d17">8</data>
   <data key="d12">[False, True]</data>
@@ -83019,7 +83019,7 @@
   <data key="d15">2</data>
   <data key="d16">50</data>
   <data key="d11">False</data>
-  <data key="d17">['10', '12']</data>
+  <data key="d17">['12', '10']</data>
   <data key="d12">True</data>
   <data key="d13">109.15144544069472</data>
   <data key="d14">LINESTRING (34.4962803 31.5356244, 34.4964774 31.5358702, 34.4957872 31.536219)</data>
@@ -84139,7 +84139,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
-  <data key="d10">['Haifa', 'Barbara']</data>
+  <data key="d10">['Barbara', 'Haifa']</data>
   <data key="d11">False</data>
   <data key="d17">8</data>
   <data key="d12">[False, True]</data>
@@ -85049,7 +85049,7 @@
   <data key="d8">[41244889, 1013749631]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
   <data key="d17">6</data>
   <data key="d12">False</data>
@@ -86879,7 +86879,7 @@
 </edge>
 <edge source="503998795" target="2999660936" id="0">
   <data key="d8">[41245275, 41245427]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">4</data>
   <data key="d16">50</data>
   <data key="d11">True</data>
@@ -87279,7 +87279,7 @@
   <data key="d8">[41244405, 41243487]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d17">8</data>
   <data key="d12">[False, True]</data>
@@ -88121,7 +88121,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
-  <data key="d10">['Demra', 'Al Masmeya']</data>
+  <data key="d10">['Al Masmeya', 'Demra']</data>
   <data key="d11">False</data>
   <data key="d17">6</data>
   <data key="d12">[False, True]</data>
@@ -88343,7 +88343,7 @@
 <edge source="503999854" target="503996243" id="0">
   <data key="d8">[41245408, 41243084]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
@@ -88705,7 +88705,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">50</data>
-  <data key="d10">['شارع المنشية', 'Al Mansheya']</data>
+  <data key="d10">['Al Mansheya', 'شارع المنشية']</data>
   <data key="d11">False</data>
   <data key="d17">10</data>
   <data key="d12">True</data>
@@ -89035,10 +89035,10 @@
   <data key="d8">[1310602578, 41245419]</data>
   <data key="d9">tertiary</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d10">شارع الجمعية</data>
   <data key="d11">False</data>
-  <data key="d17">['14', '8']</data>
+  <data key="d17">['8', '14']</data>
   <data key="d12">True</data>
   <data key="d13">229.67150317134187</data>
   <data key="d14">LINESTRING (34.5051596 31.5594906, 34.5056406 31.5599488, 34.5058114 31.5601232, 34.5058861 31.5602124, 34.5060715 31.5604339, 34.5061725 31.5605546, 34.5064504 31.5608866, 34.50646 31.560897, 34.5066574 31.5611116)</data>
@@ -89546,7 +89546,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">True</data>
   <data key="d13">160.37822561598136</data>
   <data key="d14">LINESTRING (34.540596 31.53978, 34.5410164 31.539585, 34.5411739 31.5395085, 34.5413079 31.5394435, 34.5420168 31.5391242, 34.5420821 31.5390904)</data>
@@ -90087,7 +90087,7 @@
 </edge>
 <edge source="504000790" target="503994677" id="0">
   <data key="d8">[1019651500, 41243591]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -91619,7 +91619,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">False</data>
   <data key="d13">160.37822561598136</data>
   <data key="d14">LINESTRING (34.5420821 31.5390904, 34.5420168 31.5391242, 34.5413079 31.5394435, 34.5411739 31.5395085, 34.5410164 31.539585, 34.540596 31.53978)</data>
@@ -91693,7 +91693,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
-  <data key="d10">['Demra', 'Al Masmeya']</data>
+  <data key="d10">['Al Masmeya', 'Demra']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">104.71130616174281</data>
@@ -91705,7 +91705,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">['40', '50']</data>
-  <data key="d10">['Demra', 'Najed']</data>
+  <data key="d10">['Najed', 'Demra']</data>
   <data key="d11">False</data>
   <data key="d17">['10', '6']</data>
   <data key="d12">True</data>
@@ -92762,7 +92762,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">133.4334445498158</data>
   <data key="d14">LINESTRING (34.5180169 31.5564017, 34.5179213 31.5564699, 34.5173252 31.5569136, 34.5173587 31.5569986, 34.5174021 31.5570544, 34.5176227 31.5572379)</data>
@@ -93764,7 +93764,7 @@
   <data key="d15">['4', '2']</data>
   <data key="d16">['40', '50']</data>
   <data key="d11">False</data>
-  <data key="d17">['14', '8']</data>
+  <data key="d17">['8', '14']</data>
   <data key="d12">False</data>
   <data key="d13">229.67150317134187</data>
   <data key="d10">شارع الجمعية</data>
@@ -98839,7 +98839,7 @@
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">1150.1169736887994</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d14">LINESTRING (34.5171114 31.5745082, 34.5168199 31.5742366, 34.5164942 31.5739713, 34.515798 31.5734863, 34.5156161 31.5734129, 34.5149739 31.573232, 34.5146893 31.5730319, 34.5143382 31.5727317, 34.5141671 31.5724848, 34.5138712 31.5718357, 34.5137839 31.5716903, 34.5136422 31.5715031, 34.5134152 31.5713627, 34.5133368 31.5705195, 34.5134145 31.5701952, 34.5134336 31.5697458, 34.5134237 31.5695834, 34.5133977 31.5693799, 34.5133689 31.5691642, 34.5132965 31.5688927, 34.5132651 31.5686742, 34.5132531 31.5684463, 34.513251 31.5682062, 34.5132535 31.5679586, 34.513218 31.5676808, 34.5131793 31.5674263, 34.5131728 31.5671607, 34.5131559 31.5669818, 34.5131407 31.5668363, 34.5130926 31.5666584, 34.513031 31.5663696, 34.5130081 31.5662642, 34.5129673 31.5661078, 34.5129029 31.5658021, 34.5128738 31.5656802)</data>
 </edge>
 <edge source="504005000" target="9999597946" id="0">
@@ -99391,7 +99391,7 @@
   <data key="d8">[41244914, 41245015]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d10">Al Toam</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -99598,10 +99598,10 @@
   <data key="d8">[41244209, 41244413, 41244071]</data>
   <data key="d9">secondary</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['40', '60']</data>
-  <data key="d10">['شارع البحر', 'شارع التوام']</data>
+  <data key="d16">['60', '40']</data>
+  <data key="d10">['شارع التوام', 'شارع البحر']</data>
   <data key="d11">True</data>
-  <data key="d17">['10', '12', '20']</data>
+  <data key="d17">['10', '20', '12']</data>
   <data key="d12">False</data>
   <data key="d13">338.25106088857797</data>
   <data key="d14">LINESTRING (34.4768425 31.5454595, 34.4765377 31.5457936, 34.4763655 31.5460008, 34.4759674 31.546578, 34.4759457 31.5466041, 34.4757432 31.5468477, 34.4755031 31.5471396, 34.4752968 31.5474144, 34.4752214 31.5474874, 34.4753256 31.5476087, 34.4754092 31.5477285, 34.4754484 31.5478319, 34.4754851 31.5479239, 34.4755023 31.548012)</data>
@@ -101320,8 +101320,8 @@
   <data key="d8">[41244601, 377498172]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
-  <data key="d10">['Demra', 'Najed']</data>
+  <data key="d16">['50', '40']</data>
+  <data key="d10">['Najed', 'Demra']</data>
   <data key="d11">False</data>
   <data key="d17">['10', '6']</data>
   <data key="d12">False</data>
@@ -101516,7 +101516,7 @@
   <data key="d8">[41244793, 41244511]</data>
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
   <data key="d17">['10', '6']</data>
   <data key="d12">True</data>
@@ -102151,7 +102151,7 @@
 <edge source="504006498" target="12049512454" id="0">
   <data key="d8">[41243697, 41244039]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -105274,7 +105274,7 @@
   <data key="d8">[41244593, 41244926]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">196.2721679178258</data>
@@ -105481,7 +105481,7 @@
   <data key="d8">[41244923, 41244035]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['50', '20']</data>
+  <data key="d16">['20', '50']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">307.2993063990896</data>
@@ -106327,7 +106327,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">False</data>
   <data key="d13">140.9561714986526</data>
   <data key="d14">LINESTRING (34.4919484 31.5662607, 34.4917638 31.56628, 34.4915646 31.5663408, 34.4912912 31.5664287, 34.4910555 31.5664911, 34.4908222 31.5665679, 34.4906193 31.5666186, 34.4905338 31.5665957)</data>
@@ -107439,7 +107439,7 @@
   <data key="d9">secondary</data>
   <data key="d15">4</data>
   <data key="d16">50</data>
-  <data key="d10">['شارع عز الدين القسام', 'شارع الشفاء - عز الدين القاسم']</data>
+  <data key="d10">['شارع الشفاء - عز الدين القاسم', 'شارع عز الدين القسام']</data>
   <data key="d17">20</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
@@ -107937,8 +107937,8 @@
 <edge source="504253322" target="504269637" id="0">
   <data key="d8">[41256017, 41255870]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">124.77138684005487</data>
@@ -108134,7 +108134,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">50</data>
-  <data key="d10">['Haifa', 'Al-Mashahra']</data>
+  <data key="d10">['Al-Mashahra', 'Haifa']</data>
   <data key="d11">False</data>
   <data key="d17">['12', '8']</data>
   <data key="d12">False</data>
@@ -109445,7 +109445,7 @@
   <data key="d8">[41256200, 41254332]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
   <data key="d17">6</data>
   <data key="d12">True</data>
@@ -112267,7 +112267,7 @@
 <edge source="504256749" target="8777687783" id="0">
   <data key="d8">[41257512, 978343378]</data>
   <data key="d9">residential</data>
-  <data key="d10">['شارع نواكشوط', 'شارع جيبوتي']</data>
+  <data key="d10">['شارع جيبوتي', 'شارع نواكشوط']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">328.4416539237799</data>
@@ -112471,7 +112471,7 @@
   <data key="d8">[41255209, 41254965]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d10">شارع عبد الرحيم محمود</data>
   <data key="d11">False</data>
   <data key="d17">8</data>
@@ -112803,7 +112803,7 @@
 </edge>
 <edge source="504257170" target="504299861" id="0">
   <data key="d8">[41256728, 41257254]</data>
-  <data key="d9">['tertiary', 'secondary']</data>
+  <data key="d9">['secondary', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">['40', '50']</data>
   <data key="d11">False</data>
@@ -112965,9 +112965,9 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
-  <data key="d10">['شارع أحمد ياسين', 'شارع أحمد ياسين "شارع النديم"']</data>
+  <data key="d10">['شارع أحمد ياسين "شارع النديم"', 'شارع أحمد ياسين']</data>
   <data key="d11">False</data>
-  <data key="d17">['10', '12']</data>
+  <data key="d17">['12', '10']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">194.76966732797436</data>
   <data key="d14">LINESTRING (34.4526762 31.4973216, 34.4527366 31.4973773, 34.4529008 31.4974937, 34.4530665 31.4975886, 34.4531845 31.4976544, 34.4534943 31.4977957, 34.4538029 31.4979744, 34.4540013 31.4980951, 34.4541515 31.4982196, 34.4542951 31.4983767)</data>
@@ -114744,7 +114744,7 @@
 <edge source="504258464" target="8850496861" id="0">
   <data key="d8">[41254579, 41256445]</data>
   <data key="d9">secondary</data>
-  <data key="d15">['6', '2']</data>
+  <data key="d15">['2', '6']</data>
   <data key="d16">60</data>
   <data key="d10">شارع القدس</data>
   <data key="d11">True</data>
@@ -115550,7 +115550,7 @@
 <edge source="504259147" target="11760581219" id="0">
   <data key="d8">[41254843, 41254539]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">['40', '20']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
@@ -118312,8 +118312,8 @@
 <edge source="504261284" target="504283549" id="0">
   <data key="d8">[41257925, 41257766]</data>
   <data key="d9">residential</data>
-  <data key="d15">['6', '2']</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d15">['2', '6']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d10">شارع حيفا</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
@@ -119509,7 +119509,7 @@
   <data key="d8">[41257008, 41255106]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '20']</data>
+  <data key="d16">['20', '30']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">447.7089740742732</data>
@@ -120704,7 +120704,7 @@
   <data key="d8">[41254574, 41255367]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d10">شارع الصحابة</data>
   <data key="d11">False</data>
   <data key="d17">8</data>
@@ -121240,9 +121240,9 @@
 <edge source="504263045" target="3019159795" id="0">
   <data key="d8">[41254803, 41254220]</data>
   <data key="d9">residential</data>
-  <data key="d15">['6', '2']</data>
+  <data key="d15">['2', '6']</data>
   <data key="d16">40</data>
-  <data key="d10">['شارع عمان', 'شارع عمّان']</data>
+  <data key="d10">['شارع عمّان', 'شارع عمان']</data>
   <data key="d11">False</data>
   <data key="d17">['12', '20']</data>
   <data key="d12">True</data>
@@ -121511,7 +121511,7 @@
   <data key="d8">[41255369, 41254147]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['50', '20']</data>
+  <data key="d16">['20', '50']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">320.58327682418366</data>
@@ -124622,7 +124622,7 @@
 <edge source="504265713" target="504283183" id="0">
   <data key="d8">[41255906, 41254525]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -124983,8 +124983,8 @@
 <edge source="504265959" target="504287406" id="0">
   <data key="d8">[41257756, 1005923247]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
   <data key="d17">4</data>
   <data key="d12">False</data>
@@ -126479,7 +126479,7 @@
   <data key="d8">[305438710, 301712918]</data>
   <data key="d9">secondary</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '50']</data>
+  <data key="d16">['50', '80']</data>
   <data key="d10">الكرامة</data>
   <data key="d11">False</data>
   <data key="d17">['10', '8']</data>
@@ -128557,7 +128557,7 @@
   <data key="d8">[41256739, 41254126]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '20']</data>
+  <data key="d16">['20', '30']</data>
   <data key="d10">شارع مدحت الوحيدي</data>
   <data key="d11">False</data>
   <data key="d17">8</data>
@@ -129381,8 +129381,8 @@
 <edge source="504269637" target="504253322" id="0">
   <data key="d8">[41256017, 41255870]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d17">4</data>
   <data key="d12">False</data>
@@ -131615,7 +131615,7 @@
   <data key="d8">[41257008, 41255106]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '20']</data>
+  <data key="d16">['20', '30']</data>
   <data key="d11">False</data>
   <data key="d17">8</data>
   <data key="d12">True</data>
@@ -131945,7 +131945,7 @@
 </edge>
 <edge source="504271654" target="504287325" id="0">
   <data key="d8">[41254425, 41255946]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">['4', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -133894,9 +133894,9 @@
   <data key="d8">[41255936, 41254682]</data>
   <data key="d9">residential</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d11">False</data>
-  <data key="d17">['20', '8']</data>
+  <data key="d17">['8', '20']</data>
   <data key="d12">True</data>
   <data key="d13">66.94861000191082</data>
   <data key="d10">شارع القاهرة</data>
@@ -141364,9 +141364,9 @@
   <data key="d8">[41255202, 41255572]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">False</data>
   <data key="d13">222.70828258181953</data>
   <data key="d14">LINESTRING (34.4623283 31.491841, 34.4625793 31.4913546, 34.4627469 31.491156, 34.4628801 31.4909748, 34.4628841 31.4908181, 34.4628849 31.4907271, 34.4630411 31.4905372, 34.4632677 31.4903546, 34.4635119 31.4901869)</data>
@@ -142424,7 +142424,7 @@
   <data key="d15">2</data>
   <data key="d16">['10', '40']</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">129.10941865954516</data>
   <data key="d14">LINESTRING (34.4811169 31.5017558, 34.4814512 31.5021108, 34.4817552 31.5024455, 34.4814826 31.5026061)</data>
@@ -144941,7 +144941,7 @@
 <edge source="504283183" target="504265713" id="0">
   <data key="d8">[41255906, 41254525]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -145357,7 +145357,7 @@
   <data key="d8">[41257349, 41254270]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">72.62967850034998</data>
@@ -145366,8 +145366,8 @@
 <edge source="504283549" target="504261284" id="0">
   <data key="d8">[41257925, 41257766]</data>
   <data key="d9">residential</data>
-  <data key="d15">['6', '2']</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d15">['2', '6']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">163.63040909031884</data>
@@ -145993,7 +145993,7 @@
   <data key="d8">[41255547, 41256615]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">212.5311944047964</data>
@@ -147018,7 +147018,7 @@
   <data key="d8">[593764276, 41257838]</data>
   <data key="d9">['primary', 'tertiary']</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d10">الرشيد</data>
   <data key="d11">False</data>
   <data key="d17">10</data>
@@ -148773,7 +148773,7 @@
   <data key="d8">[593764276, 41257838]</data>
   <data key="d9">['primary', 'tertiary']</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d10">الرشيد</data>
   <data key="d11">False</data>
   <data key="d17">10</data>
@@ -149442,7 +149442,7 @@
 </edge>
 <edge source="504287325" target="504271654" id="0">
   <data key="d8">[41254425, 41255946]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">['4', '2']</data>
   <data key="d16">40</data>
   <data key="d10">شارع بور سعيد</data>
@@ -149527,7 +149527,7 @@
 <edge source="504287406" target="504265959" id="0">
   <data key="d8">[41257756, 1005923247]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">['40', '20']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
@@ -151477,7 +151477,7 @@
   <data key="d8">[41254727, 41254199]</data>
   <data key="d9">residential</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d10">['Alqutli', 'شارع القوتلي']</data>
   <data key="d11">False</data>
   <data key="d17">['12', '8']</data>
@@ -153513,7 +153513,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
-  <data key="d10">['شارع أحمد ياسين', 'شارع أحمد ياسين "شارع النديم"']</data>
+  <data key="d10">['شارع أحمد ياسين "شارع النديم"', 'شارع أحمد ياسين']</data>
   <data key="d11">False</data>
   <data key="d17">['10', '12']</data>
   <data key="d12">[False, True]</data>
@@ -154772,7 +154772,7 @@
 <edge source="504292316" target="504300217" id="0">
   <data key="d8">[41256931, 41256285]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">20</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -155165,7 +155165,7 @@
   <data key="d8">[41257349, 41254270]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">72.62967850034998</data>
@@ -155436,7 +155436,7 @@
   <data key="d9">secondary</data>
   <data key="d15">4</data>
   <data key="d16">50</data>
-  <data key="d10">['شارع عز الدين القسام', 'شارع الشفاء - عز الدين القاسم']</data>
+  <data key="d10">['شارع الشفاء - عز الدين القاسم', 'شارع عز الدين القسام']</data>
   <data key="d11">False</data>
   <data key="d17">20</data>
   <data key="d12">True</data>
@@ -155610,7 +155610,7 @@
   <data key="d15">2</data>
   <data key="d16">['10', '40']</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">129.10941865954516</data>
   <data key="d14">LINESTRING (34.4814826 31.5026061, 34.4817552 31.5024455, 34.4814512 31.5021108, 34.4811169 31.5017558)</data>
@@ -156933,7 +156933,7 @@
 </edge>
 <edge source="504294018" target="3007603745" id="0">
   <data key="d8">[41257784, 41255295]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">50</data>
   <data key="d10">شارع سعيد العاص</data>
@@ -158468,7 +158468,7 @@
   <data key="d8">[41255369, 41254147]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['20', '50']</data>
+  <data key="d16">['50', '20']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">320.58327682418366</data>
@@ -160139,7 +160139,7 @@
   <data key="d8">[41255970, 41255423]</data>
   <data key="d9">residential</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">137.96848635294563</data>
@@ -162387,7 +162387,7 @@
   <data key="d8">[41255547, 41256615]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">212.5311944047964</data>
@@ -164087,11 +164087,11 @@
 <edge source="504299172" target="8880172985" id="0">
   <data key="d8">[297666950, 41257279]</data>
   <data key="d9">residential</data>
-  <data key="d15">['6', '2']</data>
+  <data key="d15">['2', '6']</data>
   <data key="d16">40</data>
   <data key="d10">شارع الدار البيضاء</data>
   <data key="d11">False</data>
-  <data key="d17">['24', '8']</data>
+  <data key="d17">['8', '24']</data>
   <data key="d12">False</data>
   <data key="d13">195.60463696997752</data>
   <data key="d14">LINESTRING (34.42276 31.5077474, 34.423688 31.507269, 34.4240909 31.5070757, 34.4245361 31.5068524)</data>
@@ -165019,7 +165019,7 @@
   <data key="d8">[41256728, 41257254]</data>
   <data key="d9">['tertiary', 'secondary']</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d10">شارع طارق بن زياد</data>
   <data key="d11">False</data>
   <data key="d17">10</data>
@@ -165375,7 +165375,7 @@
 <edge source="504300217" target="504292316" id="0">
   <data key="d8">[41256931, 41256285]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">20</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -165749,7 +165749,7 @@
 </edge>
 <edge source="504300422" target="11345127162" id="0">
   <data key="d8">[134572590, 1545518863]</data>
-  <data key="d9">['tertiary', 'secondary']</data>
+  <data key="d9">['secondary', 'tertiary']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">163.55898080875636</data>
@@ -172924,7 +172924,7 @@
 </edge>
 <edge source="505016266" target="505041688" id="0">
   <data key="d8">[41304881, 300644303]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">4</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -174592,7 +174592,7 @@
 <edge source="505016815" target="3123326218" id="0">
   <data key="d8">[41307409, 41306036, 41305709]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d10">No.2</data>
   <data key="d11">False</data>
@@ -177454,7 +177454,7 @@
 <edge source="505017618" target="505041998" id="0">
   <data key="d8">[41306842, 41307171]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -177485,7 +177485,7 @@
 </edge>
 <edge source="505017629" target="3177924403" id="0">
   <data key="d8">[41308028, 41308005, 1012789788]</data>
-  <data key="d9">['tertiary', 'secondary']</data>
+  <data key="d9">['secondary', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">80</data>
   <data key="d10">الرشيد</data>
@@ -179943,7 +179943,7 @@
 <edge source="505018781" target="505027364" id="0">
   <data key="d8">[1268149388, 41307334]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -184177,7 +184177,7 @@
 <edge source="505020711" target="11786480892" id="0">
   <data key="d8">[41307868, 41308822]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -185302,7 +185302,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '5']</data>
+  <data key="d17">['5', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">91.34410447936231</data>
   <data key="d14">LINESTRING (34.375681 31.4567882, 34.3757384 31.4566976, 34.3759781 31.4562425, 34.3762339 31.4562181)</data>
@@ -194510,7 +194510,7 @@
 <edge source="505024539" target="505040128" id="0">
   <data key="d8">[41304819, 41306003]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d17">6</data>
@@ -195358,7 +195358,7 @@
 <edge source="505024776" target="3005695158" id="0">
   <data key="d8">[41308268, 41305157]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
@@ -195511,7 +195511,7 @@
   <data key="d15">2</data>
   <data key="d16">50</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '4']</data>
+  <data key="d17">['4', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">202.0776945153226</data>
   <data key="d14">LINESTRING (34.3739241 31.4201922, 34.3745882 31.419754, 34.3741203 31.4192206, 34.3737117 31.4194801)</data>
@@ -198168,7 +198168,7 @@
   <data key="d8">[303328425, 41305019]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['20', '50']</data>
+  <data key="d16">['50', '20']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">280.1757292858391</data>
@@ -198856,8 +198856,8 @@
 <edge source="505026313" target="11388905438" id="0">
   <data key="d8">[41305406, 41306615]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">190.45243957861797</data>
@@ -199548,11 +199548,11 @@
 </edge>
 <edge source="505026648" target="505035210" id="0">
   <data key="d8">[41308410, 41305910]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">['4', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '16']</data>
+  <data key="d17">['16', '6']</data>
   <data key="d12">False</data>
   <data key="d13">227.25104553294216</data>
   <data key="d14">LINESTRING (34.4013044 31.433266, 34.4015729 31.4330962, 34.4018804 31.432956, 34.402793 31.4325969, 34.4034361 31.4323455)</data>
@@ -200751,7 +200751,7 @@
 <edge source="505027085" target="11406923714" id="0">
   <data key="d8">[41306532, 41307255]</data>
   <data key="d9">unclassified</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
@@ -201285,7 +201285,7 @@
 <edge source="505027364" target="505018781" id="0">
   <data key="d8">[1268149388, 41307334]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -201507,7 +201507,7 @@
 <edge source="505027404" target="9300360921" id="0">
   <data key="d8">[41307448, 41307094]</data>
   <data key="d9">unclassified</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">20</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -202953,7 +202953,7 @@
   <data key="d15">2</data>
   <data key="d16">50</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">211.14087064454068</data>
   <data key="d14">LINESTRING (34.3887974 31.4166344, 34.3891032 31.4162694, 34.3892269 31.4162755, 34.3893884 31.4161874, 34.389665 31.4164799, 34.389966 31.4168967, 34.3902068 31.4171359)</data>
@@ -208038,7 +208038,7 @@
 <edge source="505029496" target="11764258327" id="0">
   <data key="d8">[1230044665, 41305069]</data>
   <data key="d9">['unclassified', 'residential']</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -214528,7 +214528,7 @@
   <data key="d8">[41305603, 41308182]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">62.95072146487296</data>
@@ -214559,10 +214559,10 @@
 <edge source="505031803" target="505033703" id="0">
   <data key="d8">[41305428, 41306221]</data>
   <data key="d9">unclassified</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '4']</data>
+  <data key="d17">['4', '6']</data>
   <data key="d12">True</data>
   <data key="d13">209.17576071139888</data>
   <data key="d14">LINESTRING (34.3841192 31.4194072, 34.3850013 31.4191031, 34.3850761 31.419078, 34.38509 31.4190676, 34.3850957 31.4190603, 34.3851006 31.4190332, 34.3850924 31.4189923, 34.3850817 31.4189594, 34.3850193 31.4188253, 34.3850122 31.4188101, 34.384939 31.4186974, 34.3848529 31.418565, 34.3846716 31.4183192, 34.3845836 31.418199)</data>
@@ -215010,10 +215010,10 @@
 <edge source="505031993" target="1203310550" id="0">
   <data key="d8">[295766785, 41305677]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['3', '8']</data>
+  <data key="d17">['8', '3']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">231.00610104418308</data>
   <data key="d10">Mokhim 1</data>
@@ -219434,7 +219434,7 @@
 <edge source="505033703" target="505031803" id="0">
   <data key="d8">[41305428, 41306221]</data>
   <data key="d9">unclassified</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">['40', '50']</data>
   <data key="d11">False</data>
   <data key="d17">['4', '6']</data>
@@ -222606,11 +222606,11 @@
 </edge>
 <edge source="505035210" target="505026648" id="0">
   <data key="d8">[41308410, 41305910]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">['4', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '16']</data>
+  <data key="d17">['16', '6']</data>
   <data key="d12">True</data>
   <data key="d13">227.25104553294213</data>
   <data key="d14">LINESTRING (34.4034361 31.4323455, 34.402793 31.4325969, 34.4018804 31.432956, 34.4015729 31.4330962, 34.4013044 31.433266)</data>
@@ -223925,7 +223925,7 @@
 <edge source="505035709" target="3081950527" id="0">
   <data key="d8">[41307291, 41307991]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -224604,7 +224604,7 @@
 </edge>
 <edge source="505035878" target="505023329" id="0">
   <data key="d8">[41308841, 41305339]</data>
-  <data key="d9">['tertiary', 'unclassified']</data>
+  <data key="d9">['unclassified', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -226471,7 +226471,7 @@
   <data key="d15">2</data>
   <data key="d16">50</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">211.14087064454068</data>
   <data key="d14">LINESTRING (34.3902068 31.4171359, 34.389966 31.4168967, 34.389665 31.4164799, 34.3893884 31.4161874, 34.3892269 31.4162755, 34.3891032 31.4162694, 34.3887974 31.4166344)</data>
@@ -229052,7 +229052,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '4']</data>
+  <data key="d17">['4', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">95.27676178587599</data>
   <data key="d14">LINESTRING (34.3420523 31.3641047, 34.3422385 31.363851, 34.3423524 31.3637376, 34.3424734 31.3636495, 34.3425818 31.3636845, 34.342765 31.3637591)</data>
@@ -233368,7 +233368,7 @@
 <edge source="505040128" target="505024539" id="0">
   <data key="d8">[41306003, 41304819]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -237321,7 +237321,7 @@
 </edge>
 <edge source="505041688" target="505016266" id="0">
   <data key="d8">[41304881, 300644303]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">4</data>
   <data key="d16">40</data>
   <data key="d10">Al Andalus</data>
@@ -237994,7 +237994,7 @@
 <edge source="505041998" target="505017618" id="0">
   <data key="d8">[41306842, 41307171]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -238580,7 +238580,7 @@
 </edge>
 <edge source="505042346" target="505043756" id="0">
   <data key="d8">[302663360, 302663361, 41305970]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d10">Abu-Hosni</data>
@@ -238846,7 +238846,7 @@
   <data key="d8">[1267052480, 1219381601]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">189.9502176724705</data>
@@ -242200,7 +242200,7 @@
 </edge>
 <edge source="505043756" target="505042346" id="0">
   <data key="d8">[302663360, 302663361, 41305970]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d10">Abu-Hosni</data>
@@ -242261,7 +242261,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">30</data>
-  <data key="d10">['Street N° 46 شارع رقم 46', 'Street N° 46 ( North Street ) . شارع رقم 46']</data>
+  <data key="d10">['Street N° 46 ( North Street ) . شارع رقم 46', 'Street N° 46 شارع رقم 46']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">190.6839964729537</data>
@@ -247305,8 +247305,8 @@
 <edge source="505087694" target="505091037" id="0">
   <data key="d8">[41316769, 41318782]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
   <data key="d17">4</data>
   <data key="d12">[False, True]</data>
@@ -248219,8 +248219,8 @@
 <edge source="505089269" target="8850479593" id="0">
   <data key="d8">[41319513, 41316867]</data>
   <data key="d9">['unclassified', 'residential']</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['80', '40']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['40', '80']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">839.1239861503391</data>
@@ -249630,7 +249630,7 @@
 <edge source="505091037" target="505087694" id="0">
   <data key="d8">[41316769, 41318782]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">['40', '20']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -249641,10 +249641,10 @@
 <edge source="505091037" target="505127604" id="0">
   <data key="d8">[891355300, 891355301]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '4']</data>
+  <data key="d17">['4', '6']</data>
   <data key="d12">True</data>
   <data key="d13">165.4027942150485</data>
   <data key="d14">LINESTRING (34.3376603 31.3232459, 34.3376014 31.3232024, 34.3370907 31.3228499, 34.3362886 31.32233)</data>
@@ -249942,10 +249942,10 @@
 <edge source="505091265" target="505133567" id="0">
   <data key="d8">[41312912, 41313977]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">['40', '20']</data>
   <data key="d11">False</data>
-  <data key="d17">['4', '8']</data>
+  <data key="d17">['8', '4']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">1001.2885271358142</data>
   <data key="d14">LINESTRING (34.2747726 31.281263, 34.2754831 31.2820413, 34.2758494 31.2824789, 34.2760111 31.2826645, 34.2762846 31.2830188, 34.2765832 31.2833304, 34.2766284 31.2833974, 34.2767375 31.2834911, 34.2770245 31.2837757, 34.2772334 31.2839467, 34.2775612 31.2842831, 34.2776265 31.2843374, 34.2778311 31.2845437, 34.27785 31.2845629, 34.2781463 31.2848021, 34.2781799 31.2848293, 34.2783265 31.284932, 34.2786856 31.2852771, 34.2789673 31.2855427, 34.2794178 31.2859126, 34.279626 31.2860973, 34.2797351 31.2861861, 34.2803543 31.2867704, 34.2803772 31.2867861, 34.2812606 31.287538, 34.2817607 31.2879722)</data>
@@ -250076,7 +250076,7 @@
   <data key="d8">[41319338, 41317341]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">205.14616982809008</data>
@@ -251067,10 +251067,10 @@
 <edge source="505092837" target="505092920" id="0">
   <data key="d8">[41316784, 41318921]</data>
   <data key="d9">tertiary</data>
-  <data key="d15">['4', '1']</data>
-  <data key="d16">['50', '20']</data>
+  <data key="d15">['1', '4']</data>
+  <data key="d16">['20', '50']</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '16']</data>
+  <data key="d17">['16', '6']</data>
   <data key="d12">True</data>
   <data key="d13">49.14065521662165</data>
   <data key="d14">LINESTRING (34.3202107 31.3229716, 34.3202628 31.3230196, 34.3203585 31.3230886, 34.3206139 31.3232468)</data>
@@ -251236,10 +251236,10 @@
 <edge source="505092920" target="505092837" id="0">
   <data key="d8">[41316784, 41318921]</data>
   <data key="d9">tertiary</data>
-  <data key="d15">['4', '1']</data>
-  <data key="d16">['20', '50']</data>
+  <data key="d15">['1', '4']</data>
+  <data key="d16">['50', '20']</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '16']</data>
+  <data key="d17">['16', '6']</data>
   <data key="d12">False</data>
   <data key="d13">49.14065521662165</data>
   <data key="d14">LINESTRING (34.3206139 31.3232468, 34.3203585 31.3230886, 34.3202628 31.3230196, 34.3202107 31.3229716)</data>
@@ -251534,7 +251534,7 @@
 <edge source="505093124" target="505116982" id="0">
   <data key="d8">[41317148, 41312919]</data>
   <data key="d9">unclassified</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">20</data>
   <data key="d11">False</data>
   <data key="d17">['4', '6']</data>
@@ -251559,7 +251559,7 @@
   <data key="d15">2</data>
   <data key="d16">20</data>
   <data key="d11">False</data>
-  <data key="d17">['4', '3']</data>
+  <data key="d17">['3', '4']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">622.7436020575409</data>
   <data key="d14">LINESTRING (34.293799 31.3077484, 34.2945228 31.3072521, 34.2953921 31.3066198, 34.2958499 31.3063332, 34.2962742 31.306006, 34.2966582 31.3057099, 34.2968582 31.3055766, 34.2976615 31.3050273, 34.297968 31.3048195, 34.2983723 31.3044762, 34.2986083 31.3041759, 34.2986426 31.304041)</data>
@@ -254154,8 +254154,8 @@
   <data key="d8">[296307759, 41316439, 300111375]</data>
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '60']</data>
-  <data key="d10">['Rabaih', 'Abo-Taima']</data>
+  <data key="d16">['60', '80']</data>
+  <data key="d10">['Abo-Taima', 'Rabaih']</data>
   <data key="d11">False</data>
   <data key="d17">['10', '8']</data>
   <data key="d12">[False, True]</data>
@@ -254717,7 +254717,7 @@
 </edge>
 <edge source="505095489" target="505117463" id="0">
   <data key="d8">[41316744, 41313317]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -255416,7 +255416,7 @@
   <data key="d8">[41319513, 41314155]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '40']</data>
+  <data key="d16">['40', '80']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">728.2306969032054</data>
@@ -256222,8 +256222,8 @@
   <data key="d8">[41318118, 41319622, 41317997, 41312569, 41319038]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
-  <data key="d10">['شارع الروايدة', 'شارع القرا', 'أبو رجيلة']</data>
+  <data key="d16">['50', '40']</data>
+  <data key="d10">['شارع الروايدة', 'أبو رجيلة', 'شارع القرا']</data>
   <data key="d11">False</data>
   <data key="d17">['10', '8']</data>
   <data key="d12">[False, True]</data>
@@ -257854,8 +257854,8 @@
   <data key="d8">[41314946, 198539251]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
-  <data key="d10">['شارع ابوعنزة', 'El-Shhidda']</data>
+  <data key="d16">['60', '40']</data>
+  <data key="d10">['El-Shhidda', 'شارع ابوعنزة']</data>
   <data key="d11">False</data>
   <data key="d17">10</data>
   <data key="d12">True</data>
@@ -259317,9 +259317,9 @@
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
-  <data key="d10">['شارع الدهرة', 'شارع الضهرة']</data>
+  <data key="d10">['شارع الضهرة', 'شارع الدهرة']</data>
   <data key="d11">False</data>
-  <data key="d17">['14', '16']</data>
+  <data key="d17">['16', '14']</data>
   <data key="d12">True</data>
   <data key="d13">61.53482660557836</data>
   <data key="d14">LINESTRING (34.2941866 31.3554857, 34.2941513 31.3554455, 34.2940449 31.3553245, 34.2938587 31.355129, 34.2937902 31.3550481)</data>
@@ -260331,7 +260331,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">['40', '50']</data>
-  <data key="d10">['شارع الروايدة', 'شارع القرا', 'أبو رجيلة']</data>
+  <data key="d10">['شارع الروايدة', 'أبو رجيلة', 'شارع القرا']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">2022.6119586351708</data>
@@ -261091,7 +261091,7 @@
   <data key="d8">[41313937, 41318038]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">82.58476929157948</data>
@@ -264014,7 +264014,7 @@
 <edge source="505104055" target="505120048" id="0">
   <data key="d8">[41318393, 41317807]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d17">['4', '6']</data>
@@ -265249,7 +265249,7 @@
   <data key="d8">[41313504, 41319618]</data>
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">1199.3143443338552</data>
@@ -265269,7 +265269,7 @@
   <data key="d8">[41317049, 41317430]</data>
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">183.15619903849557</data>
@@ -265596,7 +265596,7 @@
 <edge source="505105401" target="505117184" id="0">
   <data key="d8">[41319472, 41319394]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -265617,7 +265617,7 @@
   <data key="d8">[41315423, 41315991]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">32.55355773469373</data>
@@ -268323,7 +268323,7 @@
   <data key="d8">[41319513, 41314155]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '40']</data>
+  <data key="d16">['40', '80']</data>
   <data key="d11">False</data>
   <data key="d17">6</data>
   <data key="d12">False</data>
@@ -268884,7 +268884,7 @@
 <edge source="505109075" target="3098999503" id="0">
   <data key="d8">[41314425, 41316645]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -268972,9 +268972,9 @@
 </edge>
 <edge source="505109160" target="505123396" id="0">
   <data key="d8">[41317704, 41316654]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['80', '40']</data>
+  <data key="d16">['40', '80']</data>
   <data key="d10">['عبسان الكبيرة', 'العودة']</data>
   <data key="d11">False</data>
   <data key="d17">['10', '24']</data>
@@ -269439,7 +269439,7 @@
 </edge>
 <edge source="505109508" target="2995714271" id="0">
   <data key="d8">[41317617, 295810295]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -269535,7 +269535,7 @@
   <data key="d8">[300111375, 41316439, 296307759]</data>
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '60']</data>
+  <data key="d16">['60', '80']</data>
   <data key="d10">['Rabaih', 'Abo-Taima']</data>
   <data key="d11">False</data>
   <data key="d17">['10', '8']</data>
@@ -270191,7 +270191,7 @@
   <data key="d8">[41317552, 41319352]</data>
   <data key="d9">residential</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
   <data key="d17">10</data>
   <data key="d12">[False, True]</data>
@@ -270400,7 +270400,7 @@
   <data key="d9">secondary</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
-  <data key="d10">['شارع 5', 'Road 5']</data>
+  <data key="d10">['Road 5', 'شارع 5']</data>
   <data key="d11">False</data>
   <data key="d17">12</data>
   <data key="d12">False</data>
@@ -271225,7 +271225,7 @@
   <data key="d16">80</data>
   <data key="d10">صلاح الدين</data>
   <data key="d11">True</data>
-  <data key="d17">['24', '12']</data>
+  <data key="d17">['12', '24']</data>
   <data key="d12">False</data>
   <data key="d13">70.55789112235833</data>
   <data key="d14">LINESTRING (34.3132934 31.3402577, 34.313518 31.3405267, 34.3135948 31.3406194, 34.3136386 31.3407033, 34.3136743 31.3407972)</data>
@@ -273915,10 +273915,10 @@
 <edge source="505116982" target="505093124" id="0">
   <data key="d8">[41317148, 41312919]</data>
   <data key="d9">unclassified</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">20</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '4']</data>
+  <data key="d17">['4', '6']</data>
   <data key="d12">True</data>
   <data key="d13">358.9784773974072</data>
   <data key="d14">LINESTRING (34.2950463 31.3106538, 34.2950541 31.3106289, 34.2950533 31.3103284, 34.2950628 31.3101744, 34.2950544 31.3101201, 34.2950363 31.3100227, 34.2950441 31.3098958, 34.2949079 31.3095018, 34.2948408 31.3093133, 34.2947991 31.3092224, 34.2946918 31.3089164, 34.2944916 31.3084173, 34.2944654 31.3083543, 34.2944171 31.3082323, 34.2943568 31.3081556, 34.293799 31.3077484)</data>
@@ -274205,7 +274205,7 @@
 <edge source="505117184" target="505105401" id="0">
   <data key="d8">[41319472, 41319394]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -274324,7 +274324,7 @@
   <data key="d8">[41315991, 41315423]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">32.55355773469373</data>
@@ -274445,7 +274445,7 @@
 </edge>
 <edge source="505117463" target="505095489" id="0">
   <data key="d8">[41316744, 41313317]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -274869,7 +274869,7 @@
 </edge>
 <edge source="505117811" target="505131499" id="0">
   <data key="d8">[299949740, 41313909]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -276145,10 +276145,10 @@
   <data key="d8">[1218159993, 41312581]</data>
   <data key="d9">tertiary</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d10">Abo-Baker Al-Seddeq</data>
   <data key="d11">False</data>
-  <data key="d17">['20', '8']</data>
+  <data key="d17">['8', '20']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">620.7796687449439</data>
   <data key="d14">LINESTRING (34.2331093 31.3196255, 34.2332899 31.320173, 34.2337136 31.3215249, 34.234072 31.3225227, 34.2341789 31.3230051, 34.2342349 31.3235373, 34.2342096 31.323938, 34.2341989 31.3243688, 34.2342406 31.3247776, 34.2342823 31.3250784)</data>
@@ -276343,10 +276343,10 @@
 <edge source="505120048" target="505104055" id="0">
   <data key="d8">[41318393, 41317807]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '4']</data>
+  <data key="d17">['4', '6']</data>
   <data key="d12">False</data>
   <data key="d13">500.04824054923665</data>
   <data key="d14">LINESTRING (34.3052602 31.3341426, 34.30508 31.3340697, 34.3042409 31.3337075, 34.3038339 31.3336778, 34.3032256 31.3336005, 34.3029944 31.3336157, 34.3022803 31.3342055, 34.3019099 31.3345165, 34.3017398 31.33463, 34.3014902 31.3348628, 34.30098 31.3353575)</data>
@@ -278501,7 +278501,7 @@
   <data key="d8">[41313504, 41319618]</data>
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">1199.3143443338556</data>
@@ -278554,11 +278554,11 @@
 </edge>
 <edge source="505123396" target="505109160" id="0">
   <data key="d8">[41317704, 41316654]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['80', '40']</data>
+  <data key="d16">['40', '80']</data>
   <data key="d10">['عبسان الكبيرة', 'العودة']</data>
-  <data key="d17">['24', '10']</data>
+  <data key="d17">['10', '24']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">102.4095766951735</data>
@@ -281010,7 +281010,7 @@
 <edge source="505127604" target="505091037" id="0">
   <data key="d8">[891355300, 891355301]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d17">['4', '6']</data>
@@ -281514,7 +281514,7 @@
 <edge source="505128454" target="3006854990" id="0">
   <data key="d8">[296878400, 296878399]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d17">['4', '3']</data>
@@ -283180,7 +283180,7 @@
   <data key="d8">[41314946, 198539251]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d10">['El-Shhidda', 'شارع ابوعنزة']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
@@ -283384,7 +283384,7 @@
 </edge>
 <edge source="505131499" target="505117811" id="0">
   <data key="d8">[299949740, 41313909]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">2897.5344891649256</data>
@@ -284786,10 +284786,10 @@
 <edge source="505133567" target="505091265" id="0">
   <data key="d8">[41312912, 41313977]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
-  <data key="d17">['4', '8']</data>
+  <data key="d17">['8', '4']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">1001.2885271358142</data>
   <data key="d14">LINESTRING (34.2817607 31.2879722, 34.2812606 31.287538, 34.2803772 31.2867861, 34.2803543 31.2867704, 34.2797351 31.2861861, 34.279626 31.2860973, 34.2794178 31.2859126, 34.2789673 31.2855427, 34.2786856 31.2852771, 34.2783265 31.284932, 34.2781799 31.2848293, 34.2781463 31.2848021, 34.27785 31.2845629, 34.2778311 31.2845437, 34.2776265 31.2843374, 34.2775612 31.2842831, 34.2772334 31.2839467, 34.2770245 31.2837757, 34.2767375 31.2834911, 34.2766284 31.2833974, 34.2765832 31.2833304, 34.2762846 31.2830188, 34.2760111 31.2826645, 34.2758494 31.2824789, 34.2754831 31.2820413, 34.2747726 31.281263)</data>
@@ -286361,7 +286361,7 @@
   <data key="d8">[198539250, 41319461]</data>
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '40']</data>
+  <data key="d16">['40', '80']</data>
   <data key="d10">Abo-Taima</data>
   <data key="d11">False</data>
   <data key="d17">['10', '8']</data>
@@ -286979,7 +286979,7 @@
 <edge source="505137255" target="8850488012" id="0">
   <data key="d8">[1288310841, 41317623]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">20</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
@@ -287741,7 +287741,7 @@
   <data key="d8">[41313937, 41318038]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '40']</data>
+  <data key="d16">['40', '30']</data>
   <data key="d11">False</data>
   <data key="d17">6</data>
   <data key="d12">True</data>
@@ -288765,9 +288765,9 @@
   <data key="d8">[41317282, 300583126]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">114.30400517785968</data>
   <data key="d14">LINESTRING (34.3037262 31.3567209, 34.3032856 31.3562922, 34.303415 31.3561162, 34.3032249 31.3559264)</data>
@@ -289122,10 +289122,10 @@
 <edge source="505141665" target="3100650691" id="0">
   <data key="d8">[41312602, 41314164]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['4', '8']</data>
+  <data key="d17">['8', '4']</data>
   <data key="d12">False</data>
   <data key="d13">330.3230079594818</data>
   <data key="d14">LINESTRING (34.3229283 31.349401, 34.3228955 31.3493073, 34.3223141 31.3489941, 34.3217587 31.3486812, 34.3212336 31.348418, 34.3208117 31.348134, 34.3200966 31.3477182)</data>
@@ -290822,7 +290822,7 @@
 </edge>
 <edge source="650969732" target="3076622625" id="0">
   <data key="d8">[298801924, 41243759]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -290837,7 +290837,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">True</data>
   <data key="d13">140.9561714986526</data>
   <data key="d14">LINESTRING (34.4905338 31.5665957, 34.4906193 31.5666186, 34.4908222 31.5665679, 34.4910555 31.5664911, 34.4912912 31.5664287, 34.4915646 31.5663408, 34.4917638 31.56628, 34.4919484 31.5662607)</data>
@@ -292101,11 +292101,11 @@
 <edge source="1203310550" target="505031993" id="0">
   <data key="d8">[295766785, 41305677]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d10">Mokhim 1</data>
   <data key="d11">False</data>
-  <data key="d17">['3', '8']</data>
+  <data key="d17">['8', '3']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">231.00610104418308</data>
   <data key="d14">LINESTRING (34.369869 31.4307538, 34.3690357 31.4313364, 34.3691162 31.4314714, 34.3682043 31.4321103)</data>
@@ -293049,7 +293049,7 @@
 </edge>
 <edge source="1676126762" target="505095153" id="0">
   <data key="d8">[305027332, 123783711]</data>
-  <data key="d9">['tertiary', 'secondary']</data>
+  <data key="d9">['secondary', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">50</data>
   <data key="d10">شارع السكة</data>
@@ -295548,11 +295548,11 @@
 <edge source="2086453497" target="10314747895" id="0">
   <data key="d8">[980818241, 41257711]</data>
   <data key="d9">secondary</data>
-  <data key="d15">['4', '3']</data>
+  <data key="d15">['3', '4']</data>
   <data key="d16">['60', '50']</data>
   <data key="d10">شارع عمر المختار</data>
   <data key="d11">True</data>
-  <data key="d17">['30', '12']</data>
+  <data key="d17">['12', '30']</data>
   <data key="d12">False</data>
   <data key="d13">89.04029071574125</data>
   <data key="d14">LINESTRING (34.4484772 31.5164601, 34.4484213 31.5164958, 34.4478039 31.5170177)</data>
@@ -297208,7 +297208,7 @@
   <data key="d16">['40', '50']</data>
   <data key="d10">Abo-Baker Al-Seddeq</data>
   <data key="d11">False</data>
-  <data key="d17">['20', '8']</data>
+  <data key="d17">['8', '20']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">620.7796687449439</data>
   <data key="d14">LINESTRING (34.2342823 31.3250784, 34.2342406 31.3247776, 34.2341989 31.3243688, 34.2342096 31.323938, 34.2342349 31.3235373, 34.2341789 31.3230051, 34.234072 31.3225227, 34.2337136 31.3215249, 34.2332899 31.320173, 34.2331093 31.3196255)</data>
@@ -299730,7 +299730,7 @@
 </edge>
 <edge source="2995714271" target="505109508" id="0">
   <data key="d8">[41317617, 295810295]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -303386,7 +303386,7 @@
   <data key="d8">[1303091448, 41245152]</data>
   <data key="d9">residential</data>
   <data key="d15">1</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
   <data key="d12">False</data>
   <data key="d13">86.77044661652491</data>
@@ -309023,7 +309023,7 @@
 <edge source="3005695158" target="505024776" id="0">
   <data key="d8">[41308268, 41305157]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
@@ -309567,10 +309567,10 @@
 <edge source="3006854990" target="505128454" id="0">
   <data key="d8">[296878400, 296878399]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['4', '3']</data>
+  <data key="d17">['3', '4']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">45.98207274315546</data>
   <data key="d14">LINESTRING (34.2779382 31.3666079, 34.2780519 31.3664117, 34.2778495 31.3663222)</data>
@@ -309900,7 +309900,7 @@
 </edge>
 <edge source="3007603745" target="504294018" id="0">
   <data key="d8">[41257784, 41255295]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">50</data>
   <data key="d10">شارع سعيد العاص</data>
@@ -310918,9 +310918,9 @@
   <data key="d8">[41314512, 297129610]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
-  <data key="d17">['4', '8']</data>
+  <data key="d17">['8', '4']</data>
   <data key="d12">False</data>
   <data key="d13">100.03938471871832</data>
   <data key="d14">LINESTRING (34.2955694 31.3519438, 34.29553 31.3519263, 34.2953104 31.3518675, 34.2952463 31.3518508, 34.2951923 31.351849, 34.295079 31.3517538, 34.2948992 31.3515952, 34.2948524 31.3515346, 34.2947714 31.3514213)</data>
@@ -310978,7 +310978,7 @@
   <data key="d15">2</data>
   <data key="d16">['40', '20']</data>
   <data key="d11">False</data>
-  <data key="d17">['4', '8']</data>
+  <data key="d17">['8', '4']</data>
   <data key="d12">True</data>
   <data key="d13">100.03938471871831</data>
   <data key="d14">LINESTRING (34.2947714 31.3514213, 34.2948524 31.3515346, 34.2948992 31.3515952, 34.295079 31.3517538, 34.2951923 31.351849, 34.2952463 31.3518508, 34.2953104 31.3518675, 34.29553 31.3519263, 34.2955694 31.3519438)</data>
@@ -311561,9 +311561,9 @@
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
-  <data key="d10">['شارع الدهرة', 'شارع الضهرة']</data>
+  <data key="d10">['شارع الضهرة', 'شارع الدهرة']</data>
   <data key="d11">False</data>
-  <data key="d17">['14', '16']</data>
+  <data key="d17">['16', '14']</data>
   <data key="d12">False</data>
   <data key="d13">61.53482660557836</data>
   <data key="d14">LINESTRING (34.2937902 31.3550481, 34.2938587 31.355129, 34.2940449 31.3553245, 34.2941513 31.3554455, 34.2941866 31.3554857)</data>
@@ -318363,9 +318363,9 @@
 <edge source="3019159795" target="504263045" id="0">
   <data key="d8">[41254803, 41254220]</data>
   <data key="d9">residential</data>
-  <data key="d15">['6', '2']</data>
+  <data key="d15">['2', '6']</data>
   <data key="d16">40</data>
-  <data key="d10">['شارع عمان', 'شارع عمّان']</data>
+  <data key="d10">['شارع عمّان', 'شارع عمان']</data>
   <data key="d11">False</data>
   <data key="d17">['12', '20']</data>
   <data key="d12">False</data>
@@ -323000,7 +323000,7 @@
   <data key="d15">2</data>
   <data key="d16">['40', '20']</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">True</data>
   <data key="d13">222.7082825818195</data>
   <data key="d14">LINESTRING (34.4635119 31.4901869, 34.4632677 31.4903546, 34.4630411 31.4905372, 34.4628849 31.4907271, 34.4628841 31.4908181, 34.4628801 31.4909748, 34.4627469 31.491156, 34.4625793 31.4913546, 34.4623283 31.491841)</data>
@@ -327214,7 +327214,7 @@
   <data key="d8">[41312689, 300583124]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '50']</data>
+  <data key="d16">['50', '40']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">164.57663520210644</data>
@@ -327238,7 +327238,7 @@
   <data key="d15">2</data>
   <data key="d16">['40', '50']</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">114.3040051778597</data>
   <data key="d14">LINESTRING (34.3032249 31.3559264, 34.303415 31.3561162, 34.3032856 31.3562922, 34.3037262 31.3567209)</data>
@@ -333016,7 +333016,7 @@
 </edge>
 <edge source="3076622625" target="650969732" id="0">
   <data key="d8">[298801924, 41243759]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
@@ -333102,7 +333102,7 @@
   <data key="d8">[303328425, 41305019]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['50', '20']</data>
+  <data key="d16">['20', '50']</data>
   <data key="d11">False</data>
   <data key="d17">6</data>
   <data key="d12">[False, True]</data>
@@ -333551,7 +333551,7 @@
 <edge source="3081950527" target="505035709" id="0">
   <data key="d8">[41307291, 41307991]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -334431,7 +334431,7 @@
 <edge source="3098999503" target="505109075" id="0">
   <data key="d8">[41314425, 41316645]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -334605,10 +334605,10 @@
 <edge source="3100650691" target="505141665" id="0">
   <data key="d8">[41312602, 41314164]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['4', '8']</data>
+  <data key="d17">['8', '4']</data>
   <data key="d12">True</data>
   <data key="d13">330.3230079594818</data>
   <data key="d14">LINESTRING (34.3200966 31.3477182, 34.3208117 31.348134, 34.3212336 31.348418, 34.3217587 31.3486812, 34.3223141 31.3489941, 34.3228955 31.3493073, 34.3229283 31.349401)</data>
@@ -337700,7 +337700,7 @@
 <edge source="3123326218" target="505016815" id="0">
   <data key="d8">[41307409, 41306036, 41305709]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
@@ -340484,7 +340484,7 @@
 <edge source="3145652613" target="8850511578" id="0">
   <data key="d8">[41313308, 296878399]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d17">4</data>
@@ -343454,7 +343454,7 @@
   <data key="d8">[310708224, 41253971]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
   <data key="d17">['10', '8']</data>
   <data key="d12">[False, True]</data>
@@ -343712,7 +343712,7 @@
   <data key="d16">80</data>
   <data key="d10">صلاح الدين</data>
   <data key="d11">True</data>
-  <data key="d17">['30', '12']</data>
+  <data key="d17">['12', '30']</data>
   <data key="d12">False</data>
   <data key="d13">671.1310521177555</data>
   <data key="d15">4</data>
@@ -344583,7 +344583,7 @@
 </edge>
 <edge source="3177924403" target="505017629" id="0">
   <data key="d8">[41308028, 1012789788, 41308005]</data>
-  <data key="d9">['tertiary', 'secondary']</data>
+  <data key="d9">['secondary', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">80</data>
   <data key="d10">الرشيد</data>
@@ -348038,7 +348038,7 @@
   <data key="d8">[41256739, 41254126]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['30', '20']</data>
+  <data key="d16">['20', '30']</data>
   <data key="d10">شارع مدحت الوحيدي</data>
   <data key="d11">False</data>
   <data key="d17">8</data>
@@ -348255,7 +348255,7 @@
   <data key="d8">[604412506, 41243303]</data>
   <data key="d9">secondary</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '60']</data>
+  <data key="d16">['60', '80']</data>
   <data key="d10">الرشيد</data>
   <data key="d11">True</data>
   <data key="d17">10</data>
@@ -348325,7 +348325,7 @@
 <edge source="5735198819" target="504298212" id="0">
   <data key="d8">[1217938033, 41254253]</data>
   <data key="d9">tertiary</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">60</data>
   <data key="d10">الرشيد</data>
   <data key="d11">True</data>
@@ -348469,7 +348469,7 @@
   <data key="d8">[604412507, 41244550]</data>
   <data key="d9">secondary</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '60']</data>
+  <data key="d16">['60', '80']</data>
   <data key="d10">الرشيد</data>
   <data key="d11">True</data>
   <data key="d17">10</data>
@@ -353213,7 +353213,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">30</data>
-  <data key="d10">['شارع نواكشوط', 'شارع جيبوتي']</data>
+  <data key="d10">['شارع جيبوتي', 'شارع نواكشوط']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
   <data key="d13">328.4416539237799</data>
@@ -354834,8 +354834,8 @@
 <edge source="8850479593" target="505089269" id="0">
   <data key="d8">[41319513, 41316867]</data>
   <data key="d9">['unclassified', 'residential']</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['80', '40']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['40', '80']</data>
   <data key="d11">False</data>
   <data key="d17">4</data>
   <data key="d12">True</data>
@@ -356003,7 +356003,7 @@
 <edge source="8850488012" target="505137255" id="0">
   <data key="d8">[1288310841, 41317623]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">20</data>
   <data key="d11">False</data>
   <data key="d17">4</data>
@@ -356922,7 +356922,7 @@
   <data key="d16">40</data>
   <data key="d10">شارع الصفطاوي</data>
   <data key="d11">False</data>
-  <data key="d17">['10', '12']</data>
+  <data key="d17">['12', '10']</data>
   <data key="d12">False</data>
   <data key="d13">51.05464267761562</data>
   <data key="d14">LINESTRING (34.4846749 31.5413384, 34.4846842 31.5412478, 34.4846879 31.5412227, 34.48471 31.541071, 34.4847309 31.5408818)</data>
@@ -357546,7 +357546,7 @@
 <edge source="8850511578" target="3145652613" id="0">
   <data key="d8">[41313308, 296878399]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -360465,7 +360465,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">47.88078165566135</data>
   <data key="d14">LINESTRING (34.2857946 31.3487453, 34.2855653 31.3485045, 34.2854868 31.3484047)</data>
@@ -361289,11 +361289,11 @@
 <edge source="8880172985" target="504299172" id="0">
   <data key="d8">[297666950, 41257279]</data>
   <data key="d9">residential</data>
-  <data key="d15">['6', '2']</data>
+  <data key="d15">['2', '6']</data>
   <data key="d16">40</data>
   <data key="d10">شارع الدار البيضاء</data>
   <data key="d11">False</data>
-  <data key="d17">['24', '8']</data>
+  <data key="d17">['8', '24']</data>
   <data key="d12">True</data>
   <data key="d13">195.6046369699775</data>
   <data key="d14">LINESTRING (34.4245361 31.5068524, 34.4240909 31.5070757, 34.423688 31.507269, 34.42276 31.5077474)</data>
@@ -366706,7 +366706,7 @@
 <edge source="9300360921" target="505027404" id="0">
   <data key="d8">[41307448, 41307094]</data>
   <data key="d9">unclassified</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">20</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -373335,7 +373335,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">47.88078165566135</data>
   <data key="d14">LINESTRING (34.2854868 31.3484047, 34.2855653 31.3485045, 34.2857946 31.3487453)</data>
@@ -373907,7 +373907,7 @@
 </edge>
 <edge source="9724698239" target="11299377508" id="0">
   <data key="d8">[1058308513, 1219461857]</data>
-  <data key="d9">['tertiary', 'secondary']</data>
+  <data key="d9">['secondary', 'tertiary']</data>
   <data key="d11">True</data>
   <data key="d12">False</data>
   <data key="d13">661.2653114494592</data>
@@ -375081,7 +375081,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">30</data>
-  <data key="d10">['Street N° 46 شارع رقم 46', 'Street N° 46 ( North Street ) . شارع رقم 46']</data>
+  <data key="d10">['Street N° 46 ( North Street ) . شارع رقم 46', 'Street N° 46 شارع رقم 46']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">190.68399647295374</data>
@@ -380150,7 +380150,7 @@
 </edge>
 <edge source="11262214473" target="14077084539" id="0">
   <data key="d8">[296010241, 41304884, 41306326, 312324343]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">60</data>
   <data key="d10">شارع عمر بن الخطاب</data>
@@ -391335,7 +391335,7 @@
   <data key="d8">[198539250, 41319461]</data>
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '40']</data>
+  <data key="d16">['40', '80']</data>
   <data key="d10">Abo-Taima</data>
   <data key="d11">False</data>
   <data key="d17">['10', '8']</data>
@@ -393950,7 +393950,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">True</data>
-  <data key="d17">['30', '8']</data>
+  <data key="d17">['8', '30']</data>
   <data key="d12">False</data>
   <data key="d13">190.92752635468037</data>
   <data key="d14">LINESTRING (34.4639796 31.5477407, 34.4639347 31.5478127, 34.4636305 31.5480693, 34.4633924 31.5483405, 34.463103 31.5485694, 34.4627736 31.5488579, 34.4626081 31.5489897)</data>
@@ -394455,7 +394455,7 @@
 <edge source="11388905417" target="505017324" id="0">
   <data key="d8">[41307587, 1228133589]</data>
   <data key="d9">tertiary</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">True</data>
   <data key="d12">False</data>
@@ -394537,7 +394537,7 @@
 <edge source="11388905438" target="505026313" id="0">
   <data key="d8">[41305406, 41306615]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">['40', '50']</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -394699,11 +394699,11 @@
 <edge source="11388905445" target="11388905454" id="0">
   <data key="d8">[1228133586, 1228133587]</data>
   <data key="d9">tertiary</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d10">Maghazi Shohda</data>
   <data key="d11">True</data>
-  <data key="d17">['6', '4']</data>
+  <data key="d17">['4', '6']</data>
   <data key="d12">False</data>
   <data key="d13">242.04813684791588</data>
   <data key="d14">LINESTRING (34.3865732 31.4266907, 34.3868795 31.4262552, 34.3872009 31.4258005, 34.3874918 31.4253895, 34.3876492 31.4251614, 34.3876972 31.4250945, 34.3878426 31.4248824, 34.3878809 31.4248218)</data>
@@ -395406,7 +395406,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '8']</data>
+  <data key="d17">['8', '6']</data>
   <data key="d12">False</data>
   <data key="d13">1150.1169736887998</data>
   <data key="d14">LINESTRING (34.5128738 31.5656802, 34.5129029 31.5658021, 34.5129673 31.5661078, 34.5130081 31.5662642, 34.513031 31.5663696, 34.5130926 31.5666584, 34.5131407 31.5668363, 34.5131559 31.5669818, 34.5131728 31.5671607, 34.5131793 31.5674263, 34.513218 31.5676808, 34.5132535 31.5679586, 34.513251 31.5682062, 34.5132531 31.5684463, 34.5132651 31.5686742, 34.5132965 31.5688927, 34.5133689 31.5691642, 34.5133977 31.5693799, 34.5134237 31.5695834, 34.5134336 31.5697458, 34.5134145 31.5701952, 34.5133368 31.5705195, 34.5134152 31.5713627, 34.5136422 31.5715031, 34.5137839 31.5716903, 34.5138712 31.5718357, 34.5141671 31.5724848, 34.5143382 31.5727317, 34.5146893 31.5730319, 34.5149739 31.573232, 34.5156161 31.5734129, 34.515798 31.5734863, 34.5164942 31.5739713, 34.5168199 31.5742366, 34.5171114 31.5745082)</data>
@@ -397011,7 +397011,7 @@
 <edge source="11406923714" target="505027085" id="0">
   <data key="d8">[41306532, 41307255]</data>
   <data key="d9">unclassified</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
@@ -400065,8 +400065,8 @@
 <edge source="11760581219" target="504259147" id="0">
   <data key="d8">[41254539, 41254843]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
-  <data key="d16">['40', '20']</data>
+  <data key="d15">['1', '2']</data>
+  <data key="d16">['20', '40']</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
   <data key="d13">226.85928898562543</data>
@@ -400843,7 +400843,7 @@
 <edge source="11764258327" target="505029496" id="0">
   <data key="d8">[1230044665, 41305069]</data>
   <data key="d9">['unclassified', 'residential']</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -403673,7 +403673,7 @@
   <data key="d15">2</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
-  <data key="d17">['6', '5']</data>
+  <data key="d17">['5', '6']</data>
   <data key="d12">[False, True]</data>
   <data key="d13">91.34410447936233</data>
   <data key="d14">LINESTRING (34.3762339 31.4562181, 34.3759781 31.4562425, 34.3757384 31.4566976, 34.375681 31.4567882)</data>
@@ -404885,7 +404885,7 @@
 <edge source="11786480892" target="505020711" id="0">
   <data key="d8">[41307868, 41308822]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -406929,7 +406929,7 @@
   <data key="d9">residential</data>
   <data key="d15">2</data>
   <data key="d16">50</data>
-  <data key="d10">['Haifa', 'Al-Mashahra']</data>
+  <data key="d10">['Al-Mashahra', 'Haifa']</data>
   <data key="d11">False</data>
   <data key="d17">['12', '8']</data>
   <data key="d12">True</data>
@@ -411994,7 +411994,7 @@
   <data key="d8">[41313352, 191702236]</data>
   <data key="d9">secondary</data>
   <data key="d15">2</data>
-  <data key="d10">['شارع 5', 'Road 5']</data>
+  <data key="d10">['Road 5', 'شارع 5']</data>
   <data key="d11">False</data>
   <data key="d17">12</data>
   <data key="d12">True</data>
@@ -418506,7 +418506,7 @@
 <edge source="12049512454" target="504006498" id="0">
   <data key="d8">[41243697, 41244039]</data>
   <data key="d9">residential</data>
-  <data key="d15">['2', '1']</data>
+  <data key="d15">['1', '2']</data>
   <data key="d16">40</data>
   <data key="d11">False</data>
   <data key="d12">[False, True]</data>
@@ -420183,7 +420183,7 @@
   <data key="d8">[305438710, 301712918]</data>
   <data key="d9">secondary</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '50']</data>
+  <data key="d16">['50', '80']</data>
   <data key="d10">الكرامة</data>
   <data key="d11">False</data>
   <data key="d17">['10', '8']</data>
@@ -421682,7 +421682,7 @@
   <data key="d8">[41317049, 41317430]</data>
   <data key="d9">tertiary</data>
   <data key="d15">2</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d10">Rabaih</data>
   <data key="d11">False</data>
   <data key="d12">True</data>
@@ -422859,8 +422859,8 @@
   <data key="d8">[1428389163, 198539251]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '40']</data>
-  <data key="d10">['Al-Daggat', 'El-Shhidda']</data>
+  <data key="d16">['40', '80']</data>
+  <data key="d10">['El-Shhidda', 'Al-Daggat']</data>
   <data key="d11">False</data>
   <data key="d17">10</data>
   <data key="d12">False</data>
@@ -422913,8 +422913,8 @@
   <data key="d8">[1428389163, 198539251]</data>
   <data key="d9">residential</data>
   <data key="d15">2</data>
-  <data key="d16">['80', '40']</data>
-  <data key="d10">['Al-Daggat', 'El-Shhidda']</data>
+  <data key="d16">['40', '80']</data>
+  <data key="d10">['El-Shhidda', 'Al-Daggat']</data>
   <data key="d11">False</data>
   <data key="d17">10</data>
   <data key="d12">True</data>
@@ -422986,10 +422986,10 @@
   <data key="d8">[41255936, 41254682]</data>
   <data key="d9">residential</data>
   <data key="d15">['4', '2']</data>
-  <data key="d16">['40', '60']</data>
+  <data key="d16">['60', '40']</data>
   <data key="d10">شارع القاهرة</data>
   <data key="d11">False</data>
-  <data key="d17">['20', '8']</data>
+  <data key="d17">['8', '20']</data>
   <data key="d12">False</data>
   <data key="d13">66.94861000191084</data>
   <data key="d14">LINESTRING (34.4377593 31.506218, 34.4378299 31.5061823, 34.438016 31.5060801, 34.4382156 31.5059714, 34.4383622 31.5059052)</data>
@@ -426352,7 +426352,7 @@
 </edge>
 <edge source="14077084539" target="11262214473" id="0">
   <data key="d8">[296010241, 41304884, 41306326, 312324343]</data>
-  <data key="d9">['tertiary', 'residential']</data>
+  <data key="d9">['residential', 'tertiary']</data>
   <data key="d15">2</data>
   <data key="d16">60</data>
   <data key="d10">شارع عمر بن الخطاب</data>
@@ -428017,7 +428017,7 @@
   <data key="d16">80</data>
   <data key="d10">صلاح الدين</data>
   <data key="d11">True</data>
-  <data key="d17">['30', '12']</data>
+  <data key="d17">['12', '30']</data>
   <data key="d12">False</data>
   <data key="d13">1428.4143586032249</data>
   <data key="d14">LINESTRING (34.4158409 31.4562061, 34.4160453 31.456412, 34.4162636 31.4566058, 34.416798 31.4570786, 34.4180766 31.458242, 34.4185177 31.4586311, 34.4186442 31.4587467, 34.4192971 31.4593614, 34.4196578 31.4596771, 34.4204815 31.4604416, 34.4205435 31.4604989, 34.4205927 31.4605372, 34.4210921 31.4609688, 34.4215854 31.4613109, 34.4217988 31.4614748, 34.4222255 31.4617634, 34.423102 31.4623649, 34.4233663 31.4625598, 34.4234075 31.4625902, 34.4238425 31.4628742, 34.4241701 31.463089, 34.4245309 31.463338, 34.425154 31.4637621, 34.4255308 31.4640324, 34.4260316 31.4644083, 34.426282 31.4646394, 34.4263921 31.46473, 34.4264438 31.4647736, 34.4267383 31.4650304)</data>
@@ -428059,7 +428059,7 @@
   <data key="d16">80</data>
   <data key="d10">صلاح الدين</data>
   <data key="d11">True</data>
-  <data key="d17">['30', '15']</data>
+  <data key="d17">['15', '30']</data>
   <data key="d12">False</data>
   <data key="d13">97.05606596804523</data>
   <data key="d14">LINESTRING (34.4151434 31.4555677, 34.4154467 31.4558526, 34.4157988 31.4561637, 34.4158409 31.4562061)</data>
