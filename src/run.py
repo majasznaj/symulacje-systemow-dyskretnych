@@ -16,13 +16,11 @@ import argparse
 
 import numpy as np
 import pandas as pd
-
 import config
 import damage
 import data
 import events as ev
 import network
-import report
 import router as router_mod
 import sim
 
@@ -117,43 +115,38 @@ def main():
     if a.blockades:
         events += ev.random_blockades(G, np.random.default_rng(a.seed + 1), a.blockades, month_minutes, routes)
 
-    # --- symulacja i raport ---
+   # --- symulacja i raport ---
     trace = []
     log = sim.run_simulation(trucks, G, router, crossing_nodes, hub_nodes, shares, routes, events=events,
                              damage_model=dm, month=a.month, seed=a.seed, trace_every=a.log_every,
                              trace_days=sim.parse_days(a.log_days), trace_lines=trace)
+    
     outdir = config.OUTPUT / (a.month + ("_toy" if a.toy else ""))
     outdir.mkdir(parents=True, exist_ok=True)
+    
+    # 1. Zapisuje tylko surowy plik CSV z wynikami symulacji
     log.to_csv(outdir / "truck_log.csv", index=False)
+    
+    # 2. Tworzymy tabele podsumowujące (q - przejścia, h - huby)
     q, h = report.summarize(log)
-    q.to_csv(outdir / "summary_crossings.csv"); h.to_csv(outdir / "summary_hubs.csv")
-    report.make_plots(trucks, log, outdir)
+    q.to_csv(outdir / "summary_crossings.csv")
+    h.to_csv(outdir / "summary_hubs.csv")
+    
     if trace:
         trace.sort(key=lambda s: (s[1:13]))  # chronologicznie (dz.DD GG:MM)
         (outdir / "sim_log.txt").write_text("\n".join(trace), encoding="utf-8")
-        print(f"\n--- LOG SYMULACJI ({len(trace)} linii, pełny w {outdir / 'sim_log.txt'}) ---")
-        print("\n".join(trace[:150]))
-        if len(trace) > 150:
-            print(f"... (jeszcze {len(trace) - 150} linii w pliku)")
 
+    # 3. Drukujemy na ekran tylko to, co czyste i merytoryczne:
     print("\nPrzejścia:\n", q.to_string())
     print("\nHuby:\n", h.to_string())
-    print(f"\nZdarzenia: {len(events)}; ciężarówek ze zmianą trasy: {(log['replans'] > 0).sum()}; "
-          f"czekało bez drogi: {(log['stuck_min'] > 0).sum()} (łącznie {log['stuck_min'].sum():.0f} min)")
-    print("\nSprawdzenia:")
-    for desc, ok in report.checks(trucks, log):
-        print(f"  [{'OK' if ok else 'BŁĄD'}] {desc}")
-    f_disp = config.DATA_PROC / f"dispatch_daily_{a.month}.csv"
-    if f_disp.exists():   # informacyjnie: to NIE jest test poprawności modelu
-        disp = pd.read_csv(f_disp, parse_dates=["date"], index_col="date")["rows"]
-        t0 = log["date"].min().normalize()
-        sim_hub = (t0 + pd.to_timedelta(log.loc[log["delivered"], "done_min"] // 1440, unit="D")).value_counts()
-        both = pd.concat([disp, sim_hub], axis=1, keys=["dispatching", "symulacja"]).dropna()
-        if len(both) > 3:
-            print(f"\nInformacyjnie: korelacja dziennych dostaw do hubów w symulacji z liczbą wierszy Dispatching "
-                  f"= {both.corr().iloc[0, 1]:.2f} (n={len(both)} dni; Dispatching to wydania z magazynów, nie te same ciężarówki)")
-    print(f"\nWyniki w {outdir}")
-
+    
+    replans_count = (log['replans'] > 0).sum()
+    stuck_count = (log['stuck_min'] > 0).sum()
+    stuck_sum = log['stuck_min'].sum()
+    print(f"\nZdarzenia: {len(events)}; ciężarówek ze zmianą trasy: {replans_count}; "
+          f"czekało bez drogi: {stuck_count} (łącznie {stuck_sum:.0f} min)")
+    
+    print(f"\n Symulacja zakończona. Wyniki zapisano w: {outdir}/truck_log.csv")
 
 if __name__ == "__main__":
     main()
