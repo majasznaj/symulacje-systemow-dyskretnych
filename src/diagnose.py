@@ -94,7 +94,15 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir):
             ax.scatter([p.x], [p.y], marker="x", color="red", s=40, zorder=9)
             ax.scatter([q.x], [q.y], marker=mk, color=col, edgecolor="black", s=90, zorder=10)
             ax.annotate(name, (q.x, q.y), fontsize=8, xytext=(4, 4), textcoords="offset points")
-    for (c, h), color in ((("Kerem Shalom", "Hub_Rafah"), "orange"), (("Rafah", "Hub_Rafah"), "magenta")):
+    route_colors = {
+        ("Kerem Shalom", "Hub_Rafah"): "orange",
+        ("Rafah", "Hub_Khan_Younis"): "magenta",
+        ("Gate 96", "Hub_Deir_al_Balah"): "cyan",
+        ("Erez", "Hub_North_Jabalia"): "lime",
+        ("Western Erez", "Hub_Gaza_City"): "red",
+        ("Kerem Shalom", "Hub_North_Jabalia"): "yellow",
+    }
+    for (c, h), color in route_colors.items():
         if (c, h) in routes:
             path = routes[(c, h)]["path"]
             xs = [nodes.loc[n].geometry.x for n in path]
