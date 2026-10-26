@@ -32,6 +32,7 @@ def main():
     ap.add_argument("--month", default=config.MONTH)
     ap.add_argument("--prepare-data", action="store_true", help="Excel -> data/processed")
     ap.add_argument("--build-graph", action="store_true", help="pobierz graf z Overpass")
+    ap.add_argument("--offline", action="store_true", help="z --graph-check: tylko zapisany graf, bez Overpass")
     ap.add_argument("--graph-check", action="store_true", help="diagnostyka surowego grafu OSM (Overpass), bez symulacji")
     ap.add_argument("--describe-unosat", action="store_true", help="pokaż kolumny i daty UNOSAT")
     ap.add_argument("--diagnose", action="store_true", help="diagnostyka grafu, przypięć i zniszczeń (bez symulacji)")
@@ -57,7 +58,7 @@ def main():
         return
     if a.graph_check:
         import graphcheck
-        graphcheck.run()
+        graphcheck.run(offline=a.offline)
         return
     if a.describe_unosat:
         damage.describe_unosat(damage.load_unosat())
@@ -142,6 +143,15 @@ def main():
     print("\nSprawdzenia:")
     for desc, ok in report.checks(trucks, log):
         print(f"  [{'OK' if ok else 'BŁĄD'}] {desc}")
+    f_disp = config.DATA_PROC / f"dispatch_daily_{a.month}.csv"
+    if f_disp.exists():   # informacyjnie: to NIE jest test poprawności modelu
+        disp = pd.read_csv(f_disp, parse_dates=["date"], index_col="date")["rows"]
+        t0 = log["date"].min().normalize()
+        sim_hub = (t0 + pd.to_timedelta(log.loc[log["delivered"], "done_min"] // 1440, unit="D")).value_counts()
+        both = pd.concat([disp, sim_hub], axis=1, keys=["dispatching", "symulacja"]).dropna()
+        if len(both) > 3:
+            print(f"\nInformacyjnie: korelacja dziennych dostaw do hubów w symulacji z liczbą wierszy Dispatching "
+                  f"= {both.corr().iloc[0, 1]:.2f} (n={len(both)} dni; Dispatching to wydania z magazynów, nie te same ciężarówki)")
     print(f"\nWyniki w {outdir}")
 
 

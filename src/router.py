@@ -20,7 +20,9 @@ class FieldRouter:
         self.G = G
         self.cost_fn = cost_fn
         self.hub_nodes = hub_nodes
-        self.fields = {h: DStarLite(G, start_hint, node, cost_fn=cost_fn) for h, node in hub_nodes.items()}
+        # pole kosztu dla całej floty liczymy do wyczerpania kolejki, więc heurystyka nic nie daje (h_scale=0);
+        # koszt jest w minutach, a heurystyka w metrach, więc nie można jej tu mieszać
+        self.fields = {h: DStarLite(G, start_hint, node, cost_fn=cost_fn, h_scale=0.0) for h, node in hub_nodes.items()}
         self.version = 0          # rośnie po każdej zmianie kosztów
         self.initial_work = sum(f.compute_all() for f in self.fields.values())
 

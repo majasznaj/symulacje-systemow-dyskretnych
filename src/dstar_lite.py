@@ -17,10 +17,13 @@ INF = math.inf
 
 
 class DStarLite:
-    def __init__(self, G, start, goal, weight="cost", cost_fn=None):
+    def __init__(self, G, start, goal, weight="cost", cost_fn=None, h_scale=1.0):
         """cost_fn(dane_krawędzi) -> koszt; domyślnie dane[weight]. Równoległe krawędzie u->v
-        zastępujemy jedną o najmniejszym koszcie."""
+        zastępujemy jedną o najmniejszym koszcie.
+        h_scale: mnożnik heurystyki (odległość w m). 1.0 gdy koszt jest w metrach lub większy od długości;
+        przy koszcie w minutach: 1 / (najwyższa prędkość w m/min), żeby heurystyka nie przeszacowała."""
         self.G = G
+        self.h_scale = h_scale
         cf = cost_fn or (lambda d: d.get(weight, d["length"]))
         self.succ = {u: {} for u in G.nodes}
         self.pred = {u: {} for u in G.nodes}
@@ -44,7 +47,7 @@ class DStarLite:
     def _h(self, a, b):
         na, nb = self.G.nodes[a], self.G.nodes[b]
         # 0,99: rzutowanie UTM zniekształca odległości do ~0,2%, bez marginesu heurystyka bywa nieadmisyjna
-        return 0.99 * math.hypot(na["x"] - nb["x"], na["y"] - nb["y"])
+        return 0.99 * self.h_scale * math.hypot(na["x"] - nb["x"], na["y"] - nb["y"])
 
     def _g(self, s):
         return self.g.get(s, INF)

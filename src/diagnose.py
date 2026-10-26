@@ -66,11 +66,12 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir):
     dmg = edges["damage"]
     print("liczba punktów UNOSAT w oczku (max po krawędzi): "
           + ", ".join(f"p{q}={dmg.quantile(q / 100):.0f}" for q in (10, 25, 50, 75, 90, 99)) + f", max={dmg.max():.0f}")
-    mult = edges["cost"] / edges["length"]
     slow = edges["time_min"] / (edges["length"] / (v_free * 1000 / 60))
+    sat = config.TRUCK_SPEED_KMH / config.MIN_SPEED_KMH
     print(f"krawędzie bez zniszczeń: {(dmg == 0).mean():.0%}")
-    print(f"koszt >= limit {config.MAX_COST_MULTIPLIER:.0f}x (kara nasycona): {(mult >= config.MAX_COST_MULTIPLIER - 1e-6).mean():.0%}")
-    print(f"koszt >= 2x: {(mult >= 2).mean():.0%}; czas przejazdu >= 2x: {(slow >= 2).mean():.0%}")
+    print(f"czas przejazdu >= 2x: {(slow >= 2).mean():.0%}; >= 4x: {(slow >= 4).mean():.0%}; "
+          f"na dolnym limicie prędkości ({config.MIN_SPEED_KMH:.0f} km/h, {sat:.0f}x): {(slow >= sat - 1e-6).mean():.0%}")
+    print("koszt routera = czas (RISK_WEIGHT=%g)" % config.RISK_WEIGHT)
 
     # 5. mapa: lewo = graf, przypięcia i trasy; prawo = zniszczenia na krawędziach
     fig, axes = plt.subplots(1, 2, figsize=(16, 11))

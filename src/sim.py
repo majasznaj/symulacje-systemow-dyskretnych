@@ -109,6 +109,8 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, rou
                                   f"{row.hub} | plan {pk:.1f} km, {len(plan)} odcinków, {pm:.0f} min")
         t_drive = env.now
         driven_km, replans, stuck_min, step, half, is_stuck = 0.0, 0, 0.0, 0, None, False
+        delivered = True
+        limit_min = config.STUCK_GIVE_UP_H * 60
         while node != goal:
             if seen != router.version:   # zmieniły się drogi: weź trasę z aktualnego pola
                 new = router.plan(row.hub, node)
@@ -128,6 +130,12 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, rou
                 if not is_stuck:
                     state["stuck"] += 1
                     is_stuck = True
+                if stuck_min >= limit_min:   # droga nie wraca: ciężarówka rezygnuje (inaczej symulacja nigdy by się nie skończyła)
+                    delivered = False
+                    state["stuck"] -= 1
+                    say(row.truck_id, f"w węźle {node}: brak drogi do {row.hub} od {stuck_min / 60:.0f} h, rezygnuje "
+                                      f"(nie dowiozła)")
+                    break
                 stuck_min += config.STUCK_WAIT_MIN
                 yield env.timeout(config.STUCK_WAIT_MIN)
                 continue
@@ -146,17 +154,18 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, rou
                 say(row.truck_id, f"w drodze do {row.hub}: połowa pozostałej trasy "
                                   f"(przejechane {driven_km:.1f} km, odcinków {step}) | w drodze {state['in_transit']}")
         state["in_transit"] -= 1
-        state["delivered"][row.hub] += 1
-        say(row.truck_id, f"{row.hub}: rozładunek | w drodze {state['in_transit']}, "
-                          f"dowiezione do tego hubu {state['delivered'][row.hub]}, "
-                          f"łącznie od wjazdu {env.now - row.arrival_min:.0f} min"
-                          + (f", zmian trasy {replans}, czekała bez drogi {stuck_min:.0f} min" if replans or stuck_min else ""))
+        if delivered:
+            state["delivered"][row.hub] += 1
+            say(row.truck_id, f"{row.hub}: rozładunek | w drodze {state['in_transit']}, "
+                              f"dowiezione do tego hubu {state['delivered'][row.hub]}, "
+                              f"łącznie od wjazdu {env.now - row.arrival_min:.0f} min"
+                              + (f", zmian trasy {replans}, czekała bez drogi {stuck_min:.0f} min" if replans or stuck_min else ""))
         short_km = routes[(row.crossing, row.hub)]["shortest_km"]
         log.append({
             "truck_id": row.truck_id, "date": row.date, "crossing": row.crossing, "hub": row.hub,
             "arrival_min": row.arrival_min, "queue_min": queue, "service_min": row.service_min,
             "travel_min": env.now - t_drive, "route_km": driven_km, "detour_km": driven_km - short_km,
-            "replans": replans, "stuck_min": stuck_min,
+            "replans": replans, "stuck_min": stuck_min, "delivered": delivered,
             "cleared_min": row.arrival_min + queue + row.service_min, "done_min": env.now,
         })
 

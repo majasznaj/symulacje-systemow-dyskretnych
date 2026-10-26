@@ -25,6 +25,13 @@ def load_unosat(zip_path=None):
     layer = [name for name, geom in layers if "Point" in str(geom)][0]
     gdf = gpd.read_file(gdb, layer=layer)
     print(f"UNOSAT: warstwa {layer}, {len(gdf)} punktów")
+    # legenda z samego pliku .gdb (domena damage_type): 1 zniszczony, 2 poważnie, 3 średnio, 4 możliwe uszkodzenie,
+    # 6 BRAK widocznych uszkodzeń, 11 możliwe uszkodzenie od sąsiedniego uderzenia/gruzu. Klasa 6 nie jest zniszczeniem.
+    last = [c for c in gdf.columns if c.startswith("Main_Damage_Site_Class")][-1]
+    ok = gdf[last] != 6
+    if (~ok).any():
+        print(f"UNOSAT: pominięto {int((~ok).sum())} punktów z klasą 6 ('No Visible Damage')")
+        gdf = gdf[ok]
     return gdf
 
 
@@ -57,12 +64,12 @@ def filter_as_of(gdf, as_of):
 
 
 def set_base_weights(G):
-    """Bez zniszczeń: koszt = długość, czas = długość / prędkość."""
+    """Bez zniszczeń: czas = długość / prędkość, koszt dla routera = czas [min]."""
     v = config.TRUCK_SPEED_KMH * 1000 / 60  # m/min
     for _, _, _, d in G.edges(keys=True, data=True):
         d["damage"] = 0
-        d["cost"] = d["length"]
         d["time_min"] = d["length"] / v
+        d["cost"] = d["time_min"]
 
 
 class DamageModel:
@@ -98,10 +105,10 @@ class DamageModel:
         length = d["length"]
         v_free = config.TRUCK_SPEED_KMH * 1000 / 60
         v_min = config.MIN_SPEED_KMH * 1000 / 60
-        mult = min(config.MAX_COST_MULTIPLIER, 1 + config.DAMAGE_PENALTY * dmg ** config.DAMAGE_EXPONENT)
+        # jeden wzór: ciężarówka jedzie wolniej, a router dostaje ten sam czas (plus opcjonalna kara za ryzyko)
         d["damage"] = int(dmg)
-        d["cost"] = length * mult
         d["time_min"] = length / max(v_min, v_free / (1 + config.SLOWDOWN_PER_DAMAGE * dmg))
+        d["cost"] = d["time_min"] * (1 + config.RISK_WEIGHT * dmg)
 
     def add_points(self, gdf):
         """Dokłada punkty zniszczeń. Zwraca zbiór par (u, v), których koszt się zmienił."""

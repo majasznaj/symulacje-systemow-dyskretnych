@@ -53,6 +53,11 @@ def prepare_hub_mapping(month):
     col = "Destination Recipient/ partner"
     names = df[col].value_counts().rename_axis("destination").reset_index(name="rows")
     names["hub"] = names["destination"].map(map_hub)
+    df["hub"] = df[col].map(map_hub)
+    daily = df.groupby(df["Date Dispatch"].dt.normalize()).agg(rows=(col, "size"), mapped=("hub", lambda x: x.notna().sum()))
+    daily.index.name = "date"
+    config.DATA_PROC.mkdir(parents=True, exist_ok=True)
+    daily.to_csv(config.DATA_PROC / f"dispatch_daily_{month}.csv")
     mapped = names.dropna(subset=["hub"])
     shares = (mapped.groupby("hub")["rows"].sum() / mapped["rows"].sum()).rename("share")
     shares = shares.reindex(list(config.HUBS)).fillna(0.0)
