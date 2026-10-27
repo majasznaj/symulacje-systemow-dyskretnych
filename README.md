@@ -83,8 +83,9 @@ Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 ## Znane ograniczenia
 
 1. **W grafie brakuje ulic w Rafah przy granicy z Egiptem.** W marcu 2024 jedzie do Hub_Rafah 88% ciężarówek. Kerem Shalom → Hub_Rafah ma 17,8 km przy 8,6 km w linii prostej, Rafah → Hub_Rafah 15,4 km przy 5,6 km, a zamknięcie najruchliwszej drogi (`--block-main`) zatrzymuje 182 ciężarówki, bo nie ma objazdu (`docs/rafah_graf.png`). Mapa Google pokazuje w punkcie 31.2826N 34.2572E gęstą siatkę ulic, a graf ma w promieniu 500 m od niego 6 krawędzi i żadnej z tych nazw. Brakuje ich w OSM - w razie potrzeby należy albo je sztucznie dorysować albo wybrać inne źródło map. 
-2. **Hub jest losowany z udziałów w Dispatching** (liczonych po wierszach, nie po tonażu), niezależnie od przejścia. Dla marca nie szkodzi, bo wjeżdża się tylko przez południe. Od maja pojawiają się Erez i Western Erez, od czerwca Gate 96, i wtedy to założenie zaczyna przeszkadzać: we wrześniu 2024 ciężarówki z Erez (północ) jadą głównie do Khan Younis (92 min), bo tak wyglądają udziały w Dispatching tego miesiąca (jest tam tylko 288 wierszy). W listopadzie 2023 wszystkie wjeżdżają przez Rafah, a 11% jedzie do Jabalii (43 km). Do takich miesięcy trzeba zastąpić losowanie parami przejście → hub.
+2. **Hub jest losowany z udziałów w Dispatching** niezależnie od crossingu. Trzeba zastąpić losowanie parami przejście → hub?
 3. **Zniszczenia działają prawie jak równomierne spowolnienie.** 97% krawędzi ma jakieś zniszczenia, a mediana to ok. 190 punktów w oczku (czas ×2,3). Datą zniszczenia jest data zdjęcia satelity, nie ataku. Nie ma napraw.
+4. **Część destinations z Excela pozostaje niezmapowane do hubów**
 
 
 ## Plan
