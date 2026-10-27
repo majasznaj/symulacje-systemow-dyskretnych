@@ -1,13 +1,13 @@
 # Symulacje systemów dyskretnych: logistyka pomocy humanitarnej w Strefie Gazy
 
-Model symulacji logistyki pomocy humanitarnej i dynamiki przetrwania ludności na przykładzie Strefy Gazy (brief projektu: osobny PDF).
+Model symulacji logistyki pomocy humanitarnej i dynamiki przetrwania ludności na przykładzie Strefy Gazy.
 Stan: koniec milestone'a 1, czyli mała, ale działająca baza, na której budujemy dalej.
 
 ## Co ta baza robi
 
 Odtwarza jeden miesiąc z danych ONZ. Domyślnie marzec 2024 (`config.MONTH`), każdy inny wybierasz przez `--month`, np. `python src/run.py --month 2023-11`. Dane Excela obejmują październik 2023 – styczeń 2025.
 
-1. Każdy wiersz z `Commodities-Received.xlsx` to jedna ciężarówka wjeżdżająca przez przejście graniczne (marzec 2024: 4993 ciężarówek, tylko Kerem Shalom i Rafah).
+1. Każdy wiersz z `Commodities-Received.xlsx` to jedna ciężarówka wjeżdżająca przez przejście graniczne.
 2. Na przejściu ciężarówka czeka w kolejce i jest odprawiana (SimPy).
 3. Potem jedzie po grafie dróg z OpenStreetMap do jednego z hubów. Trasę wyznacza D* Lite.
 4. Zniszczenia z UNOSAT spowalniają drogi. Stan na 1. dzień miesiąca jest punktem startu, a nowe fale zniszczeń wchodzą w dniach zdjęć.
@@ -17,7 +17,7 @@ Na wyjściu jest log każdej ciężarówki i dwie tabele podsumowań.
 
 ## Szybki start
 
-colab_run.ipynb - gotowe komórki
+plik *colab_run.ipynb* - gotowe komórki
 
 Warianty uruchomienia:
 
@@ -48,17 +48,15 @@ Wyniki trafiają do `output/<miesiąc>/`:
 | `src/data.py` | Excel → ciężarówki i udziały hubów (`data/processed/`) |
 | `src/network.py` | graf dróg (pobranie, wczytanie), przypinanie punktów do węzłów, trasy bazowe |
 | `src/damage.py` | UNOSAT → liczba punktów w oczku 500 m → czas przejazdu krawędzi |
-| `src/dstar_lite.py` | algorytm D* Lite |
+| `src/dstar_lite.py` | algorytm D* Lite (a raczej przybliżenie, bo to ciężkie w implementacji) |
 | `src/router.py` | po jednym polu kosztu D* Lite na hub, ciężarówka czyta z niego następny krok |
 | `src/fsm.py` | maszyna stanów ciężarówki |
 | `src/events.py` | zdarzenia zmieniające drogi w czasie: fale UNOSAT i blokady |
 | `src/sim.py` | pętla SimPy: wjazd, kolejka, odprawa, jazda, dojazd |
 | `src/run.py` | uruchamianie i tabele podsumowań |
 | `src/diagnose.py` | diagnostyka grafu, tras i zniszczeń, mapy |
-| `tests/test_basics.py` | D* Lite kontra Dijkstra (także po zmianach krawędzi), przejścia FSM |
 | `data/raw/` | Excele ONZ (Received, Dispatching) i archiwum UNOSAT |
 | `data/processed/` | gotowy graf `gaza_drive.graphml`, ciężarówki i udziały hubów z marca 2024, mapowanie odbiorców na huby (do przejrzenia) |
-| `docs/rafah_graf.png` | zbliżenie grafu wokół Rafah (patrz ograniczenia) |
 
 ## Modele: co jest, czego jeszcze nie ma
 
@@ -66,8 +64,7 @@ Wyniki trafiają do `output/<miesiąc>/`:
 |---|---|---|
 | Kolejka Kendalla | jest jako M/G/c | wjazdy z danych (dzień z Excela, godzina losowana równomiernie w 8–18, co przy znanej liczbie wjazdów jest równoważne procesowi Poissona), c stanowisk (Kerem Shalom 8, Rafah 6), czas odprawy Erlang-3 o średniej 25 min. **K (pojemności) nie ma.** Dopóki nikt nie jest odrzucany ani przekierowywany, K nie zmienia żadnego czasu, więc wróci razem z odrzucaniem ciężarówek |
 | FSM | jest | wjazd → kolejka → odprawa → jazda ↔ bez drogi → dowiozła / zrezygnowała. Niedozwolone przejście zgłasza błąd. Stanów rozładunku i kryzysu jeszcze nie ma |
-| D* Lite | jest | pole kosztu do każdego hubu naprawiane przyrostowo po zmianie dróg (zniszczenia, blokady). Heurystyka jest wyłączona, bo liczymy pole dla całej floty, więc w praktyce to przyrostowy Dijkstra liczony od hubu wstecz. Przyrostowa naprawa to właśnie część, która tu pracuje. Poprawność sprawdza test |
-| A* | nie ma | brief wspomina A*, zespół wybrał D* Lite |
+| D* Lite | jest | pole kosztu do każdego hubu naprawiane przyrostowo po zmianie dróg (zniszczenia, blokady). Heurystyka jest wyłączona, bo liczymy pole dla całej floty, więc w praktyce to przyrostowy Dijkstra liczony od hubu wstecz. Przyrostowa naprawa to właśnie część, która tu pracuje. |
 | Nagel-Schreckenberg (ruch, zatory przed bramką) | nie ma | |
 | Helbing (tłum w punktach dystrybucji) | nie ma | |
 | Utility AI (decyzje kierowców) | nie ma | wymaga stanu kryzysu w FSM i kategorii ładunku (kolumna `category` jest w danych, ale nie trafia do logu) |
