@@ -2,7 +2,6 @@
 from dataclasses import dataclass
 from typing import Callable
 
-import numpy as np
 import pandas as pd
 
 import damage
@@ -57,18 +56,6 @@ def busiest_edges(routes, pair_weights, k=1):
             key = (min(a, b), max(a, b))
             use[key] = use.get(key, 0) + w
     return sorted(use.items(), key=lambda kv: -kv[1])[:k]
-
-
-def random_blockades(G, rng, n, month_minutes, routes, hours=(6, 48)):
-    """n losowych blokad na drogach, które leżą na planowanych trasach (inaczej nic by nie zmieniły)."""
-    cand = sorted({(min(a, b), max(a, b)) for r in routes.values() for a, b in zip(r["path"][:-1], r["path"][1:])})
-    events = []
-    for i in range(n):
-        edge = cand[rng.integers(len(cand))]
-        h = float(rng.uniform(*hours))
-        start = float(rng.uniform(0, max(1, month_minutes - h * 60)))
-        events += blockade_events(G, start, round(h, 1), [edge], f"losowa droga #{i + 1}")
-    return events
 
 
 def unosat_wave_events(dm, gdf, month_start, next_month_start):

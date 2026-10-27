@@ -7,12 +7,8 @@ INF = math.inf
 
 
 def effective_cost(d):
-    """Koszt krawędzi z uwzględnieniem blokad (zamknięta = nieskończony)."""
-    return INF if d.get("blocked", 0) > 0 else d["cost"]
-
-
-def length_cost(d):
-    return d["length"]
+    """Koszt krawędzi = czas przejazdu [min]; zamknięta blokadą = nieskończony."""
+    return INF if d.get("blocked", 0) > 0 else d["time_min"]
 
 
 class FieldRouter:

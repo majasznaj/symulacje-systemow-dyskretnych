@@ -2,8 +2,6 @@
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
 import osmnx as ox
 import pandas as pd
 
@@ -56,8 +54,7 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir):
         base_min = sum(min(d["length"] / (v_free * 1000 / 60 * damage.speed_factor(d)) for d in G[a][b].values())
                        for a, b in zip(r["path"], r["path"][1:]))
         rows.append({"przejście": c, "hub": h, "linia_prosta_km": round(straight, 1),
-                     "najkrótsza_km": round(r["shortest_km"], 1),
-                     "najkr/prosta": round(r["shortest_km"] / straight, 2),
+                     "trasa/prosta": round(r["km"] / straight, 2),
                      "trasa_km": round(r["km"], 1), "czas_min": round(r["minutes"]),
                      "czas_bez_zniszczeń_min": round(base_min),
                      "spowolnienie_x": round(r["minutes"] / base_min, 1)})
@@ -76,15 +73,12 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir):
     print(f"krawędzie bez zniszczeń: {(dmg == 0).mean():.0%}")
     print(f"czas przejazdu >= 2x: {(slow >= 2).mean():.0%}; >= 4x: {(slow >= 4).mean():.0%}; "
           f"na dolnym limicie prędkości ({config.MIN_SPEED_KMH:.0f} km/h, {sat:.0f}x): {(slow >= sat - 1e-6).mean():.0%}")
-    print("koszt routera = czas (RISK_WEIGHT=%g)" % config.RISK_WEIGHT)
 
-    # 5. mapa: lewo = graf, przypięcia i trasy; prawo = zniszczenia na krawędziach
-    fig, axes = plt.subplots(1, 2, figsize=(16, 11))
-    for ax in axes:
-        edges.plot(ax=ax, color="#bbbbbb", linewidth=0.4)
-        ax.set_axis_off()
-    ax = axes[0]
-    ax.set_title("Graf, przypięcia (linie od punktu zadanego do węzła) i trasy")
+    # 5a. mapa grafu: przypięcia (czerwone linie od punktu zadanego do węzła) i trasy
+    fig, ax = plt.subplots(figsize=(10, 11))
+    edges.plot(ax=ax, color="#bbbbbb", linewidth=0.4)
+    ax.set_axis_off()
+    ax.set_title("Graf, przypięcia i trasy")
     for kind, pts, snapped, mk, col in (("przejście", config.CROSSINGS, crossing_nodes, "s", "deepskyblue"),
                                         ("hub", config.HUBS, hub_nodes, "^", "limegreen")):
         for name, (lat, lon) in pts.items():
@@ -109,15 +103,20 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir):
             ys = [nodes.loc[n].geometry.y for n in path]
             ax.plot(xs, ys, color=color, lw=2.5, label=f"{c} -> {h}")
     ax.legend(loc="upper left")
-    ax = axes[1]
-    ax.set_title("Zniszczenia na krawędziach (liczba punktów UNOSAT w oczku)")
-    e = edges.sort_values("damage")
-    e.plot(ax=ax, column="damage", cmap="inferno", linewidth=0.8, legend=True,
-           legend_kwds={"shrink": 0.5, "label": "punktów UNOSAT w oczku"})
     fig.tight_layout()
     fig.savefig(outdir / "diagnoza.png", dpi=110)
     plt.close(fig)
-    print(f"\nMapa: {outdir / 'diagnoza.png'}; tabele CSV w tym samym katalogu")
+
+    # 5b. mapa zniszczeń: drogi pomalowane liczbą punktów UNOSAT w oczku
+    fig, ax = plt.subplots(figsize=(9, 11))
+    ax.set_axis_off()
+    ax.set_title("Zniszczenia na krawędziach (liczba punktów UNOSAT w oczku)")
+    edges.sort_values("damage").plot(ax=ax, column="damage", cmap="inferno", linewidth=0.8, legend=True,
+                                     legend_kwds={"shrink": 0.5, "label": "punktów UNOSAT w oczku"})
+    fig.tight_layout()
+    fig.savefig(outdir / "mapa_zniszczen.png", dpi=130)
+    plt.close(fig)
+    print(f"\nMapy: {outdir / 'diagnoza.png'}, {outdir / 'mapa_zniszczen.png'}; tabele CSV w tym samym katalogu")
 
 
 def gpd_point(lon, lat, crs):

@@ -75,35 +75,27 @@ OVERPASS_URLS = [
 
 # --- zniszczenia (UNOSAT) ---
 USE_DAMAGE = True
-DAMAGE_AS_OF = None        # None = tryb dynamiczny: stan na 1. dzień miesiąca + fale UNOSAT z tego miesiąca
-                           # w dniach zdjęć; data np. "2024-03-31" = stały stan na ten dzień, bez fal
 DAMAGE_CELL_M = 500        # bok oczka siatki zliczającej zniszczenia
-RISK_WEIGHT = 0.0          # koszt trasy = czas przejazdu * (1 + RISK_WEIGHT * zniszczenia); 0 = router minimalizuje sam czas
-                           # (ZAŁOŻENIE: >0 oznacza, że kierowca unika zniszczeń także kosztem dłuższej jazdy)
 
 # --- ruch ciężarówek (ZAŁOŻENIA) ---
 TRUCK_SPEED_KMH = 30.0
 MIN_SPEED_KMH = 5.0
 SLOWDOWN_PER_DAMAGE = 1 / 150   # prędkość = SPEED / (1 + SLOWDOWN * zniszczenia), nie mniej niż MIN_SPEED.
                                 # ZAŁOŻENIE (bez kalibracji na danych): przy 150 punktach w oczku prędkość spada o połowę.
-                                # Dla porównania 750 = p99 w marcu 2024 (zniszczenia prawie nie wpływały na trasy)
+                                # Dla porównania w marcu 2024 mediana krawędzi ma ok. 190 punktów w oczku (czas x2,3), p99 ok. 750.
 
 # --- przejścia: kolejka (ZAŁOŻENIA) ---
 OPEN_HOURS = (8, 18)        # Excel ma tylko datę; godzinę wjazdu losujemy z tego okna
+# Kolejka na przejściu to M/G/c (K na razie nie ma, bo nikt nie jest odrzucany): wjazdy z Excela (dzień z danych, godzina
+# losowana równomiernie w OPEN_HOURS, czyli proces Poissona o intensywności z danych), c = LANES, czas obsługi G jak niżej.
 # Odprawa (G w notacji Kendalla). "uniform": rozkład jednostajny CLEARANCE_MIN; "erlang": Erlang(k) o średniej SERVICE_MEAN_MIN.
 # Obie wartości średniej są takie same (25 min), więc zmiana rozkładu nie zmienia średniego obciążenia stanowisk.
 SERVICE_DIST = "erlang"
 CLEARANCE_MIN = (15, 35)    # dla "uniform" (wartości z waszego notebooka)
 SERVICE_MEAN_MIN = 25.0     # dla "erlang" (ZAŁOŻENIE)
 ERLANG_K = 3                # kształt: im większe, tym bardziej równy czas odprawy (k=1 to rozkład wykładniczy)
-# Pojemność strefy przejścia (K w notacji Kendalla): ile ciężarówek naraz stoi w kolejce lub jest odprawianych.
-# Pełna strefa = ciężarówka czeka na drodze przed nią (nikt nie znika). ZAŁOŻENIE, brak danych.
-ZONE_CAPACITY = {"Kerem Shalom": 60, "Rafah": 40}
-DEFAULT_ZONE_CAPACITY = 40
 DEFAULT_LANES = 4           # liczba równoległych stanowisk odprawy
 LANES = {"Kerem Shalom": 8, "Rafah": 6}
-
-UNLOAD_MIN = (0.0, 0.0)     # czas rozładunku w hubie, minuty (ZAŁOŻENIE; 0 = jak dotąd, bez modelu tłumu)
 
 # --- dynamika (ZAŁOŻENIA) ---
 STUCK_GIVE_UP_H = 72         # ciężarówka bez drogi do hubu czeka tyle godzin, potem rezygnuje (delivered=False)

@@ -1,4 +1,4 @@
-"""Krok 6: pętla zdarzeń SimPy. Ciężarówka: wjazd -> kolejka i odprawa -> jazda odcinek po odcinku -> rozładunek.
+"""Krok 6: pętla zdarzeń SimPy. Ciężarówka: wjazd -> kolejka i odprawa -> jazda odcinek po odcinku -> dowiozła.
 
 Droga do hubu: na każdym skrzyżowaniu ciężarówka sprawdza, czy stan dróg się zmienił (zdarzenia),
 i jeśli tak, bierze nową trasę z pola D* Lite. Gdy nie ma żadnej drogi, czeka i sprawdza ponownie.
@@ -32,7 +32,7 @@ def _clock(minute):
     return f"dz.{m // 1440 + 1:02d} {m % 1440 // 60:02d}:{m % 60:02d}"
 
 
-def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, routes, events=(),
+def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, events=(),
                    damage_model=None, month=None, seed=None,
                    trace_every=0, trace_days=None, trace_lines=None):
     """Zwraca tabelę z logiem każdej ciężarówki.
@@ -55,8 +55,8 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, rou
         t["service_min"] = rng.uniform(*config.CLEARANCE_MIN, n)
     else:
         raise ValueError(f"config.SERVICE_DIST musi być 'erlang' albo 'uniform', jest {config.SERVICE_DIST!r}")
+    # hub losowany z udziałów w Dispatching, niezależnie od przejścia (ZAŁOŻENIE, patrz README)
     t["hub"] = rng.choice(list(hub_shares.index), size=n, p=hub_shares.to_numpy() / hub_shares.sum())
-    t["unload_min"] = rng.uniform(*config.UNLOAD_MIN, n)   # losowane na końcu, żeby nie zmienić poprzednich wylosowanych wartości
 
     traced = set()
     if trace_every:
@@ -66,8 +66,6 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, rou
 
     env = simpy.Environment()
     lanes = {c: simpy.Resource(env, capacity=config.LANES.get(c, config.DEFAULT_LANES))
-             for c in t["crossing"].unique()}
-    zones = {c: simpy.Resource(env, capacity=config.ZONE_CAPACITY.get(c, config.DEFAULT_ZONE_CAPACITY))
              for c in t["crossing"].unique()}
     state = {"in_transit": 0, "delivered": {h: 0 for h in hub_shares.index}, "stuck": 0}
     log = []
@@ -95,22 +93,13 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, rou
         lane = lanes[row.crossing]
         say(row.truck_id, f"{row.crossing}: wjazd | czeka {len(lane.queue)}, "
                           f"stanowiska zajęte {lane.count}/{lane.capacity} | cel {row.hub}")
-        zone = zones[row.crossing]
-        full = zone.count >= zone.capacity or len(zone.queue) > 0   # sprawdzamy przed złożeniem zgłoszenia
-        with zone.request() as zreq:
-            if full:   # strefa pełna: czekamy przed nią, a nie giniemy
-                fsm.go(S.OUTSIDE, env.now)
-                say(row.truck_id, f"{row.crossing}: strefa pełna ({zone.capacity}), czeka na drodze przed nią "
-                                  f"(przed nią {len(zone.queue)})")
-            yield zreq
-            zone_entry = env.now
-            fsm.go(S.QUEUE, env.now)
-            with lane.request() as req:
-                yield req
-                fsm.go(S.SERVICE, env.now)
-                queue = env.now - row.arrival_min
-                say(row.truck_id, f"{row.crossing}: początek odprawy po {queue:.0f} min w kolejce")
-                yield env.timeout(row.service_min)
+        fsm.go(S.QUEUE, env.now)
+        with lane.request() as req:
+            yield req
+            fsm.go(S.SERVICE, env.now)
+            queue = env.now - row.arrival_min
+            say(row.truck_id, f"{row.crossing}: początek odprawy po {queue:.0f} min w kolejce")
+            yield env.timeout(row.service_min)
 
         fsm.go(S.DRIVE, env.now)
         node, goal = crossing_nodes[row.crossing], hub_nodes[row.hub]
@@ -179,22 +168,18 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, rou
         t_end_drive = env.now
         state["in_transit"] -= 1
         if delivered:
-            fsm.go(S.UNLOAD, env.now)
-            yield env.timeout(row.unload_min)   # miejsce na model tłumu w punkcie dystrybucji
             fsm.go(S.DONE, env.now)
             state["delivered"][row.hub] += 1
-            say(row.truck_id, f"{row.hub}: rozładunek | w drodze {state['in_transit']}, "
+            say(row.truck_id, f"{row.hub}: dowiozła | w drodze {state['in_transit']}, "
                               f"dowiezione do tego hubu {state['delivered'][row.hub]}, "
                               f"łącznie od wjazdu {env.now - row.arrival_min:.0f} min"
                               + (f", zmian trasy {replans}, czekała bez drogi {stuck_min:.0f} min" if replans or stuck_min else ""))
-        short_km = routes[(row.crossing, row.hub)]["shortest_km"]
         log.append({
             "truck_id": row.truck_id, "date": row.date, "crossing": row.crossing, "hub": row.hub,
             "arrival_min": row.arrival_min, "queue_min": queue, "service_min": row.service_min,
-            "travel_min": t_end_drive - t_drive, "route_km": driven_km, "detour_km": driven_km - short_km,
+            "travel_min": t_end_drive - t_drive, "route_km": driven_km,
             "replans": replans, "stuck_min": stuck_min, "delivered": delivered,
-            "outside_min": zone_entry - row.arrival_min, "zone_entry_min": zone_entry,
-            "unload_min": fsm.minutes_in(S.UNLOAD, env.now), "final_state": fsm.state.value,
+            "final_state": fsm.state.value,
             "cleared_min": row.arrival_min + queue + row.service_min, "done_min": env.now,
         })
 

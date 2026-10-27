@@ -1,6 +1,5 @@
 """Krok 5: zniszczenia UNOSAT -> koszt i czas przejazdu krawędzi grafu."""
 import glob
-import math
 import zipfile
 from collections import Counter, defaultdict
 
@@ -18,8 +17,9 @@ def load_unosat(zip_path=None):
     if not zip_path.exists():
         raise FileNotFoundError(f"Brak {zip_path}. Wrzuć tam plik UNOSAT (zip z .gdb).")
     target = config.DATA_PROC / "unosat_extracted"
-    with zipfile.ZipFile(zip_path) as z:
-        z.extractall(target)
+    if not glob.glob(str(target / "**" / "*.gdb"), recursive=True):   # rozpakowujemy tylko za pierwszym razem
+        with zipfile.ZipFile(zip_path) as z:
+            z.extractall(target)
     gdb = glob.glob(str(target / "**" / "*.gdb"), recursive=True)[0]
     layers = pyogrio.list_layers(gdb)
     layer = [name for name, geom in layers if "Point" in str(geom)][0]
@@ -48,10 +48,17 @@ def describe_unosat(gdf):
 
 
 def first_dates(gdf):
-    """Data pierwszego zdjęcia każdego punktu = najwcześniejsza z kolumn SensorDate, SensorDate_2, ..."""
-    cols = [c for c in gdf.columns if c.startswith("SensorDate")]
-    d = pd.concat([pd.to_datetime(gdf[c], errors="coerce", utc=True) for c in cols], axis=1)
-    return d.min(axis=1)
+    """Data pierwszego zdjęcia, na którym punkt jest uszkodzony.
+
+    Kolumna SensorDate_k to data k-tego przelotu, a Main_Damage_Site_Class_k to klasa z tego przelotu (pusta albo 6 = brak
+    uszkodzenia). Bierzemy najwcześniejszą datę, przy której klasa jest niepusta i różna od 6.
+    """
+    out = []
+    for c in [c for c in gdf.columns if c.startswith("SensorDate")]:
+        cls = gdf[c.replace("SensorDate", "Main_Damage_Site_Class")]
+        d = pd.to_datetime(gdf[c], errors="coerce", utc=True)
+        out.append(d.where(cls.notna() & (cls != 6)))
+    return pd.concat(out, axis=1).min(axis=1)
 
 
 def filter_as_of(gdf, as_of):
@@ -71,13 +78,12 @@ def speed_factor(d):
 
 
 def set_base_weights(G):
-    """Bez zniszczeń: czas = długość / prędkość, koszt dla routera = czas [min]."""
+    """Bez zniszczeń: czas przejazdu krawędzi = długość / prędkość [min]. Router używa właśnie tego czasu."""
     v = config.TRUCK_SPEED_KMH * 1000 / 60  # m/min
     for _, _, _, d in G.edges(keys=True, data=True):
         d["damage"] = 0
         d["speed_factor"] = speed_factor(d)
         d["time_min"] = d["length"] / (v * d["speed_factor"])
-        d["cost"] = d["time_min"]
 
 
 class DamageModel:
@@ -103,7 +109,7 @@ class DamageModel:
             self.edge_cells[(u, v, k)] = cells
             for c in cells:
                 self.cell_edges[c].append((u, v, k))
-        changed = self.add_points(gdf)
+        self.add_points(gdf)
         hit = sum(1 for (u, v, k) in self.edge_cells if G[u][v][k]["damage"] > 0)
         print(f"Zniszczenia nałożone: {hit} z {len(self.edge_cells)} krawędzi przechodzi przez oczka ze zniszczeniami")
 
@@ -113,10 +119,9 @@ class DamageModel:
         length = d["length"]
         v_free = config.TRUCK_SPEED_KMH * 1000 / 60 * speed_factor(d)
         v_min = min(config.MIN_SPEED_KMH * 1000 / 60, v_free)
-        # jeden wzór: ciężarówka jedzie wolniej, a router dostaje ten sam czas (plus opcjonalna kara za ryzyko)
+        # jeden wzór: ciężarówka jedzie wolniej, a router dostaje ten sam czas
         d["damage"] = int(dmg)
         d["time_min"] = length / max(v_min, v_free / (1 + config.SLOWDOWN_PER_DAMAGE * dmg))
-        d["cost"] = d["time_min"] * (1 + config.RISK_WEIGHT * dmg)
 
     def add_points(self, gdf):
         """Dokłada punkty zniszczeń. Zwraca zbiór par (u, v), których koszt się zmienił."""
@@ -131,8 +136,3 @@ class DamageModel:
         for (u, v, k) in touched:
             self._refresh(u, v, k)
         return {(u, v) for (u, v, k) in touched}
-
-
-def apply_damage(G, damage_gdf):
-    """Wersja jednorazowa (bez fal w czasie)."""
-    return DamageModel(G, damage_gdf)

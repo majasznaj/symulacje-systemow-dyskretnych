@@ -1,5 +1,4 @@
 """Krok 2: graf dróg Strefy Gazy (pobranie raz, zapis do pliku) i trasy (D* Lite)."""
-import networkx as nx
 import geopandas as gpd
 import osmnx as ox
 from shapely.geometry import Point
@@ -77,12 +76,8 @@ def _best_edge(G, u, v, weight):
 def compute_routes(G, crossing_nodes, hub_nodes, router):
     """Trasy bazowe (stan dróg w chwili wywołania) dla każdej pary (przejście, hub) z pól D* Lite.
 
-    Zwraca {(przejście, hub): {path, edge_min, edge_km, km, minutes, shortest_km, detour_km}}.
-    shortest_km to najkrótsza trasa bez zniszczeń i blokad (też D* Lite, z kosztem = długość).
+    Zwraca {(przejście, hub): {path, edge_min, edge_km, km, minutes}}.
     """
-    import router as router_mod
-    length_router = router_mod.FieldRouter(G, hub_nodes, next(iter(crossing_nodes.values())),
-                                           cost_fn=router_mod.length_cost)
     routes = {}
     for c, u in crossing_nodes.items():
         for h in hub_nodes:
@@ -93,12 +88,6 @@ def compute_routes(G, crossing_nodes, hub_nodes, router):
                 dt, dkm = router.edge(a, b)
                 edge_min.append(dt); edge_km.append(dkm)
                 a = b
-            short = length_router.plan(h, u)
-            a, short_km = u, 0.0
-            for b in short:
-                short_km += length_router.edge(a, b)[1]
-                a = b
             routes[(c, h)] = {"path": [u] + path, "edge_min": edge_min, "edge_km": edge_km,
-                              "km": sum(edge_km), "minutes": sum(edge_min),
-                              "shortest_km": short_km, "detour_km": sum(edge_km) - short_km}
+                              "km": sum(edge_km), "minutes": sum(edge_min)}
     return routes
