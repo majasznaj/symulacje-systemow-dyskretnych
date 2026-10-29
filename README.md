@@ -9,11 +9,20 @@ Odtwarza jeden miesiąc z danych ONZ. Domyślnie marzec 2024 (`config.MONTH`), k
 
 1. Każdy wiersz z `Commodities-Received.xlsx` to jedna ciężarówka wjeżdżająca przez przejście graniczne.
 2. Na przejściu ciężarówka czeka w kolejce i jest odprawiana (SimPy).
-3. Potem jedzie po grafie dróg z OpenStreetMap do jednego z hubów. Trasę wyznacza D* Lite.
+3. Potem jedzie po grafie dróg z OpenStreetMap do jednego z hubów. Trasę wyznacza D* Lite. Hub jest losowany z rozkładu warunkowego `P(hub | crossing)` z `Commodities-Dispatching`: ciężarówki z Rafah mają inny rozkład destinations niż ciężarówki z Kerem Shalom.
 4. Zniszczenia z UNOSAT spowalniają drogi. Stan na 1. dzień miesiąca jest punktem startu, a nowe fale zniszczeń wchodzą w dniach zdjęć.
 5. Opcjonalnie można zamknąć najruchliwszą drogę. Ciężarówki bez trasy czekają i po 72 h rezygnują.
 
 Na wyjściu jest log każdej ciężarówki i dwie tabele podsumowań.
+
+**Weryfikacja:** rozkład hubów w symulacji vs dane `Commodities-Dispatching`:
+
+| Miesiąc | Crossing | Maks. różnica |
+|---|---|---|
+| 2023-11 | Rafah | 0,85 pp |
+| 2024-03 | Rafah | 1,15 pp |
+
+Różnice mieszczą się w szumie próbkowania (`σ ≈ 0,9 pp` przy n=2545, `σ ≈ 0,4 pp` przy n=5131). Kerem Shalom nie jest weryfikowalny w 2024-03 (brak destinations w danych — patrz „Znane ograniczenia", punkt 2).
 
 ## Szybki start
 
@@ -45,7 +54,7 @@ Wyniki trafiają do `output/<miesiąc>/`:
 | Ścieżka | Do czego |
 |---|---|
 | `src/config.py` | wszystkie parametry i założenia w jednym miejscu (przejścia, huby, liczba stanowisk, czas odprawy, prędkości) |
-| `src/data.py` | Excel → ciężarówki i udziały hubów (`data/processed/`) |
+| `src/data.py` | Excel → ciężarówki i macierz udziałów hubów `P(hub \| crossing)` (`data/processed/`) |
 | `src/network.py` | graf dróg (pobranie, wczytanie), przypinanie punktów do węzłów, trasy bazowe |
 | `src/damage.py` | UNOSAT → liczba punktów w oczku 500 m → czas przejazdu krawędzi |
 | `src/dstar_lite.py` | algorytm D* Lite (a raczej przybliżenie, bo to ciężkie w implementacji) |
@@ -56,7 +65,7 @@ Wyniki trafiają do `output/<miesiąc>/`:
 | `src/run.py` | uruchamianie i tabele podsumowań |
 | `src/diagnose.py` | diagnostyka grafu, tras i zniszczeń, mapy |
 | `data/raw/` | Excele ONZ (Received, Dispatching) i archiwum UNOSAT |
-| `data/processed/` | gotowy graf `gaza_drive.graphml`, ciężarówki i udziały hubów z marca 2024, mapowanie odbiorców na huby (do przejrzenia) |
+| `data/processed/` | gotowy graf `gaza_drive.graphml`, ciężarówki (`trucks_<miesiąc>.csv`), macierz udziałów hubów (`hub_shares_<miesiąc>.csv`, wiersze = crossingi, kolumny = huby), mapowanie odbiorców na huby (`hub_mapping_<miesiąc>.csv`, do przejrzenia) |
 
 ## Modele: co jest, czego jeszcze nie ma
 
@@ -78,19 +87,19 @@ Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 - godzina wjazdu (Excel ma tylko datę) i godziny otwarcia 8–18, przy czym odprawa trwa także po 18:00,
 - prędkość ciężarówki 30 km/h, a na drogach `service`, `living_street` i `track` odpowiednio mniej,
 - spowolnienie od zniszczeń: połowa prędkości przy 150 punktach UNOSAT w oczku 500 m, wszystkie klasy zniszczeń liczone tak samo,
-- współrzędne przejść i hubów. Przy każdej jest oznaczone, czy zostały sprawdzone na stronie źródła ([W]), pochodzą z dokumentu Logistics Cluster ([P]) czy nie mają źródła ([?]).
+- współrzędne przejść i hubów. Przy każdej jest oznaczone, czy zostały sprawdzone na stronie źródła ([W]), pochodzą z dokumentu Logistics Cluster ([P]) czy nie mają źródła ([?]),
+- próg `MIN_CROSSING_SAMPLES = 30` — jeśli w `Commodities-Dispatching` dla danego crossingu jest mniej niż 30 wierszy, używamy globalnego rozkładu hubów zamiast lokalnego (żeby nie ufać szumowi z kilku wierszy).
 
 ## Znane ograniczenia
 
-1. **W grafie brakuje ulic w Rafah przy granicy z Egiptem.** W marcu 2024 jedzie do Hub_Rafah 88% ciężarówek. Kerem Shalom → Hub_Rafah ma 17,8 km przy 8,6 km w linii prostej, Rafah → Hub_Rafah 15,4 km przy 5,6 km, a zamknięcie najruchliwszej drogi (`--block-main`) zatrzymuje 182 ciężarówki, bo nie ma objazdu (`docs/rafah_graf.png`). Mapa Google pokazuje w punkcie 31.2826N 34.2572E gęstą siatkę ulic, a graf ma w promieniu 500 m od niego 6 krawędzi i żadnej z tych nazw. Brakuje ich w OSM - w razie potrzeby należy albo je sztucznie dorysować albo wybrać inne źródło map. 
-2. **Hub jest losowany z udziałów w Dispatching** niezależnie od crossingu. Trzeba zastąpić losowanie parami przejście → hub?
+1. **W grafie brakuje ulic w Rafah przy granicy z Egiptem.** W marcu 2024 jedzie do Hub_Rafah 88% ciężarówek. Kerem Shalom → Hub_Rafah ma 17,8 km przy 8,6 km w linii prostej, Rafah → Hub_Rafah 15,4 km przy 5,6 km, a zamknięcie najruchliwszej drogi (`--block-main`) zatrzymuje 182 ciężarówki, bo nie ma objazdu (`docs/rafah_graf.png`). Mapa Google pokazuje w punkcie 31.2826N 34.2572E gęstą siatkę ulic, a graf ma w promieniu 500 m od niego 6 krawędzi i żadnej z tych nazw. Brakuje ich w OSM - w razie potrzeby należy albo je sztucznie dorysować albo wybrać inne źródło map.
+2. **Destinations dla Kerem Shalom w marcu 2024 są nieznane.** W `Commodities-Dispatching` dla 2024-03 wszystkie 5131 wierszy ma `Crossing = Rafah`, mimo że w `Commodities-Received` 76,5% wjazdów (3818/4993) jest przez Kerem Shalom. Dla Kerem Shalom używamy fallbacku do globalnego rozkładu hubów (który = rozkład Rafah, bo wszystkie destinations to Rafah). Weryfikacja `P(hub | crossing)` możliwa tylko dla Rafah — i tam zgadza się z danymi do ~1 pp (szum próbkowania 2545–5131 losowań).
 3. **Zniszczenia działają prawie jak równomierne spowolnienie.** 97% krawędzi ma jakieś zniszczenia, a mediana to ok. 190 punktów w oczku (czas ×2,3). Datą zniszczenia jest data zdjęcia satelity, nie ataku. Nie ma napraw.
-4. **Część destinations z Excela pozostaje niezmapowane do hubów**
-
+4. **Część destinations z Excela pozostaje niezmapowana do hubów** — w 2023-11 to 117 nazw (323 wiersze, 14% ruchu), głównie szpitale, magazyny logistyczne ONZ i sklepy. Do rozszerzenia `HUB_RULES` w M2 po ręcznej weryfikacji lokalizacji.
 
 ## Plan
 
-- **Milestone 2:** scenariusze z briefu jako parametry (więcej ciężarówek, krótsza odprawa, więcej stanowisk, odcięcie arterii, decentralizacja magazynów) i pętla po wielu seedach z jedną tabelą wyników; rozładunek w hubie; pary przejście → hub; K razem z odrzucaniem ciężarówek.
+- **Milestone 2:** scenariusze z briefu jako parametry (więcej ciężarówek, krótsza odprawa, więcej stanowisk, odcięcie arterii, decentralizacja magazynów) i pętla po wielu seedach z jedną tabelą wyników; rozładunek w hubie (stan `UNLOAD` w FSM); K razem z odrzucaniem ciężarówek (stan `REJECTED`); naprawa grafu w Rafah (ręczny patch albo inne źródło OSM); rozszerzenie `HUB_RULES`.
 - **Milestone 3:** Nagel-Schreckenberg przy bramkach, tłum w punktach dystrybucji (Helbing), stan kryzysu i Utility AI, KPI głodu, zdarzenia losowe z ACLED.
 - **Milestone 4:** wizualizacja, walidacja na danych historycznych, raport.
 
