@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dane rozpakowane z zipa (odtwarzane przez damage.load_unosat)
+data/processed/unosat_extracted/
+
+# Cache z --prepare-data (odtwarzane jedną komendą)
+data/processed/dispatch_daily_*.csv
+data/processed/trucks_*.csv
+data/processed/hub_shares_*.csv
+
+# Wyniki symulacji (generowane przez --month/--diagnose)
+output/

@@ -101,3 +101,4 @@ LANES = {"Kerem Shalom": 8, "Rafah": 6}
 STUCK_GIVE_UP_H = 72         # ciężarówka bez drogi do hubu czeka tyle godzin, potem rezygnuje (delivered=False)
 STUCK_WAIT_MIN = 15         # ciężarówka bez drogi do hubu sprawdza ponownie co tyle minut
 BLOCK_HOURS = 12            # domyślny czas trwania blokady z --block-main
+MIN_CROSSING_SAMPLES = 30 # poniżej tego progu dla przejścia używamy globalnego rozkładu

@@ -56,7 +56,12 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, eve
     else:
         raise ValueError(f"config.SERVICE_DIST musi być 'erlang' albo 'uniform', jest {config.SERVICE_DIST!r}")
     # hub losowany z udziałów w Dispatching, niezależnie od przejścia (ZAŁOŻENIE, patrz README)
-    t["hub"] = rng.choice(list(hub_shares.index), size=n, p=hub_shares.to_numpy() / hub_shares.sum())
+        # hub losowany z rozkładu warunkowego P(hub | crossing) z Dispatching
+    t["hub"] = [
+        rng.choice(hub_shares.columns.to_numpy(),
+                   p=hub_shares.loc[c].to_numpy() / hub_shares.loc[c].sum())
+        for c in t["crossing"]
+    ]
 
     traced = set()
     if trace_every:
@@ -67,7 +72,7 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, eve
     env = simpy.Environment()
     lanes = {c: simpy.Resource(env, capacity=config.LANES.get(c, config.DEFAULT_LANES))
              for c in t["crossing"].unique()}
-    state = {"in_transit": 0, "delivered": {h: 0 for h in hub_shares.index}, "stuck": 0}
+    state = {"in_transit": 0, "delivered": {h: 0 for h in hub_shares.columns}, "stuck": 0}
     log = []
 
     def say(truck_id, text):

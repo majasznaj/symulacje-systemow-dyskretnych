@@ -46,24 +46,43 @@ def map_hub(name):
 
 
 def prepare_hub_mapping(month):
-    """Dispatching -> tabela nazwa odbiorcy -> hub (z liczbą wierszy) oraz udziały hubów."""
+    """Dispatching -> tabela nazw odbiorców i macierz udziałów (przejście × hub)."""
     df = _read_sheet0(config.DISPATCH_XLSX)
     start, end = _month_bounds(month)
     df = df[(df["Date Dispatch"] >= start) & (df["Date Dispatch"] < end)].copy()
     col = "Destination Recipient/ partner"
+
     names = df[col].value_counts().rename_axis("destination").reset_index(name="rows")
     names["hub"] = names["destination"].map(map_hub)
+
     df["hub"] = df[col].map(map_hub)
-    daily = df.groupby(df["Date Dispatch"].dt.normalize()).agg(rows=(col, "size"), mapped=("hub", lambda x: x.notna().sum()))
+    if "Crossing" in df.columns:
+        df["crossing"] = df["Crossing"].replace(config.CROSSING_ALIASES)
+    else:
+        df["crossing"] = None
+
+    daily = df.groupby(df["Date Dispatch"].dt.normalize()).agg(
+        rows=(col, "size"), mapped=("hub", lambda x: x.notna().sum())
+    )
     daily.index.name = "date"
     config.DATA_PROC.mkdir(parents=True, exist_ok=True)
     daily.to_csv(config.DATA_PROC / f"dispatch_daily_{month}.csv")
-    mapped = names.dropna(subset=["hub"])
-    shares = (mapped.groupby("hub")["rows"].sum() / mapped["rows"].sum()).rename("share")
-    shares = shares.reindex(list(config.HUBS)).fillna(0.0)
-    shares = shares[shares > 0]
-    return names, shares
 
+    mapped = df.dropna(subset=["hub"])
+    global_share = mapped["hub"].value_counts(normalize=True)
+
+    shares = pd.DataFrame(0.0, index=list(config.CROSSINGS), columns=list(config.HUBS))
+    for c in config.CROSSINGS:
+        sub = mapped[mapped["crossing"] == c]
+        if len(sub) < config.MIN_CROSSING_SAMPLES:
+            for h in config.HUBS:
+                shares.loc[c, h] = global_share.get(h, 0.0)
+        else:
+            counts = sub["hub"].value_counts(normalize=True)
+            for h in config.HUBS:
+                shares.loc[c, h] = counts.get(h, 0.0)
+    shares = shares.div(shares.sum(axis=1), axis=0).fillna(0.0)
+    return names, shares
 
 def prepare(month=None, force=False):
     """Zapisuje data/processed/{trucks,hub_mapping,hub_shares}_<miesiąc>.csv i zwraca (trucks, shares)."""
@@ -99,5 +118,9 @@ def prepare(month=None, force=False):
 def load_prepared(month=None):
     month = month or config.MONTH
     trucks = pd.read_csv(config.DATA_PROC / f"trucks_{month}.csv", parse_dates=["date"])
-    shares = pd.read_csv(config.DATA_PROC / f"hub_shares_{month}.csv", index_col=0)["share"]
+    shares = pd.read_csv(config.DATA_PROC / f"hub_shares_{month}.csv", index_col=0)
+    if "share" in shares.columns:
+        raise RuntimeError(
+            f"Stary format cache dla {month}. Uruchom: python src/run.py --prepare-data --force"
+        )
     return trucks, shares
