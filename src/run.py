@@ -16,7 +16,7 @@ Milestone 2 (domyślnie wyłączone, bez flag wynik jest taki sam jak w M1):
   --stochastic    losowe incydenty drogowe, zamknięcia przejść i awarie pojazdów (stochastic.py)
   --analytics     tabele KPI i wykresy kpi_*.png (analytics.py)
   --m2            skrót: --unloading --demand --stochastic --analytics
-  --scenario A-E  A bazowy, B odprawa o 50% krótsza, C blokada drogi, D podwójna liczba doków, E dwa razy więcej ciężarówek
+  --scenario A-E  A bazowy, B odprawa o połowę krótsza, C blokada drogi, D podwójna liczba doków, E dwa razy więcej ciężarówek
   --multi-seed N  N przebiegów z kolejnymi ziarnami i tabela wyników (średnia, odchylenie)
 """
 import argparse
@@ -210,7 +210,11 @@ def main():
     if a.diagnose:
         import diagnose
         w = build_world(a, double_trucks)
-        diagnose.report(w["G"], w["crossing_nodes"], w["hub_nodes"], w["routes"], outdir)
+        # pary przejście-hub, którymi w tym miesiącu może jechać ciężarówka: przejście ma wjazdy, a hub ma udział w wydaniach
+        n_trucks = w["trucks"]["crossing"].value_counts()
+        used_pairs = {(c, h) for c in w["shares"].index if n_trucks.get(c, 0) > 0
+                      for h in w["shares"].columns if w["shares"].loc[c, h] > 0}
+        diagnose.report(w["G"], w["crossing_nodes"], w["hub_nodes"], w["routes"], outdir, used_pairs)
         return
 
     if a.multi_seed > 1:

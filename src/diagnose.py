@@ -2,6 +2,7 @@
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 import osmnx as ox
 import pandas as pd
 
@@ -13,7 +14,8 @@ def _km(lat1, lon1, lat2, lon2):
     return float(ox.distance.great_circle(lat1, lon1, lat2, lon2)) / 1000
 
 
-def report(G, crossing_nodes, hub_nodes, routes, outdir):
+def report(G, crossing_nodes, hub_nodes, routes, outdir, used_pairs=None):
+    """used_pairs: zbiór (przejście, hub) rysowanych na mapie tras. None = wszystkie."""
     outdir.mkdir(parents=True, exist_ok=True)
     nodes, edges = ox.graph_to_gdfs(G)
     nll = nodes.to_crs(4326)
@@ -74,11 +76,37 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir):
     print(f"czas przejazdu >= 2x: {(slow >= 2).mean():.0%}; >= 4x: {(slow >= 4).mean():.0%}; "
           f"na dolnym limicie prędkości ({config.MIN_SPEED_KMH:.0f} km/h, {sat:.0f}x): {(slow >= sat - 1e-6).mean():.0%}")
 
-    # 5a. mapa grafu: przypięcia (czerwone linie od punktu zadanego do węzła) i trasy
+    # 5a. mapa tras: jeden kolor na przejście, wszystkie huby. Tam, gdzie trasy z różnych przejść idą tą samą drogą,
+    # linie są przesunięte w bok i biegną obok siebie, więc widać każdą z nich.
+    cross_colors = {"Kerem Shalom": "tab:blue", "Rafah": "tab:orange", "Erez": "tab:green", "Western Erez": "tab:red",
+                    "Kissufim": "tab:purple", "Gate 96": "tab:brown", "JLOTS": "tab:pink"}
+    crossings_drawn = [c for c in config.CROSSINGS if used_pairs is None or any(pc == c for pc, _ in used_pairs)]
+    seg_users = {}                      # odcinek (a, b), a < b  ->  przejścia, których trasy go używają
+    for (c, h), r in routes.items():
+        if c not in crossings_drawn or (used_pairs is not None and (c, h) not in used_pairs):
+            continue
+        for u, v in zip(r["path"], r["path"][1:]):
+            seg_users.setdefault((min(u, v), max(u, v)), set()).add(c)
     fig, ax = plt.subplots(figsize=(10, 11))
-    edges.plot(ax=ax, color="#bbbbbb", linewidth=0.4)
+    edges.plot(ax=ax, color="#cccccc", linewidth=0.4)
     ax.set_axis_off()
-    ax.set_title("Graf, przypięcia i trasy")
+    ax.set_title("Trasy przejście → hub (kolor = przejście)")
+    step = 130                          # odstęp między liniami obok siebie [m w układzie mapy]
+    segments = {c: [] for c in crossings_drawn}
+    for (u, v), users in seg_users.items():
+        pu, pv = nodes.loc[u].geometry, nodes.loc[v].geometry
+        dx, dy = pv.x - pu.x, pv.y - pu.y
+        if dx * 0.45 + dy * 0.89 < 0:   # jeden kierunek odniesienia (oś Strefy, SW -> NE), żeby przesunięcie szło po tej samej stronie drogi
+            dx, dy = -dx, -dy
+        norm = (dx * dx + dy * dy) ** 0.5 or 1.0
+        nx, ny = -dy / norm, dx / norm
+        order = [c for c in crossings_drawn if c in users]
+        for k, c in enumerate(order):
+            off = (k - (len(order) - 1) / 2) * step
+            segments[c].append([(pu.x + nx * off, pu.y + ny * off), (pv.x + nx * off, pv.y + ny * off)])
+    for c in crossings_drawn:
+        ax.add_collection(LineCollection(segments[c], colors=cross_colors.get(c, "black"), linewidths=2.2, zorder=5,
+                                         label=c))
     for kind, pts, snapped, mk, col in (("przejście", config.CROSSINGS, crossing_nodes, "s", "deepskyblue"),
                                         ("hub", config.HUBS, hub_nodes, "^", "limegreen")):
         for name, (lat, lon) in pts.items():
@@ -87,24 +115,10 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir):
             ax.plot([p.x, q.x], [p.y, q.y], color="red", lw=1)
             ax.scatter([p.x], [p.y], marker="x", color="red", s=40, zorder=9)
             ax.scatter([q.x], [q.y], marker=mk, color=col, edgecolor="black", s=90, zorder=10)
-            ax.annotate(name, (q.x, q.y), fontsize=8, xytext=(4, 4), textcoords="offset points")
-    route_colors = {
-        ("Kerem Shalom", "Hub_Rafah"): "orange",
-        ("Rafah", "Hub_Khan_Younis"): "magenta",
-        ("Gate 96", "Hub_Deir_al_Balah"): "cyan",
-        ("Erez", "Hub_North_Jabalia"): "lime",
-        ("Western Erez", "Hub_Gaza_City"): "red",
-        ("Kerem Shalom", "Hub_North_Jabalia"): "yellow",
-    }
-    for (c, h), color in route_colors.items():
-        if (c, h) in routes:
-            path = routes[(c, h)]["path"]
-            xs = [nodes.loc[n].geometry.x for n in path]
-            ys = [nodes.loc[n].geometry.y for n in path]
-            ax.plot(xs, ys, color=color, lw=2.5, label=f"{c} -> {h}")
-    ax.legend(loc="upper left")
+            ax.annotate(name, (q.x, q.y), fontsize=8, xytext=(4, 4), textcoords="offset points", zorder=11)
+    ax.legend(loc="upper left", fontsize=9, title="trasy z przejścia")
     fig.tight_layout()
-    fig.savefig(outdir / "diagnoza.png", dpi=110)
+    fig.savefig(outdir / "diagnoza.png", dpi=160)
     plt.close(fig)
 
     # 5b. mapa zniszczeń: drogi pomalowane liczbą punktów UNOSAT w oczku

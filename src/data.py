@@ -1,5 +1,6 @@
 """Kroki 3 i 4: strumień ciężarówek z Excela i mapowanie odbiorców na huby."""
 import re
+import numpy as np
 import pandas as pd
 
 import config
@@ -83,8 +84,7 @@ def prepare_hub_mapping(month):
             for h in config.HUBS:
                 shares.loc[c, h] = counts.get(h, 0.0)
     shares = shares.div(shares.sum(axis=1), axis=0).fillna(0.0)
-    weights = global_share.reindex(list(config.HUBS)).fillna(0.0).rename("share")
-    return names, shares, weights
+    return names, shares
 
 def prepare(month=None, force=False):
     """Zapisuje data/processed/{trucks,hub_mapping,hub_shares}_<miesiąc>.csv i zwraca (trucks, shares)."""
@@ -93,13 +93,11 @@ def prepare(month=None, force=False):
     f_trucks = config.DATA_PROC / f"trucks_{month}.csv"
     f_map = config.DATA_PROC / f"hub_mapping_{month}.csv"
     f_shares = config.DATA_PROC / f"hub_shares_{month}.csv"
-    f_weights = config.DATA_PROC / f"hub_weights_{month}.csv"
-    if f_trucks.exists() and f_shares.exists() and f_weights.exists() and not force:
+    if f_trucks.exists() and f_shares.exists() and not force:
         return load_prepared(month)
 
     trucks = prepare_trucks(month)
-    names, shares, weights = prepare_hub_mapping(month)
-    weights.to_csv(f_weights)
+    names, shares = prepare_hub_mapping(month)
     trucks.to_csv(f_trucks, index=False)
     names.to_csv(f_map, index=False)
     shares.to_csv(f_shares)
@@ -120,10 +118,16 @@ def prepare(month=None, force=False):
 
 
 def hub_population(month=None):
-    """Ludność hubów w miesiącu: config.GAZA_POPULATION x udział hubu w wydaniach. Huby bez wydań są pomijane."""
+    """Ludność każdego huba w miesiącu z IPC (config.IPC_POPULATION, config.IPC_SPLIT): średnia z dni miesiąca
+    po interpolacji liniowej między punktami IPC. Nie zależy od wydań z Dispatching."""
     month = month or config.MONTH
-    w = pd.read_csv(config.DATA_PROC / f"hub_weights_{month}.csv", index_col=0)["share"]
-    return {h: int(round(config.GAZA_POPULATION * s)) for h, s in w.items() if s > 0}
+    start, end = _month_bounds(month)
+    days = pd.date_range(start, end - pd.Timedelta(days=1), freq="D")
+    t = days.values.astype("datetime64[D]").astype(float)
+    pts = pd.DataFrame(config.IPC_POPULATION, columns=["date", "north", "middle", "rafah"])
+    tp = pd.to_datetime(pts["date"]).values.astype("datetime64[D]").astype(float)
+    group = {g: float(np.interp(t, tp, pts[g]).mean()) for g in ("north", "middle", "rafah")}
+    return {h: int(round(group[g] * share)) for h, (g, share) in config.IPC_SPLIT.items()}
 
 
 def load_prepared(month=None):

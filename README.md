@@ -16,7 +16,7 @@ Domyślnie maj 2024 (`config.MONTH`). Inny miesiąc wybierasz przez `--month`, n
 Warstwy dodatkowe (flagi w „Szybkim starcie”):
 
 - **Rozładunek (`--unloading`).** W hubie ciężarówka czeka na wolny dok i rozładowuje się średnio 30 min.
-- **Popyt na żywność (`--demand`).** Ładunek jest przeliczany na tony. Co dobę ludność hubu zjada zapas (do 2100 kcal na osobę), a z kalorii wychodzi uproszczona faza 1–5.
+- **Popyt na żywność (`--demand`).** Ładunek jest przeliczany na tony. Co dobę ludność hubu zjada zapas (do 2100 kcal na osobę), a z kalorii wychodzi uproszczona faza 1–5. Ludność hubu to liczba mieszkańców gubernatorstwa z raportów IPC (zmienia się z miesiąca na miesiąc), a nie wynik rozkładu pomocy.
 - **Zdarzenia losowe (`--stochastic`).** Incydenty drogowe, zamknięcia przejść i awarie ciężarówek. Mają osobny generator losowy, więc nie zmieniają pozostałych losowań.
 - **Analityka (`--analytics`), scenariusze (`--scenario`), wiele seedów (`--multi-seed`).**
 
@@ -58,7 +58,7 @@ Wyniki trafiają do `output/<miesiąc>/`:
 | `truck_log.csv` | jedna linia na ciężarówkę: przejście, hub, czasy kolejki, odprawy i dojazdu, długość trasy, zmiany trasy, czy dowiozła. Z warstwami dodatkowymi także kategoria i masa ładunku, czas rozładunku, awaria, `rejections` (ile razy zawrócona przez K) |
 | `summary_crossings.csv`, `summary_hubs.csv` | kolejki na przejściach i czasy dojazdu do hubów |
 | `sim_log.txt` | log tekstowy (z `--log-days` / `--log-every`) |
-| `diagnoza.png`, `mapa_zniszczen.png`, `diagnoza_*.csv` | z `--diagnose`: trasy i drogi pomalowane zniszczeniami |
+| `diagnoza.png`, `mapa_zniszczen.png`, `diagnoza_*.csv` | z `--diagnose`: wszystkie przejścia i huby oraz trasy przejście → hub na jednej mapie (kolor = przejście, rysowane tylko dla przejść z ruchem w miesiącu, na wspólnych odcinkach linie biegną obok siebie), oraz drogi pomalowane zniszczeniami |
 | `demand_summary.csv`, `demand_history.csv` | z `--demand`: pokrycie zapotrzebowania na żywność i historia dobowa |
 | `kpi_summary.csv`, `bottleneck_*.csv`, `kpi_*.png` | z `--analytics`: wskaźniki, wąskie gardła, wykresy |
 | `multiseed_kpi.csv`, `multiseed_summary.csv` | z `--multi-seed` |
@@ -71,7 +71,7 @@ Ciężarówka odrzucona przez K ma `final_state = odrzucona`, `delivered = False
 | Ścieżka | Do czego |
 |---|---|
 | `src/config.py` | wszystkie parametry i założenia w jednym miejscu |
-| `src/data.py` | Excel → ciężarówki, udziały hubów w miesiącu, ludność hubów (`data/processed/`) |
+| `src/data.py` | Excel → ciężarówki, udziały hubów w miesiącu (`data/processed/`), ludność hubów z IPC (`hub_population`) |
 | `src/network.py` | graf dróg (pobranie, wczytanie, przycięcie do Strefy), przypinanie punktów do węzłów, trasy bazowe |
 | `src/damage.py` | UNOSAT → liczba punktów w oczku 500 m → czas przejazdu krawędzi |
 | `src/dstar_lite.py`, `src/router.py` | D* Lite: po jednym polu kosztu na hub, ciężarówka czyta z niego następny krok |
@@ -84,7 +84,7 @@ Ciężarówka odrzucona przez K ma `final_state = odrzucona`, `delivered = False
 | `src/run.py` | uruchamianie, scenariusze, wiele seedów, tabele |
 | `src/diagnose.py` | diagnostyka grafu, tras i zniszczeń |
 | `data/raw/` | Excele ONZ (Received, Dispatching) i archiwum UNOSAT |
-| `data/processed/` | graf `gaza_drive.graphml`, ciężarówki (`trucks_*.csv`), udziały hubów (`hub_shares_*.csv`, `hub_weights_*.csv`), mapowanie odbiorców na huby (`hub_mapping_*.csv`) |
+| `data/processed/` | graf `gaza_drive.graphml`, ciężarówki (`trucks_*.csv`), udziały hubów (`hub_shares_*.csv`), mapowanie odbiorców na huby (`hub_mapping_*.csv`) |
 
 ## Modele
 
@@ -94,7 +94,7 @@ Ciężarówka odrzucona przez K ma `final_state = odrzucona`, `delivered = False
 | FSM | jest | wjazd → kolejka → odprawa → jazda ↔ bez drogi → rozładunek → dowiozła / zrezygnowała. Przy pełnym przejściu: zawrócona → wjazd albo odrzucona. Niedozwolone przejście zgłasza błąd |
 | D* Lite | jest | pole kosztu do każdego hubu naprawiane przyrostowo po zmianie dróg. Heurystyka wyłączona, więc w praktyce to przyrostowy Dijkstra liczony od hubu wstecz |
 | Rozładunek w hubie | jest (`--unloading`) | doki jako zasób SimPy, średnio 30 min |
-| Popyt i żywność | jest, uproszczone (`--demand`) | zapas, kalorie na osobę, faza 1–5 z progów 2100/1900/1700/1500 kcal. To nie jest oficjalny IPC, bo liczy tylko kalorie. Wody model nie uwzględnia, bo nie ma jej w danych |
+| Popyt i żywność | jest, uproszczone (`--demand`) | zapas, ludność z IPC, kalorie na osobę, faza 1–5 z progów 2100/1900/1700/1500 kcal. To nie jest oficjalny IPC, bo liczy tylko kalorie. Wody model nie uwzględnia, bo nie ma jej w danych |
 | Zdarzenia losowe | jest (`--stochastic`) | częstości nieskalibrowane, dane ACLED nie są użyte |
 
 Możliwe rozszerzenia w przyszłości: Nagel-Schreckenberg (ruch przed bramką), model tłumu Helbinga, Utility AI, dane ACLED.
@@ -109,7 +109,7 @@ Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 - spowolnienie od zniszczeń: połowa prędkości przy 150 punktach UNOSAT w oczku 500 m, wszystkie klasy zniszczeń liczone tak samo,
 - współrzędne przejść i hubów. Przy każdej oznaczono, czy sprawdzono je na stronie źródła ([W]), pochodzą z dokumentu Logistics Cluster ([P]) czy nie mają źródła ([?]),
 - przelicznik palety na tony 0,64 t (z median: 14 t na ciężarówkę przy 22 paletach), ciężarówka bez znanej ilości dostaje 14 t,
-- łączna ludność Gazy 2,2 mln (`GAZA_POPULATION`) to jedyna liczba spoza Excela. Ludność hubu to 2,2 mln razy udział hubu w wydaniach danego miesiąca. Zakładamy, że pomoc jedzie tam, gdzie są ludzie,
+- ludność hubów (`IPC_POPULATION`, `IPC_SPLIT`): liczby z raportów IPC (tabela niżej), interpolowane liniowo po dniach, a dla miesiąca uśrednione. IPC łączy gubernatorstwa (północ = North Gaza + Gaza, środek = Deir al-Balah + Khan Younis), więc dzielimy je w stałej proporcji z tabeli IPC z kwietnia 2025 (310 : 740 i 400 : 620). Dla grudnia 2023 – stycznia 2024 południe też jest podzielone na środek i Rafah w proporcji z marca 2024. Dla Rafah w maju i czerwcu 2024 użyliśmy dodatkowo dwóch liczb z raportów (ok. 200 tys. pod koniec maja, ok. 65 tys. w połowie czerwca). Przed grudniem 2023 (październik, listopad) zostaje stan z grudnia. Hub jest jednym punktem, więc cała ludność gubernatorstwa jest przypisana do jednego huba,
 - doki rozładunkowe (4/3/3/2/2) i czas rozładunku 30 min,
 - częstości zdarzeń losowych: incydenty 0,002 na krawędź na dobę, zamknięcia przejść 0,15 (Kerem Shalom) i 0,20 (Rafah) na dobę po 6 ± 2 h, awarie 3% na 100 km,
 - próg `MIN_CROSSING_SAMPLES = 30`: przy mniejszej liczbie wierszy dla przejścia używany jest rozkład globalny (działa tylko z `HUB_SHARE_BY_CROSSING = True`).
@@ -120,13 +120,13 @@ Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 2. **Kolumna `Crossing` w Dispatching nie zgadza się z Received.** W 2024-03 wszystkie 5131 wierszy ma `Rafah`, a w Received 76,5% wjazdów jest przez Kerem Shalom. W 2024-05 Dispatching ma 62% wierszy z „Rafah”, a przez Rafah wjechało 5,5% ciężarówek. Nie wiemy, co ta kolumna oznacza. Dlatego hub jest losowany z rozkładu całego miesiąca i nie zależy od przejścia. Stary wariant włącza `HUB_SHARE_BY_CROSSING = True`.
 3. **Zniszczenia działają prawie jak równomierne spowolnienie.** 97% krawędzi ma jakieś zniszczenia, mediana to ok. 190 punktów w oczku (czas ×2,3). Datą zniszczenia jest data zdjęcia, nie ataku. W UNOSAT nie ma dat naprawy, więc domyślnie fale zostają. `--damage-lifetime` zakłada, że po N dniach droga wraca do poprzedniej prędkości.
 4. **Kolejka jest skalibrowana tylko co do rzędu wielkości.** Liczba stanowisk nie jest znana (11 komórek Kerem Shalom to miejsca postoju, nie równoległe odprawy). Doniesienia o czasie czekania są anegdotyczne: ok. 11 h, czasem do trzech dni (The World, lipiec 2024), średnio do 20 dni na trasie z Egiptu (Oxfam, marzec 2024). W maju 2024 na Kerem Shalom wychodzi średnio ok. 2,5 h, p95 ok. 10 h, maksimum ok. 16 h (seed 42, bez zdarzeń losowych). Przy 10 stanowiskach średnia spada do 1,3 h, przy 12 do 0,7 h. Czekanie przed dniem z danych (trasa z Egiptu, Al-Arisz, Nitzana) nie jest w modelu. Na małych przejściach (Erez, Western Erez, Gate 96, JLOTS) 4 stanowiska to zgadywanie.
-5. **Wyniki z warstwami dodatkowymi zależą od założeń bez danych.** Ludność hubu wynika z udziału wydań, więc pokrycie żywności na hub wychodzi podobne (w 2024-05 ok. 93–100%). Informacja jest w pokryciu łącznym: w 2024-05 ok. 97% (odchylenie 0,15 pp przy 5 seedach). Ludność Rafah wychodzi ok. 1 mln, a w maju 2024 Rafah był wysiedlany, więc jest zawyżona. Średnia kolejka na przejściach to w 2024-05 ok. 126 min bez zdarzeń losowych i ok. 177 min z `--m2` (odchylenie 25 min), więc z `--m2` trzeba raportować średnią z wielu seedów.
+5. **Wyniki z warstwami dodatkowymi zależą od założeń bez danych.** Ludność hubów pochodzi z IPC i nie zależy od pomocy, więc pokrycie żywności różni się między hubami. W 2024-05 (seed 42, `--m2`): Hub_North_Jabalia 4%, Hub_Khan_Younis 38%, a Gaza City, Deir al-Balah i Rafah 100%. Pokrycie łączne to ok. 76% (odchylenie 1,1 pp przy 5 seedach, `--demand`). Zapas nie przepływa między hubami, więc nadwyżka w jednym hubie nie pomaga innemu. Ludność w maju 2024 szybko się zmieniała (Rafah z 1,3 mln do ok. 65 tys.), a model bierze średnią z miesiąca. Rozbicie grup IPC na gubernatorstwa to założenie. Średnia kolejka na przejściach to w 2024-05 ok. 126 min bez zdarzeń losowych i ok. 177 min z `--m2` (odchylenie 25 min), więc z `--m2` trzeba raportować średnią z wielu seedów.
 6. **Graf zawiera drogi serwisowe i dojazdowe oraz Korytarz Filadelfijski.** Trasy mogą przechodzić przez drogi, których ciężarówki humanitarne nie używają.
 7. **Część odbiorców z Excela nie jest zmapowana do hubów.** W 2023-11 to 117 nazw (14% ruchu), głównie szpitale, magazyny ONZ i sklepy. Do rozszerzenia w `HUB_RULES` po sprawdzeniu lokalizacji.
 
 ## Plan
 
-- Kalibracja kolejki i doków, scenariusz zamknięcia całego przekroju korytarza, rozszerzenie `HUB_RULES`, ludność z IPC dla danego okresu.
+- Kalibracja kolejki i doków, scenariusz zamknięcia całego przekroju korytarza, rozszerzenie `HUB_RULES`.
 - Porównanie kierunku zmian z raportami IPC, walidacja, raport końcowy.
 
 ## Jak dodawać nowe rzeczy
@@ -157,3 +157,18 @@ Nie ma ich w Excelach. Użyliśmy ich do ustawienia czasu odprawy, liczby stanow
 | W czerwcu 2026 z Egiptu rozładowano tylko 52% zgłoszonych ciężarówek, bo część była zawracana. W listopadzie 2025 przez Nitzana zawrócono 48%. | uzasadnienie odrzucania ciężarówek | Logistics Cluster Palestine, protokoły spotkań: [2 lipca 2026](https://logcluster.org/sites/default/files/public/2026-07/logistics-clusterpalestinemeeting-minutes_260702.pdf), [listopad 2025](https://reliefweb.int/attachments/1ffe4842-e338-5420-b06d-5914d9178b84/Logistics%20Cluster_Palestine_Gaza_Meeting%20Minutes_251111.pdf) |
 
 Wartości, które **nie** pochodzą z żadnego źródła, tylko z naszego założenia: liczba stanowisk (8 i 6, na małych przejściach 4), 15 m na ciężarówkę, doba do ponownej próby i trzy próby.
+
+### Źródła z internetu (ludność hubów)
+
+Użyte w `IPC_POPULATION` i `IPC_SPLIT` w `src/config.py`.
+
+| Okres | Liczby | Źródło |
+|---|---|---|
+| 24.11–7.12.2023 i prognoza do 7.02.2024 | północ 600 tys. (prognoza 500 tys.), południe 1 626 544 (prognoza 1 726 544), razem 2 226 544 | IPC, [*Gaza Strip: Acute Food Insecurity, Nov 2023 – Feb 2024*](https://www.ipcinfo.org/fileadmin/user_upload/ipcinfo/docs/IPC_Gaza_Acute_Food_Insecurity_Nov2023_Feb2024.pdf) |
+| 15.02–15.03.2024 | North Gaza + Gaza 300 tys., Deir al-Balah + Khan Younis 600 tys., Rafah 1 326 544 | IPC, [*Special Brief (18.03.2024)*](https://www.un.org/unispal/wp-content/uploads/2024/03/IPC_Gaza_Strip_Acute_Food_Insecurity_Feb_July2024_Special_Brief.pdf) |
+| koniec maja 2024 | w Rafah zostaje ok. 200 tys. po wysiedleniu 945 tys. osób | UNRWA (29.05.2024), cytowane w [raporcie Famine Review Committee (czerwiec 2024)](https://www.un.org/unispal/wp-content/uploads/2024/06/IPC_Famine_Review_Committee_Report_Gaza_June2024.pdf) |
+| połowa czerwca 2024 | w Rafah zostaje ok. 65 tys. | UNRWA, cytowane przez [FEWS NET, *Gaza Targeted Analysis* (czerwiec 2024)](https://fews.net/middle-east-and-europe/gaza/targeted-analysis/june-2024/print) |
+| 1.09–31.10.2024 i prognoza do 30.04.2025 | północ 430 715, Deir al-Balah + Khan Younis 1 665 702, Rafah 44 201, razem 2 140 618 | IPC, [*Special Brief, Sept 2024 – Aug 2025*](https://www.ipcinfo.org/fileadmin/user_upload/ipcinfo/docs/IPC_Gaza_Strip_Acute_Food_Insecurity_Malnutrition_Sept2024_Aug2025_Special_Brief.pdf) |
+| 1.04–10.05.2025 (tylko do podziału grup) | North Gaza 310 tys., Gaza 740 tys., Deir al-Balah 400 tys., Khan Younis 620 tys., Rafah 30 tys. | IPC, [*Special Brief, Apr – Sep 2025*](https://www.ipcinfo.org/fileadmin/user_upload/ipcinfo/docs/IPC_Gaza_Strip_Acute_Food_Insecurity_Apr_Sep2025_Special_Report.pdf) |
+
+Wartości z założenia: podział grup IPC na pojedyncze gubernatorstwa, podział południa w grudniu 2023 – styczniu 2024, stan północy w maju–czerwcu 2024 (300 tys. jak w marcu) i interpolacja liniowa między punktami.

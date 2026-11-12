@@ -146,11 +146,38 @@ TRUCK_PAYLOAD_MT = 14.0     # ładunek, gdy nie da się go policzyć z jednostki
 MAX_TRUCK_MT = 40.0         # górna granica na ciężarówkę (w danych są skrajne ilości, np. 5120 palet w jednym wierszu)
 
 # --- popyt (demand.py) ---
-# Ludność hubu = GAZA_POPULATION x udział hubu w wydaniach z Dispatching w danym miesiącu (data.hub_population).
-# Excel nie ma ludności, więc przyjmujemy, że pomoc jedzie tam, gdzie są ludzie, a rozkład ludności zmienia się z miesiąca na miesiąc
-# razem z rozkładem wydań (np. po maju 2024 Rafah znika z danych). To założenie, nie pomiar: dzięki niemu pokrycie na hub jest
-# porównywalne między hubami, a główną miarą jest pokrycie łączne. Hub bez wydań w tym miesiącu nie ma ludności i nie jest liczony.
-GAZA_POPULATION = 2_200_000   # ZAŁOŻENIE: jedyna liczba spoza Excela (ok. 2,2 mln wg ONZ), do podmiany na dane IPC/WorldPop
+# Ludność hubu pochodzi z raportów IPC (liczba ludzi w gubernatorstwie), niezależnie od tego, ile pomocy dociera do huba.
+# IPC łączy gubernatorstwa w grupy analizy, a huby odpowiadają pojedynczym gubernatorstwom, więc patrz IPC_SPLIT.
+# Punkty to (data, północ = North Gaza + Gaza, środek = Deir al-Balah + Khan Younis, Rafah). Między punktami jest interpolacja
+# liniowa po dniach, a ludność miesiąca to średnia z jego dni (data.hub_population). Przed pierwszym i po ostatnim punkcie wartość jest stała.
+IPC_POPULATION = [
+    # IPC 21.12.2023, analiza 24.11-7.12.2023: północ 600 000, południe (mieszkańcy + przesiedleni) 1 626 544.
+    # IPC nie rozbija południa na gubernatorstwa, więc dzielimy je jak w IPC z marca 2024 (środek 600 000 : Rafah 1 326 544).
+    ("2023-12-01", 600_000, 507_000, 1_119_544),
+    # IPC 21.12.2023, prognoza 8.12.2023-7.02.2024: północ 500 000, południe 1 726 544 (ten sam podział południa).
+    ("2024-01-15", 500_000, 538_000, 1_188_544),
+    # IPC 18.03.2024, analiza 15.02-15.03.2024: północ 300 000, środek 600 000, Rafah 1 326 544.
+    ("2024-03-01", 300_000, 600_000, 1_326_544),
+    # Początek ofensywy na Rafah (6.05.2024): bez zmian względem IPC z marca (jej prognoza obejmuje do 15.07.2024).
+    ("2024-05-06", 300_000, 600_000, 1_326_544),
+    # Rafah: ok. 200 000 mieszkańców po wysiedleniu 945 000 osób (UNRWA 29.05.2024, cytowane w raporcie FRC z czerwca 2024).
+    # Północ bez zmian, środek = reszta do sumy 2 226 544.
+    ("2024-05-26", 300_000, 1_726_544, 200_000),
+    # Rafah: ok. 65 000 w połowie czerwca 2024 (UNRWA, cytowane przez FEWS NET). Środek = reszta do sumy.
+    ("2024-06-15", 300_000, 1_861_544, 65_000),
+    # IPC wrzesień 2024 (analiza 1.09-31.10.2024, prognoza do 30.04.2025 z tymi samymi liczbami): suma 2 140 618.
+    ("2024-09-01", 430_715, 1_665_702, 44_201),
+    ("2025-04-30", 430_715, 1_665_702, 44_201),
+]
+# Podział grup IPC na gubernatorstwa według tabeli IPC z kwietnia 2025 (jedyna z pięcioma osobnymi gubernatorstwami):
+# North Gaza 310 000 : Gaza 740 000, Deir al-Balah 400 000 : Khan Younis 620 000. ZAŁOŻENIE: stały udział w całym okresie.
+IPC_SPLIT = {
+    "Hub_North_Jabalia": ("north", 310_000 / 1_050_000),
+    "Hub_Gaza_City": ("north", 740_000 / 1_050_000),
+    "Hub_Deir_al_Balah": ("middle", 400_000 / 1_020_000),
+    "Hub_Khan_Younis": ("middle", 620_000 / 1_020_000),
+    "Hub_Rafah": ("rafah", 1.0),
+}
 
 # --- rozkład hubów ---
 # False: P(hub) z wszystkich wydań miesiąca. Kolumna Crossing w Dispatching nie zgadza się z Received (np. 2024-03: wszystkie

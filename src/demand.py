@@ -1,6 +1,6 @@
 """demand.py – Warstwa popytowa i wskaźnik bezpieczeństwa żywnościowego (opcjonalna warstwa, flaga --demand).
 
-Każdy hub obsługuje pewną populację (data.hub_population: config.GAZA_POPULATION razy udział hubu w wydaniach miesiąca) i ma dzienne zapotrzebowanie na żywność.
+Każdy hub obsługuje pewną populację (data.hub_population: ludność gubernatorstwa z raportów IPC, niezależna od wydań pomocy) i ma dzienne zapotrzebowanie na żywność.
 Dostawy zwiększają zapas w hubie, a co dobę populacja zjada tyle, ile jest w zapasie (do pełnej racji).
 Faza bezpieczeństwa żywnościowego jest liczona z kalorii faktycznie zjedzonych tego dnia na osobę.
 
