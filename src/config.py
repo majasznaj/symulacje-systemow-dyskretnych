@@ -18,7 +18,7 @@ UNOSAT_ZIP = DATA_RAW / "unosat_gaza.zip"
 GRAPH_FILE = DATA_PROC / "gaza_drive.graphml"
 
 # --- okno czasowe i losowość ---
-MONTH = "2024-03"   # miesiąc z Excela, który odtwarzamy
+MONTH = "2024-05"   # miesiąc z Excela, który odtwarzamy (maj 2024: cztery przejścia i cztery huby z ładunkiem)
 SEED = 42
 
 # --- przejścia graniczne i huby (WGS84) ---
@@ -93,12 +93,19 @@ OPEN_HOURS = (8, 18)        # Excel ma tylko datę; godzinę wjazdu losujemy z t
 # Kolejka na przejściu to M/G/c (K na razie nie ma, bo nikt nie jest odrzucany): wjazdy z Excela (dzień z danych, godzina
 # losowana równomiernie w OPEN_HOURS, czyli proces Poissona o intensywności z danych), c = LANES, czas obsługi G jak niżej.
 # Odprawa (G w notacji Kendalla). "uniform": rozkład jednostajny CLEARANCE_MIN; "erlang": Erlang(k) o średniej SERVICE_MEAN_MIN.
-# Obie wartości średniej są takie same (25 min), więc zmiana rozkładu nie zmienia średniego obciążenia stanowisk.
+# Obie wartości średniej są takie same (45 min), więc zmiana rozkładu nie zmienia średniego obciążenia stanowisk.
+# Czas odprawy: Gisha, "Kerem Shalom Crossing" (2020): przekazanie towaru z ciężarówki izraelskiej na palestyńską trwa ok. 45 min
+# (rozładunek, przeniesienie przez "sterylne" ciężarówki, załadunek). Dla Rafah przyjmujemy to samo (przeładunek z ciężarówek
+# egipskich na palestyńskie, MSF 2024), więc to założenie. Uwaga: to czas fizyczny, a w praktyce o czekaniu decyduje też zgoda COGAT.
+# Liczba stanowisk NIE jest znana (Gisha: 11 komórek po 17-25 ciężarówek, ale to miejsce na postój, nie liczba równoległych odpraw).
+# c dobrane tak, żeby przy 45 min kolejka na Kerem Shalom w marcu-maju 2024 wychodziła rzędu godzin (średnio ok. 2-3 h, p95 ok. 10 h),
+# bo kierowcy opisywali ok. 11 h oczekiwania, a czasem do trzech dni (The World, VII 2024; Oxfam III 2024: do 20 dni w kolejkach,
+# głównie na trasie z Egiptu, czyli przed dniem z Excela). To jedyna kalibracja, wyłącznie rzędu wielkości, bez danych o czasach.
 SERVICE_DIST = "erlang"
-CLEARANCE_MIN = (15, 35)    # dla "uniform" (wartości z waszego notebooka)
-SERVICE_MEAN_MIN = 25.0     # dla "erlang" (ZAŁOŻENIE)
+CLEARANCE_MIN = (30, 60)    # dla "uniform" (średnia 45 min)
+SERVICE_MEAN_MIN = 45.0     # dla "erlang"
 ERLANG_K = 3                # kształt: im większe, tym bardziej równy czas odprawy (k=1 to rozkład wykładniczy)
-DEFAULT_LANES = 4           # liczba równoległych stanowisk odprawy
+DEFAULT_LANES = 4           # liczba równoległych stanowisk odprawy (przejścia z małym ruchem: Erez, Gate 96, JLOTS, Western Erez)
 LANES = {"Kerem Shalom": 8, "Rafah": 6}
 
 # --- dynamika (ZAŁOŻENIA) ---
@@ -121,15 +128,16 @@ TRUCK_PAYLOAD_MT = 14.0     # ładunek, gdy nie da się go policzyć z jednostki
 MAX_TRUCK_MT = 40.0         # górna granica na ciężarówkę (w danych są skrajne ilości, np. 5120 palet w jednym wierszu)
 
 # --- popyt (demand.py) ---
-# Populacje obsługiwane przez huby (ZAŁOŻENIE: przybliżenia z WorldPop / UN OCHA 2024, jedne dla całego okresu).
-# Do poprawy: IPC podaje populację per gubernatorstwo i okres, a w 2023-24 ludność była rozłożona inaczej niż w 2025.
-HUB_POPULATIONS = {
-    "Hub_Rafah":           600_000,
-    "Hub_Khan_Younis":     400_000,
-    "Hub_Deir_al_Balah":   350_000,
-    "Hub_Gaza_City":       200_000,
-    "Hub_North_Jabalia":   150_000,
-}
+# Ludność hubu = GAZA_POPULATION x udział hubu w wydaniach z Dispatching w danym miesiącu (data.hub_population).
+# Excel nie ma ludności, więc przyjmujemy, że pomoc jedzie tam, gdzie są ludzie, a rozkład ludności zmienia się z miesiąca na miesiąc
+# razem z rozkładem wydań (np. po maju 2024 Rafah znika z danych). To założenie, nie pomiar: dzięki niemu pokrycie na hub jest
+# porównywalne między hubami, a główną miarą jest pokrycie łączne. Hub bez wydań w tym miesiącu nie ma ludności i nie jest liczony.
+GAZA_POPULATION = 2_200_000   # ZAŁOŻENIE: jedyna liczba spoza Excela (ok. 2,2 mln wg ONZ), do podmiany na dane IPC/WorldPop
+
+# --- rozkład hubów ---
+# False: P(hub) z wszystkich wydań miesiąca. Kolumna Crossing w Dispatching nie zgadza się z Received (np. 2024-03: wszystkie
+# wydania "Rafah", a 76% wjazdów to Kerem Shalom), więc nie warunkujemy huba przejściem. True: P(hub | crossing) jak w M1.
+HUB_SHARE_BY_CROSSING = False
 
 # --- rozładunek w hubie (--unloading) ---
 # Liczba równoległych stanowisk rozładunku (ZAŁOŻENIE: brak danych) i czas rozładunku, Erlang(k) o tej średniej.

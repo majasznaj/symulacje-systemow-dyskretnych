@@ -142,7 +142,7 @@ def run_once(a, seed, double_trucks=False, quiet=False):
             print(f"Zdarzenia losowe: {n_st} (incydenty drogowe i zamknięcia przejść)")
 
     import demand as demand_mod
-    demand_model = demand_mod.DemandModel() if a.demand else None
+    demand_model = demand_mod.DemandModel(data.hub_population(a.month)) if a.demand else None
     edge_usage = {} if a.analytics else None
 
     # --- symulacja ---

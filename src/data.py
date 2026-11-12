@@ -53,6 +53,7 @@ def prepare_hub_mapping(month):
     col = "Destination Recipient/ partner"
 
     names = df[col].value_counts().rename_axis("destination").reset_index(name="rows")
+    names = names.sort_values(["rows", "destination"], ascending=[False, True]).reset_index(drop=True)
     names["hub"] = names["destination"].map(map_hub)
 
     df["hub"] = df[col].map(map_hub)
@@ -74,7 +75,7 @@ def prepare_hub_mapping(month):
     shares = pd.DataFrame(0.0, index=list(config.CROSSINGS), columns=list(config.HUBS))
     for c in config.CROSSINGS:
         sub = mapped[mapped["crossing"] == c]
-        if len(sub) < config.MIN_CROSSING_SAMPLES:
+        if not config.HUB_SHARE_BY_CROSSING or len(sub) < config.MIN_CROSSING_SAMPLES:
             for h in config.HUBS:
                 shares.loc[c, h] = global_share.get(h, 0.0)
         else:
@@ -82,7 +83,8 @@ def prepare_hub_mapping(month):
             for h in config.HUBS:
                 shares.loc[c, h] = counts.get(h, 0.0)
     shares = shares.div(shares.sum(axis=1), axis=0).fillna(0.0)
-    return names, shares
+    weights = global_share.reindex(list(config.HUBS)).fillna(0.0).rename("share")
+    return names, shares, weights
 
 def prepare(month=None, force=False):
     """Zapisuje data/processed/{trucks,hub_mapping,hub_shares}_<miesiąc>.csv i zwraca (trucks, shares)."""
@@ -91,11 +93,13 @@ def prepare(month=None, force=False):
     f_trucks = config.DATA_PROC / f"trucks_{month}.csv"
     f_map = config.DATA_PROC / f"hub_mapping_{month}.csv"
     f_shares = config.DATA_PROC / f"hub_shares_{month}.csv"
-    if f_trucks.exists() and f_shares.exists() and not force:
+    f_weights = config.DATA_PROC / f"hub_weights_{month}.csv"
+    if f_trucks.exists() and f_shares.exists() and f_weights.exists() and not force:
         return load_prepared(month)
 
     trucks = prepare_trucks(month)
-    names, shares = prepare_hub_mapping(month)
+    names, shares, weights = prepare_hub_mapping(month)
+    weights.to_csv(f_weights)
     trucks.to_csv(f_trucks, index=False)
     names.to_csv(f_map, index=False)
     shares.to_csv(f_shares)
@@ -113,6 +117,13 @@ def prepare(month=None, force=False):
         print(f"Niezmapowane nazwy ({len(unmapped)}), zajrzyj do {f_map.name}:")
         print(unmapped.head(10).to_string(index=False))
     return trucks, shares
+
+
+def hub_population(month=None):
+    """Ludność hubów w miesiącu: config.GAZA_POPULATION x udział hubu w wydaniach. Huby bez wydań są pomijane."""
+    month = month or config.MONTH
+    w = pd.read_csv(config.DATA_PROC / f"hub_weights_{month}.csv", index_col=0)["share"]
+    return {h: int(round(config.GAZA_POPULATION * s)) for h, s in w.items() if s > 0}
 
 
 def load_prepared(month=None):

@@ -1,6 +1,6 @@
 """demand.py – Warstwa popytowa i wskaźnik bezpieczeństwa żywnościowego (Milestone 2, autor: Martyna; zintegrowane).
 
-Każdy hub obsługuje pewną populację (config.HUB_POPULATIONS) i ma dzienne zapotrzebowanie na żywność.
+Każdy hub obsługuje pewną populację (data.hub_population: config.GAZA_POPULATION razy udział hubu w wydaniach miesiąca) i ma dzienne zapotrzebowanie na żywność.
 Dostawy zwiększają zapas w hubie, a co dobę populacja zjada tyle, ile jest w zapasie (do pełnej racji).
 Faza bezpieczeństwa żywnościowego jest liczona z kalorii faktycznie zjedzonych tego dnia na osobę.
 
@@ -114,8 +114,9 @@ class HubDemand:
 class DemandModel:
     """Zarządza stanem popytowym wszystkich hubów przez całą symulację."""
 
-    def __init__(self, populations: Dict[str, int] = None):
-        pops = populations or config.HUB_POPULATIONS
+    def __init__(self, populations: Dict[str, int]):
+        """populations: {hub: liczba mieszkańców}, patrz data.hub_population()."""
+        pops = populations
         self.hubs: Dict[str, HubDemand] = {name: HubDemand(name=name, population=pop) for name, pop in pops.items()}
 
     def deliver(self, hub: str, minute: float, cargo_category: str, quantity_mt: float):
