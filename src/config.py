@@ -26,11 +26,16 @@ SEED = 42
 CROSSINGS = {
     "Kerem Shalom": (31.2208, 34.2706),     # [W] Wikipedia: 31°13′15″N 34°16′14″E
     "Rafah": (31.2486, 34.2592),            # [W] Wikipedia: 31°14′55″N 34°15′33″E
-    "Kissufim": (31.3736, 34.3758),         # [?] z notebooka, bez źródła
-    "Gate 96": (31.4395, 34.4125),          # [?] z notebooka, bez źródła
-    "JLOTS": (31.4820, 34.4030),            # [?] z notebooka, bez źródła (tymczasowe molo)
+    "Kissufim": (31.3738, 34.3733),         # [W] OSM node 13141629229 "Kissufim crossing" (poprzednio 31.3736, 34.3758, ok. 250 m obok)
+    "Gate 96": (31.4527, 34.4529),          # [?] wschodni koniec korytarza Netzarim (OSM, droga 749), ok. 70 m od płotu. Dokładnej
+                                            # lokalizacji brak w OSM i w prasie ("dziura w płocie" przy korytarzu Netzarim).
+                                            # W V 2024 nieużywany (Gisha). Poprzednio 31.4395, 34.4125, ok. 1,9 km w głębi Strefy.
+    "JLOTS": (31.4969, 34.4090),            # [?] brzegowy koniec mola z OSM (way 1262899251). To molo WCK z III 2024; pływające molo
+                                            # JLOTS (17.05-VII 2024) stało w pobliżu, tuż na północ od korytarza Netzarim. Ciężarówki
+                                            # zjeżdżały z mola na plażę. Poprzednio 31.4820, 34.4030, ok. 1 km w głębi lądu.
     "Erez": (31.5582, 34.5447),             # [W] Wikipedia: 31°33′29.52″N 34°32′41″E (poprzednio 31.5414, 34.4908, ok. 5 km obok)
-    "Western Erez": (31.5640, 34.4710),     # [?] z notebooka, bez źródła
+    "Western Erez": (31.5931, 34.4950),     # [W] OSM node 12403280153 "Erez West Crossing" (Zikim). Poprzednio 31.5640, 34.4710,
+                                            # czyli w Beit Lahia, ok. 3,9 km od granicy.
 }
 # Huby to punkty orientacyjne (magazyn albo obóz UNRWA jako przybliżenie okolicy dystrybucji), nie dokładne adresy.
 HUBS = {
