@@ -15,4 +15,4 @@ data/processed/trucks_*.csv
 data/processed/hub_shares_*.csv
 
 # Wyniki symulacji (generowane przez --month/--diagnose)
-output/
+output/.DS_Store
