@@ -8,7 +8,7 @@ Stan: baza z milestone'a 1 plus opcjonalne warstwy milestone'a 2 (rozładunek w 
 Odtwarza jeden miesiąc z danych ONZ. Domyślnie maj 2024 (`config.MONTH`; cztery przejścia wjazdowe i cztery huby z ładunkiem), każdy inny wybierasz przez `--month`, np. `python src/run.py --month 2023-11`. Dane Excela obejmują październik 2023 – styczeń 2025.
 
 1. Każdy wiersz z `Commodities-Received.xlsx` to jedna ciężarówka wjeżdżająca przez przejście graniczne.
-2. Na przejściu ciężarówka czeka w kolejce i jest odprawiana (SimPy).
+2. Na przejściu ciężarówka czeka w kolejce i jest odprawiana (SimPy). Przejście ma skończoną pojemność K (odprawa plus kolejka): gdy jest pełne, ciężarówka jest zawracana, wraca po dobie i po trzech odmowach jest odrzucona na stałe.
 3. Potem jedzie po grafie dróg z OpenStreetMap do jednego z hubów. Trasę wyznacza D* Lite. Hub jest losowany z rozkładu `P(hub)` z wszystkich wydań danego miesiąca w `Commodities-Dispatching`. Przejście wjazdu bierzemy z `Commodities-Received`. Kolumna `Crossing` w Dispatching nie zgadza się z Received (patrz „Znane ograniczenia”, punkt 2), więc nie warunkujemy huba przejściem. Stary wariant `P(hub | crossing)` włącza `config.HUB_SHARE_BY_CROSSING = True`.
 4. Zniszczenia z UNOSAT spowalniają drogi. Stan na 1. dzień miesiąca jest punktem startu, a nowe fale zniszczeń wchodzą w dniach zdjęć. `--damage-lifetime N` zdejmuje falę po N dniach od zdjęcia (założenie: w UNOSAT nie ma dat naprawy). Zmiana trasy zapisuje się w `replan_causes` i w logu tekstowym jako `powód:`.
 5. Opcjonalnie można zamknąć najruchliwszą drogę. Ciężarówki bez trasy czekają i po 72 h rezygnują.
@@ -44,6 +44,7 @@ Warianty uruchomienia:
 | `--log-days 1,2 --log-every 50` | log tekstowy `sim_log.txt`: wszystkie ciężarówki z dni 1–2, log wyświetlany dla co 50. ciężarówki, plus wszystkie zdarzenia |
 | `--month 2023-11` | inny miesiąc z Excela. Dane przygotowują się same przy pierwszym uruchomieniu, potem są w `data/processed/` |
 | `--no-damage` | punkt odniesienia bez zniszczeń |
+| `--no-capacity` | bez pojemności K (zwykłe M/G/c, jak w M1) |
 | `--damage-lifetime 14` | fala UNOSAT schodzi z dróg 14 dni po zdjęciu |
 | `--block-main "5 08:00" --block-hours 12 --block-k 1` | zamyka k najruchliwszych dróg 5. dnia o 8:00 na 12 h |
 | `--build-graph` | ponowne pobranie grafu z Overpass (graf jest już w repo) |
@@ -72,7 +73,7 @@ Wyniki trafiają do `output/<miesiąc>/`:
 | `multiseed_kpi.csv`, `multiseed_summary.csv` | z `--multi-seed`: KPI każdego przebiegu oraz średnia i odchylenie |
 | `data/processed/hub_weights_<miesiąc>.csv` | udział hubów w wydaniach miesiąca (losowanie hubów i ludność hubów) |
 | `scenario_<A-E>/` | z `--scenario`: te same pliki co wyżej dla danego scenariusza |
-Kolumny M2 w `truck_log.csv`: `category`, `cargo_mt`, `unload_wait_min`, `unload_min`, `breakdown_delay_min`.
+Kolumny M2 w `truck_log.csv`: `category`, `cargo_mt`, `unload_wait_min`, `unload_min`, `breakdown_delay_min`, `rejections` (ile razy zawrócona przez K). Ciężarówka odrzucona na stałe ma `final_state = odrzucona`, `delivered = False`, a czasy kolejki i dojazdu puste.
 
 ## Gdzie co jest
 
@@ -99,8 +100,8 @@ Kolumny M2 w `truck_log.csv`: `category`, `cargo_mt`, `unload_wait_min`, `unload
 
 | Model z notatek zespołu | Stan | Uwagi |
 |---|---|---|
-| Kolejka Kendalla | jest jako M/G/c | wjazdy z danych (dzień z Excela, godzina losowana równomiernie w 8–18, co przy znanej liczbie wjazdów jest równoważne procesowi Poissona), c stanowisk (Kerem Shalom 8, Rafah 6), czas odprawy Erlang-3 o średniej 45 min (Gisha 2020: przekazanie towaru z ciężarówki na ciężarówkę ok. 45 min). **K (pojemności) nie ma.** Dopóki nikt nie jest odrzucany ani przekierowywany, K nie zmienia żadnego czasu, więc wróci razem z odrzucaniem ciężarówek |
-| FSM | jest | wjazd → kolejka → odprawa → jazda ↔ bez drogi → rozładunek → dowiozła / zrezygnowała. Niedozwolone przejście zgłasza błąd. Stanu kryzysu jeszcze nie ma |
+| Kolejka Kendalla | jest jako M/G/c | wjazdy z danych (dzień z Excela, godzina losowana równomiernie w 8–18, co przy znanej liczbie wjazdów jest równoważne procesowi Poissona), c stanowisk (Kerem Shalom 8, Rafah 6), czas odprawy Erlang-3 o średniej 45 min (Gisha 2020: przekazanie towaru z ciężarówki na ciężarówkę ok. 45 min). **K (pojemność)** jest: największa liczba ciężarówek w systemie przejścia naraz (odprawa plus kolejka), Kerem Shalom 200, Rafah 250, pozostałe 100. Wartości oszacowane z długości kolejek (Reuters 25.03.2024: 3 km przy Kerem Shalom, 1,5 km przy Rafah) i z Gisha (11 komórek po 17–25 ciężarówek), przy założeniu 15 m na ciężarówkę. Przy pełnym systemie ciężarówka jest zawracana, wraca po 24 h i po trzech odmowach jest odrzucona na stałe. W maju, marcu i listopadzie nikt nie jest odrzucany, bo największa kolejka to ok. 170 ciężarówek. K działa dopiero przy przeciążeniu, np. w scenariuszu E (2x więcej ciężarówek): odrzuconych jest wtedy 577 z 8684 ciężarówek, a średnia kolejka dowiezionych na Kerem Shalom spada z ok. 23 h do ok. 10 h |
+| FSM | jest | wjazd → kolejka → odprawa → jazda ↔ bez drogi → rozładunek → dowiozła / zrezygnowała; przy pełnym przejściu wjazd → zawrócona → wjazd albo odrzucona. Niedozwolone przejście zgłasza błąd. Stanu kryzysu jeszcze nie ma |
 | Rozładunek w hubie | jest (opcja `--unloading`) | doki jako zasób SimPy (`HUB_UNLOAD_DOCKS`), czas Erlang-3 o średniej 30 min. Liczba doków i czas są założeniem, patrz niżej |
 | Popyt i bezpieczeństwo żywnościowe | jest w wersji uproszczonej (`--demand`) | zapas żywności w hubie, kalorie na osobę na dobę, faza 1–5 z progów 2100/1900/1700/1500 kcal. To **nie jest** oficjalny IPC (IPC liczy też wodę, zdrowie i śmiertelność), tylko uproszczony wskaźnik z samych kalorii |
 | Zdarzenia losowe | są własne (`--stochastic`) | incydenty drogowe, zamknięcia przejść, awarie. Dane ACLED nie są użyte, więc częstości nie są skalibrowane |
@@ -115,6 +116,7 @@ Kolumny M2 w `truck_log.csv`: `category`, `cargo_mt`, `unload_wait_min`, `unload
 
 Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 
+- pojemność K (Kerem Shalom 200, Rafah 250, pozostałe 100), doba do ponownej próby i trzy próby (z długości kolejek w Reuters i Gisha, patrz tabela „Modele”),
 - liczba stanowisk odprawy (Kerem Shalom 8, Rafah 6, pozostałe 4) i czas odprawy. Czas 45 min pochodzi z opisu przejścia (Gisha 2020), a liczba stanowisk jest dobrana tak, żeby kolejka na Kerem Shalom wychodziła rzędu godzin (patrz „Znane ograniczenia”, punkt 5). Brief mówi, że czasów na granicy nie ma w publicznych danych,
 - godzina wjazdu (Excel ma tylko datę) i godziny otwarcia 8–18, przy czym odprawa trwa także po 18:00,
 - prędkość ciężarówki 30 km/h, a na drogach `service`, `living_street` i `track` odpowiednio mniej,
@@ -132,13 +134,13 @@ Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 2. **Kolumna `Crossing` w Dispatching nie zgadza się z Received.** W 2024-03 wszystkie 5131 wierszy Dispatching ma `Crossing = Rafah`, a w Received 76,5% wjazdów (3818/4993) jest przez Kerem Shalom. W 2024-05 Dispatching ma 62% wierszy z „Rafah”, a w Received przez Rafah wjechało 5,5% ciężarówek. Nie wiemy, co ta kolumna oznacza (przejście wjazdu, miejsce wydania albo domyślna wartość). Dlatego przejście wjazdu bierzemy z Received, a hub losujemy z rozkładu całego miesiąca. Skutek: rozkład hubów nie zależy od przejścia, a pytanie „czy ładunek z Kerem Shalom jedzie gdzie indziej niż z Rafah” zostaje bez odpowiedzi na tych danych.
 3. **Zniszczenia działają prawie jak równomierne spowolnienie.** 97% krawędzi ma jakieś zniszczenia, a mediana to ok. 190 punktów w oczku (czas ×2,3). Datą zniszczenia jest data zdjęcia satelity, nie ataku. W pliku UNOSAT prawie nie ma późniejszego zejścia do klasy „brak uszkodzeń”, więc domyślnie fale zostają. `--damage-lifetime` jest jawnym założeniem, że po N dniach droga wraca do poprzedniej prędkości.
 4. **Wyniki M2 zależą od założeń, które nie mają danych.** Ludność hubu jest wyliczana z udziału wydań, więc pokrycie żywności na hub wychodzi podobne dla wszystkich hubów (w 2024-05 ok. 93–100%). Jest to w dużej mierze skutek tego założenia. Rzeczywista informacja jest w pokryciu łącznym (2,2 mln osób razy 2100 kcal na dobę wobec dowiezionej żywności): w 2024-05 ok. 97% przy seedach 42–46 (odchylenie 0,15 pp). Ludność w Rafah wychodzi ok. 1 mln (46% wydań), a w maju 2024 Rafah był wysiedlany, więc rozkład ludności jest tu zawyżony. Średnia kolejka na przejściach (wszystkie ciężarówki) to w 2024-05 ok. 126 min bez zdarzeń losowych (odchylenie 3 min przy 5 seedach) i ok. 177 min z `--m2` (odchylenie 25 min). Różnicę dokładają losowe zamknięcia przejść, które nie są skalibrowane, więc przy `--m2` należy raportować średnią z wielu seedów. Czas oczekiwania na dok zależy od zgadywanej liczby doków (w 2024-05 średnio ok. 11 min).
-5. **Kolejka przejść jest skalibrowana tylko co do rzędu wielkości.** Czas odprawy 45 min pochodzi z opisu Kerem Shalom (Gisha 2020). Liczba stanowisk nie jest znana: przejście ma 11 komórek po 17–25 ciężarówek, ale to miejsca postoju, nie liczba równoległych odpraw. Doniesienia o czasie oczekiwania są anegdotyczne (kierowca ok. 11 h, czasem do trzech dni, The World, lipiec 2024; Oxfam, marzec 2024: średnio do 20 dni w kolejkach, głównie na trasie z Egiptu). Dobraliśmy c (Kerem Shalom 8) tak, żeby przy 45 min kolejka wychodziła rzędu godzin. W maju 2024 daje to na Kerem Shalom średnio ok. 2,5 h, p95 ok. 10 h, maksimum ok. 16 h (seed 42, bez zdarzeń losowych). Ten wynik zależy od c: przy 10 stanowiskach średnia spada do 1,3 h, przy 12 do 0,7 h. Dane Excela liczą ciężarówki w dniu przyjęcia, więc czekanie wielodniowe i tygodniowe (trasa z Egiptu, Al-Arisz, Nitzana) dzieje się przed dniem z danych i nie jest w modelu. Nie ma też pojemności K ani odrzucania ciężarówek (według Logistics Cluster w czerwcu 2026 prawie połowa zgłoszonych ciężarówek z Egiptu wracała bez rozładunku).
+5. **Kolejka przejść jest skalibrowana tylko co do rzędu wielkości.** Czas odprawy 45 min pochodzi z opisu Kerem Shalom (Gisha 2020). Liczba stanowisk nie jest znana: przejście ma 11 komórek po 17–25 ciężarówek, ale to miejsca postoju, nie liczba równoległych odpraw. Doniesienia o czasie oczekiwania są anegdotyczne (kierowca ok. 11 h, czasem do trzech dni, The World, lipiec 2024; Oxfam, marzec 2024: średnio do 20 dni w kolejkach, głównie na trasie z Egiptu). Dobraliśmy c (Kerem Shalom 8) tak, żeby przy 45 min kolejka wychodziła rzędu godzin. W maju 2024 daje to na Kerem Shalom średnio ok. 2,5 h, p95 ok. 10 h, maksimum ok. 16 h (seed 42, bez zdarzeń losowych). Ten wynik zależy od c: przy 10 stanowiskach średnia spada do 1,3 h, przy 12 do 0,7 h. Dane Excela liczą ciężarówki w dniu przyjęcia, więc czekanie wielodniowe i tygodniowe (trasa z Egiptu, Al-Arisz, Nitzana) dzieje się przed dniem z danych i nie jest w modelu. Pojemność K jest (patrz tabela „Modele”), ale w bazowych miesiącach nie jest osiągana, więc nie wpływa na wyniki, a w rzeczywistości część ciężarówek jest zawracana (według Logistics Cluster w czerwcu 2026 prawie połowa zgłoszonych ciężarówek z Egiptu wracała bez rozładunku). Liczba stanowisk na małych przejściach (Erez, Western Erez, Gate 96, JLOTS: 4) jest zgadywana, a przy 45 min daje na nich kolejki rzędu 1–1,5 h.
 6. **Graf zawiera drogi serwisowe i dojazdowe oraz Korytarz Filadelfijski.** Trasy mogą przechodzić przez drogi, których ciężarówki humanitarne w praktyce nie używają. Do rozważenia ograniczenie klas dróg.
 7. **Część destinations z Excela pozostaje niezmapowana do hubów** — w 2023-11 to 117 nazw (323 wiersze, 14% ruchu), głównie szpitale, magazyny logistyczne ONZ i sklepy. Do rozszerzenia `HUB_RULES` po ręcznej weryfikacji lokalizacji.
 
 ## Plan
 
-- **Milestone 2 (zrobione):** scenariusze A–E i pętla po wielu seedach, rozładunek w hubie (stan `UNLOAD`), uproszczony popyt na żywność, zdarzenia losowe, analityka KPI, naprawa grafu w Rafah. **Zostaje do M2/M3:** K razem z odrzucaniem ciężarówek (stan `REJECTED`), kalibracja kolejki i doków, scenariusz zamknięcia całego przekroju korytarza, rozszerzenie `HUB_RULES`, ludność z IPC per okres.
+- **Milestone 2 (zrobione):** scenariusze A–E i pętla po wielu seedach, rozładunek w hubie (stan `UNLOAD`), uproszczony popyt na żywność, zdarzenia losowe, analityka KPI, naprawa grafu w Rafah. **Zostaje do M2/M3:** kalibracja kolejki i doków, scenariusz zamknięcia całego przekroju korytarza, rozszerzenie `HUB_RULES`, ludność z IPC per okres.
 - **Milestone 3:** Nagel-Schreckenberg przy bramkach, tłum w punktach dystrybucji (Helbing), stan kryzysu i Utility AI, zdarzenia z ACLED, kalibracja zdarzeń losowych.
 - **Milestone 4:** wizualizacja, walidacja na danych historycznych, raport.
 
@@ -153,7 +155,20 @@ Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 
 - UN OCHA / Logistics Cluster: `Commodities-Received.xlsx`, `Commodities-Dispatching.xlsx` (wjazdy i wydania pomocy),
 - UNOSAT: ocena zniszczeń budynków w Strefie Gazy (`unosat_gaza.zip`, warstwa punktowa),
-- OpenStreetMap przez OSMnx: sieć dróg,
-- opis przejścia Kerem Shalom i czas przekazania towaru (ok. 45 min): Gisha, *Kerem Shalom Crossing* (2020),
-- oczekiwanie na przejściach: The World / PRX, *The struggle to get aid into Gaza* (12.07.2024); Oxfam (marzec 2024, cytowany przez The National, 19.03.2024); Doctors Without Borders, *What it takes to get lifesaving supplies into Gaza* (trasa przez Al-Arisz i Nitzana, tygodnie); CNN (21.08.2025),
-- zwroty ciężarówek z Egiptu: Logistics Cluster Palestine, protokoły spotkań.
+- OpenStreetMap przez OSMnx: sieć dróg.
+
+### Źródła z internetu (parametry kolejki i pojemności K)
+
+Nie ma ich w Excelach. Użyliśmy ich do ustawienia czasu odprawy, liczby stanowisk i pojemności K w `src/config.py`. Dane o czasach są anegdotyczne, więc służą tylko do ustalenia rzędu wielkości (patrz „Znane ograniczenia”, punkt 5).
+
+| Co z niego wzięliśmy | Gdzie użyte | Źródło |
+|---|---|---|
+| Przekazanie towaru z ciężarówki izraelskiej na palestyńską trwa ok. 45 min. Po stronie izraelskiej jest 11 komórek po 17–25 ciężarówek. Wjazd ok. 6:00–15:00, praca do zmroku. | `SERVICE_MEAN_MIN = 45`, szacunek K | Gisha, [*Kerem Shalom Crossing*, factsheet (2020)](https://gisha.org/UserFiles/File/publications/Kerem_Shalom_Crossing_2020_EN.pdf) |
+| Kolejka ciężarówek długości 3 km przy Kerem Shalom i 1,5 km (miejscami po dwie-trzy w poprzek) przy Rafah, marzec 2024. | `CAPACITY_K` (200 i 250, przy założeniu 15 m na ciężarówkę) | Reuters, [*Destruction, lawlessness and red tape hobble aid as Gazans go hungry* (25.03.2024)](https://www.reuters.com/world/middle-east/destruction-lawlessness-red-tape-hobble-aid-gazans-go-hungry-2024-03-25/) |
+| Kierowca czekał ok. 11 h, czasem do trzech dni, śpiąc w ciężarówce. | dobór liczby stanowisk (kolejka rzędu godzin) | The World / PRX, [*The struggle to get aid into Gaza* (12.07.2024)](https://theworld.org/stories/2024/07/12/the-struggle-to-get-aid-into-gaza) |
+| Ciężarówki stoją w kolejkach średnio ok. 20 dni (według Oxfam, głównie trasa z Egiptu, czyli przed dniem z Excela). | opis ograniczenia, że czekanie przed dniem z danych nie jest w modelu | Oxfam (marzec 2024), cytowany w The National, [*How Israel is obstructing life-saving aid from entering Gaza* (19.03.2024)](https://www.thenationalnews.com/mena/palestine-israel/2024/03/19/how-israel-blocks-aid-to-gaza/) |
+| Trasa z Egiptu przez Al-Arisz, Rafah i Nitzana trwa 4–5 tygodni. Jedna odrzucona pozycja cofa całą partię. | uzasadnienie zawracania i ponownych prób przy K | Lekarze bez Granic, [*What it takes to get lifesaving supplies into Gaza*](https://www.doctorswithoutborders.org/latest/impossible-task-getting-lifesaving-supplies-gaza) |
+| Kierowcy z Egiptu tygodniami czekają na zgodę, a inspekcje trwają ok. 18 h. Ze 150–200 ciężarówek przyjmowano 15–20. | uzasadnienie odrzucania ciężarówek | CNN, [*What the Gaza blockade looks like through the eyes of Egyptian truck drivers* (21.08.2025)](https://www.cnn.com/2025/08/21/middleeast/gaza-blockade-egypt-truck-drivers-israel-intl) |
+| W czerwcu 2026 z Egiptu rozładowano tylko 52% zgłoszonych ciężarówek, bo część była zawracana. W listopadzie 2025 przez Nitzana zawrócono 48%. | uzasadnienie odrzucania ciężarówek | Logistics Cluster Palestine, protokoły spotkań: [2 lipca 2026](https://logcluster.org/sites/default/files/public/2026-07/logistics-clusterpalestinemeeting-minutes_260702.pdf), [listopad 2025](https://reliefweb.int/attachments/1ffe4842-e338-5420-b06d-5914d9178b84/Logistics%20Cluster_Palestine_Gaza_Meeting%20Minutes_251111.pdf) |
+
+Wartości, które **nie** pochodzą z żadnego źródła, tylko z naszego założenia: liczba stanowisk (8 i 6, na małych przejściach 4), 15 m na ciężarówkę, doba do ponownej próby i trzy próby.

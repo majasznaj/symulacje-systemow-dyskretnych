@@ -1,5 +1,8 @@
 """Krok 6: pętla zdarzeń SimPy. Ciężarówka: wjazd -> kolejka i odprawa -> jazda odcinek po odcinku -> (rozładunek) -> dowiozła.
 
+Pojemność K (config.CAPACITY_K): gdy w systemie przejścia (odprawa + kolejka) jest już K ciężarówek, nowa jest zawracana,
+wraca po config.REJECT_RETRY_H godzinach i po config.MAX_ATTEMPTS odmowach jest odrzucona na stałe (kolumna rejections).
+
 Droga do hubu: na każdym skrzyżowaniu ciężarówka sprawdza, czy stan dróg się zmienił (zdarzenia),
 i jeśli tak, bierze nową trasę z pola D* Lite. Gdy nie ma żadnej drogi, czeka i sprawdza ponownie.
 
@@ -97,6 +100,7 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, eve
     docks = {h: simpy.Resource(env, capacity=unload_docks.get(h, config.DEFAULT_HUB_DOCKS)) for h in hub_nodes} \
         if unload_docks else None
     state = {"in_transit": 0, "delivered": {h: 0 for h in hub_shares.columns}, "stuck": 0, "remaining": n}
+    capacity = {c: config.CAPACITY_K.get(c, config.DEFAULT_CAPACITY_K) for c in lanes} if config.CAPACITY_K is not None else {}
     log = []
 
     def say(truck_id, text):
@@ -140,15 +144,43 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, eve
         yield env.timeout(row.arrival_min)
         fsm = TruckFSM(row.truck_id, env.now)
         lane = lanes[row.crossing]
-        while closed_crossings and row.crossing in closed_crossings:   # przejście zamknięte (stochastic): czeka przed bramą
-            yield env.timeout(5)
+        k_max = capacity.get(row.crossing)
+        rejections, reject_delay = 0, 0.0
+        while True:
+            while closed_crossings and row.crossing in closed_crossings:   # przejście zamknięte (stochastic): czeka przed bramą
+                yield env.timeout(5)
+            if k_max is None or lane.count + len(lane.queue) < k_max:
+                break
+            rejections += 1   # system pełny (K): zawróć
+            fsm.go(S.RETURNED, env.now)
+            if rejections >= config.MAX_ATTEMPTS:
+                fsm.go(S.REJECTED, env.now)
+                say(row.truck_id, f"{row.crossing}: system pełny (K={k_max}), odmowa {rejections}. z {config.MAX_ATTEMPTS}, "
+                                  f"odrzucona na stałe")
+                log.append({
+                    "truck_id": row.truck_id, "date": row.date, "crossing": row.crossing, "hub": row.hub,
+                    "arrival_min": row.arrival_min, "queue_min": np.nan, "service_min": np.nan,
+                    "travel_min": np.nan, "route_km": np.nan, "replans": 0, "replan_causes": "",
+                    "stuck_min": 0.0, "delivered": False, "final_state": fsm.state.value,
+                    "cleared_min": np.nan, "done_min": env.now,
+                    "category": row.category, "cargo_mt": row.cargo_mt,
+                    "unload_wait_min": 0.0, "unload_min": 0.0, "breakdown_delay_min": 0.0,
+                    "rejections": rejections,
+                })
+                state["remaining"] -= 1
+                return
+            say(row.truck_id, f"{row.crossing}: system pełny (K={k_max}), odmowa {rejections}. z {config.MAX_ATTEMPTS}, "
+                              f"wraca za {config.REJECT_RETRY_H:g} h")
+            yield env.timeout(config.REJECT_RETRY_H * 60)
+            reject_delay += config.REJECT_RETRY_H * 60
+            fsm.go(S.ARRIVAL, env.now)
         say(row.truck_id, f"{row.crossing}: wjazd | czeka {len(lane.queue)}, "
                           f"stanowiska zajęte {lane.count}/{lane.capacity} | cel {row.hub}")
         fsm.go(S.QUEUE, env.now)
         with lane.request() as req:
             yield req
             fsm.go(S.SERVICE, env.now)
-            queue = env.now - row.arrival_min
+            queue = env.now - row.arrival_min - reject_delay   # czas w kolejce w udanej próbie (bez dób po odmowach)
             say(row.truck_id, f"{row.crossing}: początek odprawy po {queue:.0f} min w kolejce")
             yield env.timeout(row.service_min)
 
@@ -283,7 +315,7 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, eve
             "cleared_min": row.arrival_min + queue + row.service_min, "done_min": env.now,
             "category": row.category, "cargo_mt": row.cargo_mt,
             "unload_wait_min": unload_wait, "unload_min": row.unload_min if docks else 0.0,
-            "breakdown_delay_min": breakdown_delay,
+            "breakdown_delay_min": breakdown_delay, "rejections": rejections,
         })
         state["remaining"] -= 1
 

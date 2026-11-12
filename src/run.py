@@ -47,6 +47,8 @@ def summarize(log):
     q = log.groupby("crossing").agg(
         trucks=("truck_id", "size"), queue_mean_min=("queue_min", "mean"),
         queue_p95_min=("queue_min", lambda s: s.quantile(0.95)), queue_max_min=("queue_min", "max"),
+        returned=("rejections", lambda s: int((s > 0).sum())),
+        rejected=("final_state", lambda s: int((s == "odrzucona").sum())),
     )
     agg = dict(trucks=("truck_id", "size"), route_km_mean=("route_km", "mean"), travel_min_mean=("travel_min", "mean"),
                travel_min_p95=("travel_min", lambda s: s.quantile(0.95)))
@@ -178,12 +180,15 @@ def main():
     ap.add_argument("--demand", action="store_true", help="popyt na żywność i pokrycie zapotrzebowania w hubach")
     ap.add_argument("--stochastic", action="store_true", help="losowe incydenty, zamknięcia przejść i awarie")
     ap.add_argument("--analytics", action="store_true", help="tabele KPI i wykresy kpi_*.png")
+    ap.add_argument("--no-capacity", action="store_true", help="bez pojemności K (zwykłe M/G/c, jak w M1)")
     ap.add_argument("--m2", action="store_true", help="skrót: --unloading --demand --stochastic --analytics")
     ap.add_argument("--scenario", default=None, choices=sorted(SCENARIOS), help="; ".join(f"{k}: {v}" for k, v in SCENARIOS.items()))
     ap.add_argument("--multi-seed", type=int, default=0, help="N przebiegów z ziarnami seed, seed+1, ... i tabela wyników")
     a = ap.parse_args()
     if a.m2:
         a.unloading = a.demand = a.stochastic = a.analytics = True
+    if a.no_capacity:
+        config.CAPACITY_K = None
     if a.damage_lifetime is not None:
         config.DAMAGE_LIFETIME_DAYS = a.damage_lifetime
 
@@ -231,7 +236,8 @@ def main():
     print(f"\nZdarzenia: {len(events)}; objazdy w trakcie jazdy: {(log['replans'] > 0).sum()}; "
           f"inna trasa niż 1. dnia miesiąca przez UNOSAT: {n_unosat}; "
           f"czekało bez drogi: {(log['stuck_min'] > 0).sum()} (łącznie {log['stuck_min'].sum():.0f} min); "
-          f"niedowiezionych: {(~log['delivered']).sum()}")
+          f"niedowiezionych: {(~log['delivered']).sum()} (w tym odrzuconych przez K: {(log['final_state'] == 'odrzucona').sum()}, "
+          f"zawróconych co najmniej raz: {(log['rejections'] > 0).sum()})")
     if a.stochastic:
         print(f"Awarie pojazdów: {(log['breakdown_delay_min'] > 0).sum()}")
     if demand_model is not None:
@@ -258,6 +264,7 @@ def multi_seed(a, double_trucks, outdir):
         row = {
             "seed": seed,
             "delivered_pct": round(100 * log["delivered"].mean(), 1),
+            "rejected_pct": round(100 * (log["final_state"] == "odrzucona").mean(), 1),
             "queue_mean_min": round(log["queue_min"].mean(), 1),
             "queue_p95_min": round(log["queue_min"].quantile(0.95), 1),
             "travel_mean_min": round(log.loc[log["delivered"], "travel_min"].mean(), 1),

@@ -108,6 +108,19 @@ ERLANG_K = 3                # kształt: im większe, tym bardziej równy czas od
 DEFAULT_LANES = 4           # liczba równoległych stanowisk odprawy (przejścia z małym ruchem: Erez, Gate 96, JLOTS, Western Erez)
 LANES = {"Kerem Shalom": 8, "Rafah": 6}
 
+# --- pojemność K (M/G/c/K) ---
+# K to największa liczba ciężarówek w systemie przejścia naraz: w odprawie plus w kolejce. Gdy jest pełno, ciężarówka jest
+# zawracana (stan "zawrócona"), wraca po REJECT_RETRY_H godzinach i próbuje ponownie, a po MAX_ATTEMPTS odmowach jest odrzucona
+# na stałe (stan "odrzucona", nie dowiozła). Odpowiada to re-manifestowaniu i odrzucaniu ciężarówek opisanemu przez Logistics Cluster.
+# Wartości K szacujemy z długości kolejek: Reuters (25.03.2024) opisuje kolejkę ciężarówek długości 3 km przy Kerem Shalom i
+# 1,5 km przy Rafah, miejscami po dwie-trzy w poprzek. Przy ok. 15 m na ciężarówkę to ok. 200 (Kerem Shalom) i ok. 250 (Rafah).
+# Podobnie Gisha: 11 komórek po 17-25 ciężarówek, czyli 187-275 miejsc po stronie izraelskiej. 15 m, REJECT_RETRY_H i MAX_ATTEMPTS to
+# założenia. CAPACITY_K = None wyłącza K (zwykłe M/G/c, jak w M1).
+CAPACITY_K = {"Kerem Shalom": 200, "Rafah": 250}
+DEFAULT_CAPACITY_K = 100    # przejścia z małym ruchem (ZAŁOŻENIE)
+REJECT_RETRY_H = 24         # po tylu godzinach zawrócona ciężarówka próbuje ponownie (ZAŁOŻENIE)
+MAX_ATTEMPTS = 3            # po tylu odmowach ciężarówka jest odrzucona na stałe (ZAŁOŻENIE)
+
 # --- dynamika (ZAŁOŻENIA) ---
 STUCK_GIVE_UP_H = 72         # ciężarówka bez drogi do hubu czeka tyle godzin, potem rezygnuje (delivered=False)
 STUCK_WAIT_MIN = 15         # ciężarówka bez drogi do hubu sprawdza ponownie co tyle minut
