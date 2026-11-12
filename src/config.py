@@ -102,3 +102,53 @@ STUCK_GIVE_UP_H = 72         # ciężarówka bez drogi do hubu czeka tyle godzin
 STUCK_WAIT_MIN = 15         # ciężarówka bez drogi do hubu sprawdza ponownie co tyle minut
 BLOCK_HOURS = 12            # domyślny czas trwania blokady z --block-main
 MIN_CROSSING_SAMPLES = 30 # poniżej tego progu dla przejścia używamy globalnego rozkładu
+
+
+# =============================================================================
+# PARAMETRY MILESTONE 2 – dokleić do config.py
+# =============================================================================
+
+# --- Modele popytowe (DemandModel w demand.py) ---
+# Populacje obsługiwane przez huby (ZAŁOŻENIE: przybliżenia z WorldPop / UN OCHA 2024)
+HUB_POPULATIONS = {
+    "Hub_Rafah":           600_000,
+    "Hub_Khan_Younis":     400_000,
+    "Hub_Deir_al_Balah":   350_000,
+    "Hub_Gaza_City":       200_000,
+    "Hub_North_Jabalia":   150_000,
+}
+
+# --- Kolejki rozładunkowe (sim_m2.py) ---
+# Liczba równoległych stanowisk rozładunku w hubie (ZAŁOŻENIE)
+HUB_UNLOAD_DOCKS = {
+    "Hub_Rafah": 4,
+    "Hub_Khan_Younis": 3,
+    "Hub_Deir_al_Balah": 3,
+    "Hub_Gaza_City": 2,
+    "Hub_North_Jabalia": 2,
+}
+DEFAULT_HUB_DOCKS = 2
+# Czas rozładunku [min], Erlang(k) o tej średniej (ZAŁOŻENIE: ~30 min)
+UNLOAD_MEAN_MIN = 30.0
+UNLOAD_ERLANG_K = 3
+
+# --- Parametry stochastyczne (stochastic.py) ---
+# Prawdopodobieństwo incydentu drogowego na krawędź na dobę (ZAŁOŻENIE)
+INCIDENT_RATE_PER_EDGE_PER_DAY = 0.002
+# Czas trwania incydentu [h] – rozkład normalny (ZAŁOŻENIE)
+INCIDENT_DURATION_HOURS_MEAN = 3.0
+INCIDENT_DURATION_HOURS_STD = 1.5
+
+# Prawdopodobieństwo zamknięcia przejścia na dobę (ZAŁOŻENIE, kalibracja na ACLED)
+CROSSING_CLOSURE_RATE_PER_DAY = {
+    "Kerem Shalom": 0.15,
+    "Rafah": 0.20,
+}
+CROSSING_CLOSURE_HOURS_MEAN = 6.0
+CROSSING_CLOSURE_HOURS_STD = 2.0
+
+# Awarie pojazdów: prawdopodobieństwo na 100 km (ZAŁOŻENIE)
+BREAKDOWN_PROB_PER_100KM = 0.03
+# Czas naprawy [min], log-normalny (ZAŁOŻENIE)
+BREAKDOWN_REPAIR_MIN_MEAN = 90.0
+BREAKDOWN_REPAIR_MIN_STD = 60.0
