@@ -1,4 +1,4 @@
-"""stochastic.py – Losowe zdarzenia zakłócające (Milestone 2, autor: Martyna; zintegrowane).
+"""stochastic.py – Losowe zdarzenia zakłócające (opcjonalna warstwa, flaga --stochastic).
 
 Generuje zdarzenia events.Event dla:
   1. losowych krótkotrwałych zamknięć dróg (incydenty, kontrole wojskowe itp.),

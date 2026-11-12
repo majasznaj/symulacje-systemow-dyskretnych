@@ -128,7 +128,7 @@ BLOCK_HOURS = 12            # domyślny czas trwania blokady z --block-main
 MIN_CROSSING_SAMPLES = 30 # poniżej tego progu dla przejścia używamy globalnego rozkładu
 
 # =============================================================================
-# MILESTONE 2: rozładunek w hubach, popyt na żywność, zdarzenia losowe (moduły: Martyna)
+# WARSTWY DODATKOWE: rozładunek w hubach, popyt na żywność, zdarzenia losowe
 # Wszystko poniżej jest WYŁĄCZONE domyślnie i włączane flagami run.py (--unloading, --demand, --stochastic, --m2).
 # Wartości oznaczone ZAŁOŻENIE nie pochodzą z danych i trzeba je opisać w raporcie.
 # =============================================================================
