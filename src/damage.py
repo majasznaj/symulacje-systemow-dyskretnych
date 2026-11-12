@@ -61,13 +61,18 @@ def first_dates(gdf):
     return pd.concat(out, axis=1).min(axis=1)
 
 
-def filter_as_of(gdf, as_of):
-    """Zostawia punkty, które były już zauważone na zdjęciu nie późniejszym niż as_of."""
+def filter_as_of(gdf, as_of, lifetime_days=None):
+    """Zostawia punkty już widoczne na as_of. Przy lifetime_days odrzuca te, które już 'wygasły'."""
     if as_of is None:
         return gdf
-    kept = gdf[first_dates(gdf) <= pd.Timestamp(as_of, tz="UTC")]
-    print(f"Zniszczenia na {as_of}: {len(kept)} z {len(gdf)} punktów")
-    return kept
+    first = first_dates(gdf)
+    as_of = pd.Timestamp(as_of, tz="UTC")
+    kept = first <= as_of
+    if lifetime_days:
+        kept &= first > as_of - pd.Timedelta(days=lifetime_days)
+    out = gdf[kept]
+    print(f"Zniszczenia na {as_of.date()}: {len(out)} z {len(gdf)} punktów")
+    return out
 
 
 def speed_factor(d):
@@ -123,16 +128,35 @@ class DamageModel:
         d["damage"] = int(dmg)
         d["time_min"] = length / max(v_min, v_free / (1 + config.SLOWDOWN_PER_DAMAGE * dmg))
 
-    def add_points(self, gdf):
-        """Dokłada punkty zniszczeń. Zwraca zbiór par (u, v), których koszt się zmienił."""
-        if len(gdf) == 0:
-            return set()
+    def _cell_counts(self, gdf):
         pts = gdf.to_crs(self.G.graph["crs"])
-        new = Counter(zip((pts.geometry.x // self.cell).astype(int), (pts.geometry.y // self.cell).astype(int)))
-        self.counts.update(new)
+        return Counter(zip((pts.geometry.x // self.cell).astype(int), (pts.geometry.y // self.cell).astype(int)))
+
+    def _touch(self, cells):
         touched = set()
-        for cell in new:
+        for cell in cells:
             touched.update(self.cell_edges.get(cell, ()))
         for (u, v, k) in touched:
             self._refresh(u, v, k)
         return {(u, v) for (u, v, k) in touched}
+
+    def add_points(self, gdf):
+        """Dokłada punkty zniszczeń. Zwraca zbiór par (u, v), których koszt się zmienił."""
+        if len(gdf) == 0:
+            return set()
+        new = self._cell_counts(gdf)
+        self.counts.update(new)
+        return self._touch(new)
+
+    def remove_points(self, gdf):
+        """Zdejmuje punkty (naprawa po czasie życia fali). Zwraca krawędzie, których koszt się zmienił."""
+        if len(gdf) == 0:
+            return set()
+        gone = self._cell_counts(gdf)
+        for cell, n in gone.items():
+            left = self.counts.get(cell, 0) - n
+            if left > 0:
+                self.counts[cell] = left
+            else:
+                self.counts.pop(cell, None)
+        return self._touch(gone)

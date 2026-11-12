@@ -4,6 +4,7 @@ from typing import Callable
 
 import pandas as pd
 
+import config
 import damage
 
 
@@ -12,6 +13,7 @@ class Event:
     minute: float          # minuty od początku miesiąca
     label: str
     apply: Callable        # apply(G, damage_model) -> zbiór par (u, v), których koszt się zmienił
+    roads: bool = True     # False: zdarzenie nie zmienia dróg (np. zamknięcie przejścia), router nie jest przeliczany
 
 
 def _both_directions(G, edges):
@@ -59,13 +61,25 @@ def busiest_edges(routes, pair_weights, k=1):
 
 
 def unosat_wave_events(dm, gdf, month_start, next_month_start):
-    """Nowe punkty zniszczeń, które UNOSAT zobaczył w trakcie miesiąca, wchodzą w dniu zdjęcia."""
+    """Nowe punkty UNOSAT wchodzą w dniu zdjęcia. Przy DAMAGE_LIFETIME_DAYS schodzą po tylu dniach."""
     first = damage.first_dates(gdf)
-    sel = (first > month_start) & (first < next_month_start)
+    lifetime = config.DAMAGE_LIFETIME_DAYS
     events = []
-    for date in sorted(first[sel].unique()):
+    added = (first > month_start) & (first < next_month_start)
+    for date in sorted(first[added].unique()):
         sub = gdf[(first == date).to_numpy()]
         minute = (pd.Timestamp(date) - month_start).total_seconds() / 60
         label = f"FALA UNOSAT {pd.Timestamp(date).date()}: +{len(sub)} punktów zniszczeń"
         events.append(Event(minute, label, lambda G_, dm_, sub=sub: dm_.add_points(sub)))
+    if not lifetime:
+        return events
+    # kohorty widoczne w tym miesiącu (już na mapie albo dokładane) — data zejścia od zdjęcia
+    cohorts = first.notna() & (first < next_month_start) & (first + pd.Timedelta(days=lifetime) > month_start)
+    for date in sorted(first[cohorts].unique()):
+        sub = gdf[(first == date).to_numpy()]
+        exp = pd.Timestamp(date) + pd.Timedelta(days=lifetime)
+        minute = (exp - month_start).total_seconds() / 60
+        label = (f"NAPRAWA UNOSAT {pd.Timestamp(date).date()}: -{len(sub)} punktów "
+                 f"po {lifetime:g} dniach")
+        events.append(Event(minute, label, lambda G_, dm_, sub=sub: dm_.remove_points(sub)))
     return events

@@ -66,7 +66,8 @@ ROAD_EXCLUDED = ("abandoned|bridleway|bus_guideway|construction|corridor|cyclewa
 # Wolniejsze typy dróg: prędkość swobodna = TRUCK_SPEED_KMH * współczynnik (ZAŁOŻENIA, brak danych)
 ROAD_SPEED_FACTOR = {"service": 0.6, "living_street": 0.6, "track": 0.4}
 GRAPH_STRONGLY_CONNECTED = True   # False = zostaw największą słabo spójną składową (nie gubi miast za jednokierunkową luką)
-GAZA_BBOX = (34.20, 31.21, 34.57, 31.60)   # (zachód, południe, wschód, północ), awaryjnie
+GAZA_BBOX = (34.20, 31.21, 34.57, 31.60)   # (zachód, południe, wschód, północ), awaryjnie; i tak przycinane do granicy Strefy
+GAZA_CLIP_BUFFER_M = 500    # graf = granica Strefy + tyle metrów (przejścia leżą na granicy; więcej wpuszcza drogi spoza Strefy)
 OVERPASS_URLS = [
     "https://overpass-api.de/api",
     "https://overpass.kumi.systems/api",
@@ -76,6 +77,9 @@ OVERPASS_URLS = [
 # --- zniszczenia (UNOSAT) ---
 USE_DAMAGE = True
 DAMAGE_CELL_M = 500        # bok oczka siatki zliczającej zniszczenia
+# None = zniszczenia zostają do końca symulacji (UNOSAT nie ma dat naprawy).
+# Liczba = po tylu dniach od zdjęcia punkty schodzą z dróg (ZAŁOŻENIE).
+DAMAGE_LIFETIME_DAYS = None
 
 # --- ruch ciężarówek (ZAŁOŻENIA) ---
 TRUCK_SPEED_KMH = 30.0
@@ -102,3 +106,61 @@ STUCK_GIVE_UP_H = 72         # ciężarówka bez drogi do hubu czeka tyle godzin
 STUCK_WAIT_MIN = 15         # ciężarówka bez drogi do hubu sprawdza ponownie co tyle minut
 BLOCK_HOURS = 12            # domyślny czas trwania blokady z --block-main
 MIN_CROSSING_SAMPLES = 30 # poniżej tego progu dla przejścia używamy globalnego rozkładu
+
+# =============================================================================
+# MILESTONE 2: rozładunek w hubach, popyt na żywność, zdarzenia losowe (moduły: Martyna)
+# Wszystko poniżej jest WYŁĄCZONE domyślnie i włączane flagami run.py (--unloading, --demand, --stochastic, --m2).
+# Wartości oznaczone ZAŁOŻENIE nie pochodzą z danych i trzeba je opisać w raporcie.
+# =============================================================================
+
+# --- ładunek: przeliczenie jednostek z Commodities-Received na tony ---
+# Mediana ciężarówki rozliczanej w tonach (MT) to 14 t, a w paletach 22 palety, stąd ok. 0,64 t na paletę (ZAŁOŻENIE:
+# obie grupy wożą podobny ładunek). Jednostka "Truck" ma ilość 1, a jednostki typu sztuki czy namioty nie mają wagi.
+TONNES_PER_PALLET = 0.64
+TRUCK_PAYLOAD_MT = 14.0     # ładunek, gdy nie da się go policzyć z jednostki (ZAŁOŻENIE: mediana ciężarówek w MT)
+MAX_TRUCK_MT = 40.0         # górna granica na ciężarówkę (w danych są skrajne ilości, np. 5120 palet w jednym wierszu)
+
+# --- popyt (demand.py) ---
+# Populacje obsługiwane przez huby (ZAŁOŻENIE: przybliżenia z WorldPop / UN OCHA 2024, jedne dla całego okresu).
+# Do poprawy: IPC podaje populację per gubernatorstwo i okres, a w 2023-24 ludność była rozłożona inaczej niż w 2025.
+HUB_POPULATIONS = {
+    "Hub_Rafah":           600_000,
+    "Hub_Khan_Younis":     400_000,
+    "Hub_Deir_al_Balah":   350_000,
+    "Hub_Gaza_City":       200_000,
+    "Hub_North_Jabalia":   150_000,
+}
+
+# --- rozładunek w hubie (--unloading) ---
+# Liczba równoległych stanowisk rozładunku (ZAŁOŻENIE: brak danych) i czas rozładunku, Erlang(k) o tej średniej.
+HUB_UNLOAD_DOCKS = {
+    "Hub_Rafah": 4,
+    "Hub_Khan_Younis": 3,
+    "Hub_Deir_al_Balah": 3,
+    "Hub_Gaza_City": 2,
+    "Hub_North_Jabalia": 2,
+}
+DEFAULT_HUB_DOCKS = 2
+UNLOAD_MEAN_MIN = 30.0      # ZAŁOŻENIE
+UNLOAD_ERLANG_K = 3
+
+# --- zdarzenia losowe (--stochastic, stochastic.py) ---
+# Incydent drogowy: krawędź zamknięta na kilka godzin (ZAŁOŻENIE). Uczęszczane drogi mają INCIDENT_BUSY_FACTOR razy większe ryzyko.
+INCIDENT_RATE_PER_EDGE_PER_DAY = 0.002
+INCIDENT_BUSY_FACTOR = 3.0
+INCIDENT_BUSY_TOP_K = 200
+INCIDENT_DURATION_HOURS_MEAN = 3.0
+INCIDENT_DURATION_HOURS_STD = 1.5
+
+# Zamknięcie przejścia: prawdopodobieństwo na dobę (ZAŁOŻENIE, bez kalibracji; ACLED nie jest jeszcze użyte)
+CROSSING_CLOSURE_RATE_PER_DAY = {
+    "Kerem Shalom": 0.15,
+    "Rafah": 0.20,
+}
+CROSSING_CLOSURE_HOURS_MEAN = 6.0
+CROSSING_CLOSURE_HOURS_STD = 2.0
+
+# Awaria pojazdu: prawdopodobieństwo na 100 km i czas naprawy [min], rozkład log-normalny (ZAŁOŻENIE)
+BREAKDOWN_PROB_PER_100KM = 0.03
+BREAKDOWN_REPAIR_MIN_MEAN = 90.0
+BREAKDOWN_REPAIR_MIN_STD = 60.0

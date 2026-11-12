@@ -1,11 +1,12 @@
 """Maszyna stanów ciężarówki (FSM). Każda ciężarówka jest zawsze w jednym stanie, a przejścia są z góry dozwolone.
 
     wjazd -> kolejka -> odprawa -> jazda <-> bez_drogi
-                                   jazda -> dowiozła
+                                   jazda -> rozładunek -> dowiozła   (rozładunek tylko z --unloading)
+                                   jazda -> dowiozła                 (bez rozładunku)
                                    bez_drogi -> zrezygnowała
 
-Stan 'odprawa' oddaje kontrolę do DES (stanowiska na przejściu, zasób SimPy), 'jazda' do routera D* Lite.
-Później tu wejdą stany 'rozładunek' (model tłumu w punkcie dystrybucji) i 'kryzys' (Utility AI).
+Stan 'odprawa' oddaje kontrolę do DES (stanowiska na przejściu, zasób SimPy), 'jazda' do routera D* Lite,
+'rozładunek' do doków w hubie (zasób SimPy). Później dojdzie stan 'kryzys' (Utility AI).
 Nieprawidłowe przejście zgłasza błąd, więc pomyłka w logice wychodzi od razu, a nie jako dziwny wynik.
 """
 from enum import Enum
@@ -16,6 +17,7 @@ class S(str, Enum):
     QUEUE = "kolejka"
     SERVICE = "odprawa"
     DRIVE = "jazda"
+    UNLOAD = "rozładunek"
     STUCK = "bez_drogi"
     DONE = "dowiozła"
     GAVE_UP = "zrezygnowała"
@@ -25,7 +27,8 @@ ALLOWED = {
     S.ARRIVAL: {S.QUEUE},
     S.QUEUE: {S.SERVICE},
     S.SERVICE: {S.DRIVE},
-    S.DRIVE: {S.STUCK, S.DONE},
+    S.DRIVE: {S.STUCK, S.UNLOAD, S.DONE},   # DONE bezpośrednio, gdy rozładunek jest wyłączony
+    S.UNLOAD: {S.DONE},
     S.STUCK: {S.DRIVE, S.GAVE_UP},
     S.DONE: set(),
     S.GAVE_UP: set(),

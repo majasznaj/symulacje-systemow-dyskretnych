@@ -16,23 +16,55 @@ def road_filter():
             '["service"!~"emergency_access|parking|parking_aisle|private"]')
 
 
+def gaza_polygon():
+    """Granica Strefy (Nominatim) powiększona o config.GAZA_CLIP_BUFFER_M, bo przejścia leżą na samej granicy.
+
+    Bufor jest mały (500 m), żeby do grafu nie weszły drogi izraelskie ani egipskie, którymi ciężarówki
+    miałyby skróty poza Strefą. Zwraca None, gdy nie ma sieci albo Nominatim nie odpowiada.
+    """
+    try:
+        gdf = ox.geocode_to_gdf("Gaza Strip")
+        metric = gdf.estimate_utm_crs()
+        poly = gdf.to_crs(metric).buffer(config.GAZA_CLIP_BUFFER_M).to_crs("EPSG:4326").iloc[0]
+        return poly
+    except Exception as e:  # noqa: BLE001
+        print(f"  granica Strefy niedostępna ({type(e).__name__}): graf nie zostanie przycięty do granicy")
+        return None
+
+
+def clip_to_gaza(G, poly):
+    """Zostawia węzły wewnątrz poly i największą spójną składową. Bez poly zwraca G bez zmian."""
+    if poly is None:
+        return G
+    nodes = ox.graph_to_gdfs(G, edges=False)
+    H = G.subgraph(nodes.index[nodes.within(poly)]).copy()
+    return ox.truncate.largest_component(H, strongly=config.GRAPH_STRONGLY_CONNECTED)
+
+
 def build_graph(path=None, network_type="drive"):
-    """Pobiera sieć dróg z Overpass i zapisuje do pliku. Uruchamiasz RAZ (python run.py --build-graph)."""
+    """Pobiera sieć dróg z Overpass i zapisuje do pliku. Uruchamiasz RAZ (python run.py --build-graph).
+
+    Graf jest przycięty do granicy Strefy + 500 m. Bez przycinania (prostokąt GAZA_BBOX obejmuje też Izrael)
+    graf miał ponad 30 tys. węzłów, a trasy mogły iść drogami poza Strefą.
+    """
     path = path or config.GRAPH_FILE
     ox.settings.requests_timeout = 300
     last_err = None
+    poly = gaza_polygon()
+    ways = (["polygon"] if poly is not None else []) + ["bbox"]
     for url in config.OVERPASS_URLS:
         if hasattr(ox.settings, "overpass_url"):
             ox.settings.overpass_url = url
         else:  # starsze wersje osmnx
             ox.settings.overpass_endpoint = url
-        for how in ("place", "bbox"):
+        for how in ways:
             try:
                 print(f"Pobieram graf: {url} ({how})...")
-                if how == "place":
-                    G = ox.graph_from_place("Gaza Strip", network_type=network_type, custom_filter=road_filter())
+                if how == "polygon":
+                    G = ox.graph_from_polygon(poly, network_type=network_type, custom_filter=road_filter())
                 else:
                     G = ox.graph_from_bbox(bbox=config.GAZA_BBOX, network_type=network_type, custom_filter=road_filter())
+                G = clip_to_gaza(G, poly)
                 G = ox.truncate.largest_component(G, strongly=config.GRAPH_STRONGLY_CONNECTED)
                 path.parent.mkdir(parents=True, exist_ok=True)
                 ox.save_graphml(G, path)
