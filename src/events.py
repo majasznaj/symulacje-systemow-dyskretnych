@@ -61,9 +61,8 @@ def busiest_edges(routes, pair_weights, k=1):
 
 
 def unosat_wave_events(dm, gdf, month_start, next_month_start):
-    """Nowe punkty UNOSAT wchodzą w dniu zdjęcia. Przy DAMAGE_LIFETIME_DAYS schodzą po tylu dniach."""
-    first = damage.first_dates(gdf)
-    lifetime = config.DAMAGE_LIFETIME_DAYS
+    """Nowe punkty UNOSAT wchodzą w dniu zdjęcia, a znikają po losowym czasie odgruzowania (kolumna expires)."""
+    first, expires = gdf["first"], gdf["expires"]
     events = []
     added = (first > month_start) & (first < next_month_start)
     for date in sorted(first[added].unique()):
@@ -71,15 +70,12 @@ def unosat_wave_events(dm, gdf, month_start, next_month_start):
         minute = (pd.Timestamp(date) - month_start).total_seconds() / 60
         label = f"FALA UNOSAT {pd.Timestamp(date).date()}: +{len(sub)} punktów zniszczeń"
         events.append(Event(minute, label, lambda G_, dm_, sub=sub: dm_.add_points(sub)))
-    if not lifetime:
-        return events
-    # kohorty widoczne w tym miesiącu (już na mapie albo dokładane) — data zejścia od zdjęcia
-    cohorts = first.notna() & (first < next_month_start) & (first + pd.Timedelta(days=lifetime) > month_start)
-    for date in sorted(first[cohorts].unique()):
-        sub = gdf[(first == date).to_numpy()]
-        exp = pd.Timestamp(date) + pd.Timedelta(days=lifetime)
-        minute = (exp - month_start).total_seconds() / 60
-        label = (f"NAPRAWA UNOSAT {pd.Timestamp(date).date()}: -{len(sub)} punktów "
-                 f"po {lifetime:g} dniach")
+    # odgruzowanie: punkty widoczne w tym miesiącu, które schodzą przed jego końcem (po dobie, żeby było mało zdarzeń)
+    cleared = first.notna() & (first < next_month_start) & (expires > month_start) & (expires < next_month_start)
+    day = expires.dt.floor("D")
+    for date in sorted(day[cleared].unique()):
+        sub = gdf[(cleared & (day == date)).to_numpy()]
+        minute = max(0.0, (pd.Timestamp(date) - month_start).total_seconds() / 60)
+        label = f"ODGRUZOWANIE {pd.Timestamp(date).date()}: -{len(sub)} punktów"
         events.append(Event(minute, label, lambda G_, dm_, sub=sub: dm_.remove_points(sub)))
     return events

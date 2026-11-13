@@ -10,7 +10,7 @@ Domyślnie maj 2024 (`config.MONTH`). Inny miesiąc wybierasz przez `--month`, n
 1. Każdy wiersz z `Commodities-Received.xlsx` to jedna ciężarówka wjeżdżająca przez przejście graniczne.
 2. Na przejściu ciężarówka czeka w kolejce i jest odprawiana (SimPy). Przejście ma skończoną pojemność K (odprawa plus kolejka). Gdy jest pełne, ciężarówka zawraca, wraca po dobie, a po trzech odmowach jest odrzucona na stałe.
 3. Potem jedzie po grafie dróg z OpenStreetMap do jednego z hubów. Trasę wyznacza D* Lite. Hub jest losowany spośród hubów tej samej części Strefy co przejście (północ: Erez, Western Erez, Gate 96, JLOTS; południe: Kerem Shalom, Rafah, Kissufim), z wagami z tonażu żywności wydanej w danym miesiącu w `Commodities-Dispatching`. Przejście wjazdu pochodzi z `Received`, bo kolumna `Crossing` w `Dispatching` jest niespójna (patrz „Znane ograniczenia”, punkt 2).
-4. Zniszczenia z UNOSAT spowalniają drogi. Stan na 1. dzień miesiąca jest punktem startu, a nowe fale wchodzą w dniach zdjęć. `--damage-lifetime N` zdejmuje falę po N dniach od zdjęcia. Zmiana trasy zapisuje się w `replan_causes` i w logu tekstowym.
+4. Zniszczenia z UNOSAT spowalniają drogi. Stan na 1. dzień miesiąca jest punktem startu, a nowe fale wchodzą w dniach zdjęć. Każdy punkt znika z dróg po losowym czasie odgruzowania (domyślnie 60–180 dni od zdjęcia, `--debris-days`, `--no-debris`). Szczegóły w „Zniszczenia i odgruzowanie”. Zmiana trasy zapisuje się w `replan_causes` i w logu tekstowym.
 5. Opcjonalnie można zamknąć najruchliwszą drogę. Ciężarówki bez trasy czekają i po 72 h rezygnują.
 
 Warstwy dodatkowe (flagi w „Szybkim starcie”):
@@ -41,7 +41,8 @@ Pliki *demo.ipynb* (przegląd krok po kroku z wykresami) i *colab_run_m2.ipynb* 
 | `--seed 7` | inne ziarno losowań |
 | `--log-days 1,2 --log-every 50` | log tekstowy `sim_log.txt`: wszystkie ciężarówki z dni 1–2 i co 50. ciężarówka, plus zdarzenia |
 | `--no-damage` | bez zniszczeń |
-| `--damage-lifetime 14` | fala UNOSAT schodzi z dróg 14 dni po zdjęciu |
+| `--debris-days 90,180` | czas odgruzowania punktu losowany z 90–180 dni od zdjęcia (domyślnie 60–180) |
+| `--no-debris` | bez odgruzowania, zniszczenia zostają na drogach |
 | `--no-capacity` | bez pojemności K |
 | `--block-main "5 08:00" --block-hours 12 --block-k 1` | zamyka k najruchliwszych dróg 5. dnia o 8:00 na 12 h |
 | `--diagnose` | tylko diagnostyka grafu, tras i zniszczeń (bez symulacji) |
@@ -58,7 +59,7 @@ Wyniki trafiają do `output/<miesiąc>/`:
 | `truck_log.csv` | jedna linia na ciężarówkę: przejście, hub, czasy kolejki, odprawy i dojazdu, długość trasy, zmiany trasy, czy dowiozła. Z warstwami dodatkowymi także kategoria i masa ładunku, czas rozładunku, awaria, `rejections` (ile razy zawrócona przez K) |
 | `summary_crossings.csv`, `summary_hubs.csv` | kolejki na przejściach i czasy dojazdu do hubów |
 | `sim_log.txt` | log tekstowy (z `--log-days` / `--log-every`) |
-| `diagnoza.png`, `mapa_zniszczen.png`, `diagnoza_*.csv` | z `--diagnose`: wszystkie przejścia i huby oraz trasy przejście → hub na jednej mapie (kolor = przejście, rysowane tylko dla przejść z ruchem w miesiącu, na wspólnych odcinkach linie biegną obok siebie), oraz drogi pomalowane zniszczeniami |
+| `diagnoza.png`, `mapa_zniszczen.png`, `diagnoza_*.csv` | z `--diagnose`: wszystkie przejścia i huby oraz trasy przejście → hub na jednej mapie (kolor = przejście, rysowane tylko dla przejść z ruchem w miesiącu, na wspólnych odcinkach linie biegną obok siebie), oraz mapa zniszczeń (szare drogi bez zniszczeń, od żółtego do ciemnoczerwonego rosnące zniszczenia) |
 | `demand_summary.csv`, `demand_history.csv` | z `--demand`: pokrycie zapotrzebowania na żywność i historia dobowa |
 | `kpi_summary.csv`, `bottleneck_*.csv`, `kpi_*.png` | z `--analytics`: wskaźniki, wąskie gardła, wykresy |
 | `multiseed_kpi.csv`, `multiseed_summary.csv` | z `--multi-seed` |
@@ -73,10 +74,10 @@ Ciężarówka odrzucona przez K ma `final_state = odrzucona`, `delivered = False
 | `src/config.py` | wszystkie parametry i założenia w jednym miejscu |
 | `src/data.py` | Excel → ciężarówki, udziały hubów w miesiącu (`data/processed/`), ludność hubów z IPC (`hub_population_daily`) |
 | `src/network.py` | graf dróg (pobranie, wczytanie, przycięcie do Strefy), przypinanie punktów do węzłów, trasy bazowe |
-| `src/damage.py` | UNOSAT → liczba punktów w oczku 500 m → czas przejazdu krawędzi |
+| `src/damage.py` | UNOSAT → ważona liczba punktów w oczku 100 m, czas odgruzowania → czas przejazdu krawędzi |
 | `src/dstar_lite.py`, `src/router.py` | D* Lite: po jednym polu kosztu na hub, ciężarówka czyta z niego następny krok |
 | `src/fsm.py` | maszyna stanów ciężarówki |
-| `src/events.py` | zdarzenia zmieniające drogi w czasie: fale UNOSAT i blokady |
+| `src/events.py` | zdarzenia zmieniające drogi w czasie: fale UNOSAT, odgruzowanie i blokady |
 | `src/sim.py` | pętla SimPy: wjazd, kolejka, odprawa, jazda, rozładunek, doby popytu |
 | `src/demand.py` | ładunek → tony, zapas żywności, kalorie na osobę, faza kaloryczna 1–5 |
 | `src/stochastic.py` | incydenty drogowe, zamknięcia przejść, awarie |
@@ -93,11 +94,35 @@ Ciężarówka odrzucona przez K ma `final_state = odrzucona`, `delivered = False
 | Kolejka M/G/c/K | jest | wjazdy z danych (dzień z Excela, godzina losowana w 8–18), c stanowisk (Kerem Shalom 8, Rafah 6, pozostałe 4), czas odprawy Erlang-3 o średniej 45 min (Gisha 2020). K = największa liczba ciężarówek w systemie przejścia: Kerem Shalom 200, Rafah 250, pozostałe 100 (z długości kolejek, patrz „Źródła”). Przy pełnym systemie ciężarówka zawraca, wraca po 24 h, a po trzech odmowach jest odrzucona. W maju, marcu i listopadzie K nie jest osiągane (największa kolejka ok. 170 ciężarówek). Działa przy przeciążeniu: w scenariuszu E (2x ciężarówek) odrzuconych jest 577 z 8684, a średnia kolejka dowiezionych spada z ok. 23 h do ok. 10 h |
 | FSM | jest | wjazd → kolejka → odprawa → jazda ↔ bez drogi → rozładunek → dowiozła / zrezygnowała. Przy pełnym przejściu: zawrócona → wjazd albo odrzucona. Niedozwolone przejście zgłasza błąd |
 | D* Lite | jest | pole kosztu do każdego hubu naprawiane przyrostowo po zmianie dróg. Heurystyka wyłączona, więc w praktyce to przyrostowy Dijkstra liczony od hubu wstecz |
+| Zniszczenia dróg | jest, założenia bez kalibracji | UNOSAT w oczkach 100 m z wagami klas, odgruzowanie po losowym czasie 60–180 dni. Opis i wrażliwość w „Zniszczenia i odgruzowanie” |
 | Rozładunek w hubie | jest (`--unloading`) | doki jako zasób SimPy, średnio 30 min |
 | Popyt i żywność | jest, uproszczone (`--demand`) | zapas, ludność z IPC, kalorie na osobę, faza kaloryczna 1–5 z progów 2100/1900/1700/1500 kcal. To nie jest klasyfikacja IPC, bo liczy tylko kalorie. Wody model nie uwzględnia, bo nie ma jej w danych. Opis w „Ludność i żywność” |
 | Zdarzenia losowe | jest (`--stochastic`) | częstości nieskalibrowane, dane ACLED nie są użyte |
 
 Możliwe rozszerzenia w przyszłości: Nagel-Schreckenberg (ruch przed bramką), model tłumu Helbinga, Utility AI, dane ACLED.
+
+## Zniszczenia i odgruzowanie
+
+Źródło: punktowa warstwa UNOSAT (uszkodzone budynki, 174 tys. punktów), wczytywana w `damage.py`.
+
+1. **Data i klasa punktu.** Datą punktu jest data pierwszego zdjęcia, na którym budynek jest uszkodzony (klasa inna niż 6). Klasa pochodzi z tego zdjęcia.
+2. **Waga klasy** (`DAMAGE_CLASS_WEIGHT`): zniszczony i poważnie uszkodzony 1,0, średnio uszkodzony 0,75, możliwe uszkodzenie (klasy 4 i 11) 0,5. Założenie: gruz robią głównie budynki zniszczone, ale słabsze uszkodzenia też utrudniają przejazd.
+3. **Oczka 100 m** (`DAMAGE_CELL_M`). Suma wag punktów w oczku. Krawędź grafu bierze maksimum z oczek, przez które przechodzi. Oczko 100 m zamiast 500 m oznacza, że liczy się okolica drogi, a nie cała dzielnica.
+4. **Spowolnienie.** Prędkość = 30 km/h / (1 + n/6), gdzie n to ważona liczba punktów w oczku, nie mniej niż 5 km/h. Połowa prędkości przy 6 punktach na hektar to ta sama gęstość co przy poprzednim oczku 500 m (150 punktów). Czas krawędzi używa też router.
+5. **Odgruzowanie.** Każdy punkt dostaje czas odgruzowania losowany z U(60, 180) dni od daty zdjęcia (`DEBRIS_CLEAR_DAYS`, generator z ziarnem `DEBRIS_SEED`, więc ten sam w każdym miesiącu i przebiegu). Po tym czasie punkt nie wpływa na drogę. Stan na 1. dzień miesiąca to punkty już sfotografowane i jeszcze nieodgruszczone. W miesiącu punkty wchodzą w dniach zdjęć i znikają co dobę (zdarzenia `FALA UNOSAT` i `ODGRUZOWANIE` w logu).
+
+Odgruzowanie to usuwanie gruzu z jezdni, a nie odbudowa budynków. Przedział 60–180 dni to założenie. Drogi używane do transportu odgruzowuje się szybciej, a w trakcie wojny sprzętu i paliwa brakowało, więc dokładna wartość jest nieznana.
+
+**Wrażliwość, maj 2024 (stan na 1.05, `--diagnose`):**
+
+| Odgruzowanie | Punktów widocznych (waga) | Krawędzie bez zniszczeń | Krawędzie z czasem ≥ 2× | Spowolnienie tras przejście-hub (mediana / maks.) |
+|---|---|---|---|---|
+| brak (`--no-debris`) | 132 tys. (98 tys.) | 26% | 44% | ×1,4 / ×2,2 |
+| 90–180 dni | 64 tys. (49 tys.) | 35% | 22% | ×1,2 / ×1,5 |
+| 60–180 dni (domyślnie) | 54 tys. (42 tys.) | 36% | 17% | ×1,2 / ×1,5 |
+| 30–120 dni | 20 tys. (16 tys.) | 60% | 6% | ×1,1 / ×1,4 |
+
+Poprzedni model (oczko 500 m, wszystkie klasy po 1, bez odgruzowania) miał zniszczenia na 97% krawędzi i medianę ×2,3, czyli prawie równomierne spowolnienie całej sieci.
 
 ## Ludność i żywność
 
@@ -151,7 +176,7 @@ Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 - czas odprawy 45 min (Gisha 2020), liczba stanowisk (8, 6, 4) dobrana tak, żeby kolejka na Kerem Shalom wychodziła rzędu godzin, pojemność K (200, 250, 100), doba do ponownej próby i trzy próby,
 - godzina wjazdu (Excel ma tylko datę) i godziny otwarcia 8–18, przy czym odprawa trwa także po 18:00,
 - prędkość ciężarówki 30 km/h, na drogach `service`, `living_street` i `track` mniej,
-- spowolnienie od zniszczeń: połowa prędkości przy 150 punktach UNOSAT w oczku 500 m, wszystkie klasy zniszczeń liczone tak samo,
+- zniszczenia dróg: połowa prędkości przy 6 ważonych punktach UNOSAT w oczku 100 m, wagi klas (1 i 2: 1,0; 3: 0,75; 4 i 11: 0,5) i czas odgruzowania 60–180 dni (opis i wrażliwość w „Zniszczenia i odgruzowanie”),
 - współrzędne przejść i hubów. Przy każdej oznaczono, czy sprawdzono je na stronie źródła ([W]), pochodzą z dokumentu Logistics Cluster ([P]) czy nie mają źródła ([?]),
 - przelicznik palety na tony 0,64 t (z median: 14 t na ciężarówkę przy 22 paletach), ciężarówka bez znanej ilości dostaje 14 t,
 - ludność hubów: punkty IPC, podział grup IPC na gubernatorstwa i dwie liczby dla Rafah z raportów (opis i źródła w „Ludność i żywność”),
@@ -165,8 +190,8 @@ Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 
 1. **Graf w Rafah (naprawiony 12.11.2026).** Poprzedni graf miał w Rafah 460 krawędzi, a trasy do Hub_Rafah były 2,5–2,9 razy dłuższe niż linia prosta. Po ponownym pobraniu z OSM pas ma 3009 krawędzi, a graf 25 634 węzłów zamiast 14 002. Graf jest przycięty do granicy Strefy plus 500 m (`GAZA_CLIP_BUFFER_M`), bo prostokąt `GAZA_BBOX` obejmuje też Izrael. Trasa jest teraz 1,1–1,3 razy dłuższa niż linia prosta dla wszystkich par przejście-hub. Hub_Rafah (współrzędne z dokumentu z 2009, [P]) przypina się do węzła 783 m od punktu. Zamknięcie jednej krawędzi (`--block-main`) daje objazd ok. 0,5 km, więc scenariusz C prawie nic nie zmienia. Zamknięcie głównej drogi północ–południe wymaga zamknięcia całego przekroju korytarza.
 2. **Kolumna `Crossing` w Dispatching nie zgadza się z Received.** W 2024-03 wszystkie 5131 wierszy ma `Rafah`, a w Received 76,5% wjazdów jest przez Kerem Shalom. W 2024-05 Dispatching ma 62% wierszy z „Rafah”, a przez Rafah wjechało 5,5% ciężarówek. Nie wiemy, co ta kolumna oznacza. Dlatego nie przypisujemy hubów po przejściu z Dispatching. Hub zależy tylko od strefy przejścia z Received (północ / południe), a wagi w strefie to tonaż żywności z całego miesiąca.
-3. **Zniszczenia działają prawie jak równomierne spowolnienie.** 97% krawędzi ma jakieś zniszczenia, mediana to ok. 190 punktów w oczku (czas ×2,3). Datą zniszczenia jest data zdjęcia, nie ataku. W UNOSAT nie ma dat naprawy, więc domyślnie fale zostają. `--damage-lifetime` zakłada, że po N dniach droga wraca do poprzedniej prędkości.
-4. **Kolejka jest skalibrowana tylko co do rzędu wielkości.** Liczba stanowisk nie jest znana (11 komórek Kerem Shalom to miejsca postoju, nie równoległe odprawy). Doniesienia o czasie czekania są anegdotyczne: ok. 11 h, czasem do trzech dni (The World, lipiec 2024), średnio do 20 dni na trasie z Egiptu (Oxfam, marzec 2024). W maju 2024 na Kerem Shalom wychodzi średnio ok. 2,5 h, p95 ok. 10 h, maksimum ok. 16 h (seed 42, bez zdarzeń losowych). Przy 10 stanowiskach średnia spada do 1,3 h, przy 12 do 0,7 h. Czekanie przed dniem z danych (trasa z Egiptu, Al-Arisz, Nitzana) nie jest w modelu. Na małych przejściach (Erez, Western Erez, Gate 96, JLOTS) 4 stanowiska to zgadywanie.
+3. **Zniszczenia dróg wynikają z założeń, bez kalibracji.** UNOSAT opisuje budynki, nie drogi. Wpływ na przejazd zależy od trzech parametrów bez danych: czasu odgruzowania, wag klas i progu spowolnienia. Datą zniszczenia jest data zdjęcia, nie ataku. W maju 2024 mediana spowolnienia tras przejście-hub to ×1,2 (bez odgruzowania ×1,4, najgorsza trasa ×1,5), więc zniszczenia słabo zmieniają wyniki kolejki i żywności (pokrycie żywności 83,4% zarówno przy odgruzowaniu 30–120, jak i 60–180 dni). Ciężarówki nie napotykają dróg nieprzejezdnych. Wyniki zależą od tego, jak szybko usuwano gruz, a UNOSAT tego nie pokazuje.
+4. **Kolejka jest skalibrowana tylko co do rzędu wielkości.** Liczba stanowisk nie jest znana (11 komórek Kerem Shalom to miejsca postoju, nie równoległe odprawy). Doniesienia o czasie czekania są anegdotyczne: ok. 11 h, czasem do trzech dni (The World, lipiec 2024), średnio do 20 dni na trasie z Egiptu (Oxfam, marzec 2024). W maju 2024 na Kerem Shalom wychodzi średnio ok. 2,5 h, mediana ok. 1,3 h, maksimum ok. 16 h (seed 42, bez zdarzeń losowych). Przy 10 stanowiskach średnia spada do 1,3 h, przy 12 do 0,7 h. Czekanie przed dniem z danych (trasa z Egiptu, Al-Arisz, Nitzana) nie jest w modelu. Na małych przejściach (Erez, Western Erez, Gate 96, JLOTS) 4 stanowiska to zgadywanie.
 5. **Wyniki żywności zależą od założeń bez danych.** Podział grup IPC na gubernatorstwa jest stałą proporcją z kwietnia 2025. Rafah w maju i czerwcu 2024 ma dwie liczby z raportów zamiast tabeli IPC. Żywność jest wspólna w grupie IPC, ale nie płynie między grupami, więc nadwyżka w Rafah nie pomaga środkowi ani północy. Przypisanie przejść do stref jest założeniem, a w Dispatching od czerwca 2024 prawie nie ma wydań na północy, więc wagi North_Jabalia / Gaza City wynikają wtedy z ludności. Zapas startuje od zera, a pokrycie liczy tylko pomoc z Excela. Rozkład hubów pochodzi z Dispatching, które obejmuje ok. 38% tonażu z Received. W listopadzie 2023 12% odbiorców z Dispatching nie jest zmapowanych do hubów. Średnia kolejka na przejściach to w 2024-05 ok. 126 min bez zdarzeń losowych i ok. 177 min z `--m2` (odchylenie 25 min), więc z `--m2` trzeba raportować średnią z wielu seedów.
 6. **Graf zawiera drogi serwisowe i dojazdowe oraz Korytarz Filadelfijski.** Trasy mogą przechodzić przez drogi, których ciężarówki humanitarne nie używają.
 7. **Część odbiorców z Excela nie jest zmapowana do hubów.** W 2023-11 to 117 nazw (14% ruchu), głównie szpitale, magazyny ONZ i sklepy. Do rozszerzenia w `HUB_RULES` po sprawdzeniu lokalizacji.

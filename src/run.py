@@ -46,12 +46,12 @@ def summarize(log):
     """Dwie tabele: kolejki na przejściach i czasy dojazdu do hubów (tylko dowiezione ciężarówki)."""
     q = log.groupby("crossing").agg(
         trucks=("truck_id", "size"), queue_mean_min=("queue_min", "mean"),
-        queue_p95_min=("queue_min", lambda s: s.quantile(0.95)), queue_max_min=("queue_min", "max"),
+        queue_median_min=("queue_min", "median"), queue_max_min=("queue_min", "max"),
         returned=("rejections", lambda s: int((s > 0).sum())),
         rejected=("final_state", lambda s: int((s == "odrzucona").sum())),
     )
     agg = dict(trucks=("truck_id", "size"), route_km_mean=("route_km", "mean"), travel_min_mean=("travel_min", "mean"),
-               travel_min_p95=("travel_min", lambda s: s.quantile(0.95)))
+               travel_min_median=("travel_min", "median"))
     if (log["unload_min"] > 0).any():   # rozładunek włączony
         agg["unload_wait_mean_min"] = ("unload_wait_min", "mean")
     h = log[log["delivered"]].groupby("hub").agg(**agg)
@@ -92,16 +92,15 @@ def build_world(a, double_trucks=False, quiet=False):
     damage.set_base_weights(G)
     dm, wave_events = None, []
     if config.USE_DAMAGE and not a.no_damage:
-        gdf = damage.load_unosat()
-        dm = damage.DamageModel(
-            G, damage.filter_as_of(gdf, month_start.strftime("%Y-%m-%d"), config.DAMAGE_LIFETIME_DAYS))
+        gdf = damage.prepare_points(damage.load_unosat())
+        dm = damage.DamageModel(G, damage.filter_as_of(gdf, month_start.strftime("%Y-%m-%d")))
         wave_events = ev.unosat_wave_events(dm, gdf, month_start, next_month)
         n_add = sum(1 for e in wave_events if e.label.startswith("FALA"))
-        n_fix = sum(1 for e in wave_events if e.label.startswith("NAPRAWA"))
-        life = config.DAMAGE_LIFETIME_DAYS
+        n_fix = sum(1 for e in wave_events if e.label.startswith("ODGRUZOWANIE"))
+        clear = config.DEBRIS_CLEAR_DAYS
         if not quiet:
-            print(f"Fale UNOSAT w tym miesiącu: {n_add} wejść, {n_fix} napraw"
-                  + (f" (życie {life:g} dni)" if life else " (bez schodzenia)"))
+            print(f"Fale UNOSAT w tym miesiącu: {n_add} wejść, {n_fix} dni z odgruzowaniem"
+                  + (f" (czas odgruzowania {clear[0]:g}-{clear[1]:g} dni)" if clear else " (bez odgruzowania)"))
 
     # --- router D* Lite i trasy bazowe ---
     router = router_mod.FieldRouter(G, hub_nodes, next(iter(crossing_nodes.values())))
@@ -167,8 +166,9 @@ def main():
     ap.add_argument("--describe-unosat", action="store_true", help="pokaż kolumny i daty UNOSAT")
     ap.add_argument("--diagnose", action="store_true", help="diagnostyka grafu, przypięć, tras i zniszczeń (bez symulacji)")
     ap.add_argument("--no-damage", action="store_true", help="bez zniszczeń (punkt odniesienia)")
-    ap.add_argument("--damage-lifetime", type=float, default=None,
-                    help="po ilu dniach od zdjęcia UNOSAT punkty schodzą z dróg (domyślnie zostają)")
+    ap.add_argument("--debris-days", default=None, metavar="MIN,MAX",
+                    help="czas odgruzowania punktu UNOSAT, losowany z U(MIN, MAX) dni od zdjęcia (domyślnie config.DEBRIS_CLEAR_DAYS)")
+    ap.add_argument("--no-debris", action="store_true", help="bez odgruzowania: zniszczenia zostają na drogach")
     ap.add_argument("--block-main", default="", help='zamknij najruchliwsze drogi: "DZIEŃ GG:MM", np. "5 08:00"')
     ap.add_argument("--block-hours", type=float, default=config.BLOCK_HOURS)
     ap.add_argument("--block-k", type=int, default=1, help="ile najruchliwszych dróg zamknąć")
@@ -189,8 +189,11 @@ def main():
         a.unloading = a.demand = a.stochastic = a.analytics = True
     if a.no_capacity:
         config.CAPACITY_K = None
-    if a.damage_lifetime is not None:
-        config.DAMAGE_LIFETIME_DAYS = a.damage_lifetime
+    if a.no_debris:
+        config.DEBRIS_CLEAR_DAYS = None
+    elif a.debris_days:
+        lo, hi = (float(x) for x in a.debris_days.split(","))
+        config.DEBRIS_CLEAR_DAYS = (lo, hi)
 
     if a.prepare_data:
         data.prepare(a.month, force=True)
@@ -271,7 +274,7 @@ def multi_seed(a, double_trucks, outdir):
             "delivered_pct": round(100 * log["delivered"].mean(), 1),
             "rejected_pct": round(100 * (log["final_state"] == "odrzucona").mean(), 1),
             "queue_mean_min": round(log["queue_min"].mean(), 1),
-            "queue_p95_min": round(log["queue_min"].quantile(0.95), 1),
+            "queue_median_min": round(log["queue_min"].median(), 1),
             "travel_mean_min": round(log.loc[log["delivered"], "travel_min"].mean(), 1),
             "stuck_trucks": int((log["stuck_min"] > 0).sum()),
         }

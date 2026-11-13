@@ -67,8 +67,8 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir, used_pairs=None):
     # 4. zniszczenia na krawędziach
     print("\n=== 4. ZNISZCZENIA NA KRAWĘDZIACH ===")
     dmg = edges["damage"]
-    print("liczba punktów UNOSAT w oczku (max po krawędzi): "
-          + ", ".join(f"p{q}={dmg.quantile(q / 100):.0f}" for q in (10, 25, 50, 75, 90, 99)) + f", max={dmg.max():.0f}")
+    print("ważona liczba zniszczeń UNOSAT w oczku 100 m (max po krawędzi): "
+          + ", ".join(f"p{q}={dmg.quantile(q / 100):.1f}" for q in (10, 25, 50, 75, 90, 99)) + f", max={dmg.max():.1f}")
     sf = edges["highway"].map(lambda h: damage.speed_factor({"highway": h}))
     slow = edges["time_min"] / (edges["length"] / (v_free * 1000 / 60 * sf))
     sat = config.TRUCK_SPEED_KMH / config.MIN_SPEED_KMH
@@ -121,12 +121,24 @@ def report(G, crossing_nodes, hub_nodes, routes, outdir, used_pairs=None):
     fig.savefig(outdir / "diagnoza.png", dpi=160)
     plt.close(fig)
 
-    # 5b. mapa zniszczeń: drogi pomalowane liczbą punktów UNOSAT w oczku
+    # 5b. mapa zniszczeń: drogi bez zniszczeń na szaro i cienko, uszkodzone w kolorach od żółtego do ciemnoczerwonego.
+    # Progi to ważona liczba punktów w oczku 100 m; przy 6 prędkość spada o połowę (SLOWDOWN_PER_DAMAGE).
+    bins = [(0, 1, "#ffd966", 0.9, "do 1 (prawie bez wpływu)"), (1, 3, "#f6a21e", 1.2, "1–3"),
+            (3, 6, "#e8590c", 1.6, "3–6"), (6, 12, "#c1121f", 2.0, "6–12 (prędkość ≥ 2x mniejsza)"),
+            (12, float("inf"), "#4a0010", 2.6, "powyżej 12")]
     fig, ax = plt.subplots(figsize=(9, 11))
     ax.set_axis_off()
-    ax.set_title("Zniszczenia na krawędziach (liczba punktów UNOSAT w oczku)")
-    edges.sort_values("damage").plot(ax=ax, column="damage", cmap="inferno", linewidth=0.8, legend=True,
-                                     legend_kwds={"shrink": 0.5, "label": "punktów UNOSAT w oczku"})
+    ax.set_facecolor("white")
+    ax.set_title("Zniszczenia na drogach (ważona liczba punktów UNOSAT w oczku 100 m)")
+    dmg = edges["damage"]
+    edges[dmg <= 0].plot(ax=ax, color="#d9d9d9", linewidth=0.4, zorder=1)
+    handles = [plt.Line2D([], [], color="#d9d9d9", lw=2, label=f"bez zniszczeń ({(dmg <= 0).mean():.0%} krawędzi)")]
+    for z, (lo, hi, col, lw, name) in enumerate(bins, start=2):   # silniejsze zniszczenia rysowane na wierzchu
+        sub = edges[(dmg > lo) & (dmg <= hi)]
+        if len(sub):
+            sub.plot(ax=ax, color=col, linewidth=lw, zorder=z)
+        handles.append(plt.Line2D([], [], color=col, lw=3, label=f"{name} ({len(sub) / len(edges):.0%})"))
+    ax.legend(handles=handles, loc="lower left", fontsize=9, title="zniszczenia w oczku (udział krawędzi)")
     fig.tight_layout()
     fig.savefig(outdir / "mapa_zniszczen.png", dpi=130)
     plt.close(fig)

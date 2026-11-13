@@ -1,9 +1,10 @@
 """Krok 5: zniszczenia UNOSAT -> koszt i czas przejazdu krawędzi grafu."""
 import glob
 import zipfile
-from collections import Counter, defaultdict
+from collections import defaultdict
 
 import geopandas as gpd
+import numpy as np
 import osmnx as ox
 import pandas as pd
 
@@ -47,31 +48,55 @@ def describe_unosat(gdf):
         print(f"\n{col}:\n{gdf[col].value_counts(dropna=False).to_string()}")
 
 
-def first_dates(gdf):
-    """Data pierwszego zdjęcia, na którym punkt jest uszkodzony.
+def first_info(gdf):
+    """Data pierwszego zdjęcia, na którym punkt jest uszkodzony, i klasa uszkodzenia z tego zdjęcia.
 
     Kolumna SensorDate_k to data k-tego przelotu, a Main_Damage_Site_Class_k to klasa z tego przelotu (pusta albo 6 = brak
     uszkodzenia). Bierzemy najwcześniejszą datę, przy której klasa jest niepusta i różna od 6.
     """
-    out = []
+    best, best_cls = None, None
     for c in [c for c in gdf.columns if c.startswith("SensorDate")]:
         cls = gdf[c.replace("SensorDate", "Main_Damage_Site_Class")]
-        d = pd.to_datetime(gdf[c], errors="coerce", utc=True)
-        out.append(d.where(cls.notna() & (cls != 6)))
-    return pd.concat(out, axis=1).min(axis=1)
+        d = pd.to_datetime(gdf[c], errors="coerce", utc=True).where(cls.notna() & (cls != 6))
+        if best is None:
+            best, best_cls = d, cls.where(d.notna())
+            continue
+        better = d.notna() & (best.isna() | (d < best))
+        best, best_cls = best.where(~better, d), best_cls.where(~better, cls)
+    return best, best_cls
 
 
-def filter_as_of(gdf, as_of, lifetime_days=None):
-    """Zostawia punkty już widoczne na as_of. Przy lifetime_days odrzuca te, które już 'wygasły'."""
+def first_dates(gdf):
+    return first_info(gdf)[0] if "first" not in gdf.columns else gdf["first"]
+
+
+def prepare_points(gdf):
+    """Dokłada kolumny: first (data zdjęcia), w (waga klasy) i expires (koniec odgruzowania).
+
+    Czas odgruzowania każdego punktu jest losowany raz z U(DEBRIS_CLEAR_DAYS) własnym generatorem (stałe ziarno
+    DEBRIS_SEED), więc jest ten sam w każdym miesiącu i w każdym przebiegu. Punkt znika z dróg w dniu first + czas.
+    """
+    first, cls = first_info(gdf)
+    out = gdf.copy()
+    out["first"] = first
+    out["w"] = cls.map(config.DAMAGE_CLASS_WEIGHT).fillna(config.DAMAGE_DEFAULT_WEIGHT).astype(float)
+    if config.DEBRIS_CLEAR_DAYS:
+        lo, hi = config.DEBRIS_CLEAR_DAYS
+        days = np.random.default_rng(config.DEBRIS_SEED).uniform(lo, hi, len(out))
+        out["expires"] = first + pd.to_timedelta(days, unit="D")
+    else:
+        out["expires"] = pd.Series(pd.NaT, index=out.index, dtype="datetime64[ns, UTC]")
+    return out
+
+
+def filter_as_of(gdf, as_of):
+    """Punkty widoczne na as_of: już sfotografowane i jeszcze nieodgruszczone."""
     if as_of is None:
         return gdf
-    first = first_dates(gdf)
     as_of = pd.Timestamp(as_of, tz="UTC")
-    kept = first <= as_of
-    if lifetime_days:
-        kept &= first > as_of - pd.Timedelta(days=lifetime_days)
+    kept = (gdf["first"] <= as_of) & (gdf["expires"].isna() | (gdf["expires"] > as_of))
     out = gdf[kept]
-    print(f"Zniszczenia na {as_of.date()}: {len(out)} z {len(gdf)} punktów")
+    print(f"Zniszczenia na {as_of.date()}: {len(out)} z {len(gdf)} punktów (waga {out['w'].sum():.0f})")
     return out
 
 
@@ -102,7 +127,7 @@ class DamageModel:
     def __init__(self, G, gdf):
         self.G = G
         self.cell = config.DAMAGE_CELL_M
-        self.counts = Counter()
+        self.counts = {}
         self.edge_cells, self.cell_edges = {}, defaultdict(list)
         edges = ox.graph_to_gdfs(G, nodes=False)
         for (u, v, k), geom, length in zip(edges.index, edges.geometry, edges["length"]):
@@ -125,12 +150,15 @@ class DamageModel:
         v_free = config.TRUCK_SPEED_KMH * 1000 / 60 * speed_factor(d)
         v_min = min(config.MIN_SPEED_KMH * 1000 / 60, v_free)
         # jeden wzór: ciężarówka jedzie wolniej, a router dostaje ten sam czas
-        d["damage"] = int(dmg)
+        d["damage"] = round(float(dmg), 2)
         d["time_min"] = length / max(v_min, v_free / (1 + config.SLOWDOWN_PER_DAMAGE * dmg))
 
     def _cell_counts(self, gdf):
+        """Suma wag punktów w każdym oczku: {oczko: waga}."""
         pts = gdf.to_crs(self.G.graph["crs"])
-        return Counter(zip((pts.geometry.x // self.cell).astype(int), (pts.geometry.y // self.cell).astype(int)))
+        kx = (pts.geometry.x // self.cell).astype(int).to_numpy()
+        ky = (pts.geometry.y // self.cell).astype(int).to_numpy()
+        return pd.Series(gdf["w"].to_numpy()).groupby([kx, ky]).sum().to_dict()
 
     def _touch(self, cells):
         touched = set()
@@ -145,17 +173,18 @@ class DamageModel:
         if len(gdf) == 0:
             return set()
         new = self._cell_counts(gdf)
-        self.counts.update(new)
+        for cell, n in new.items():
+            self.counts[cell] = self.counts.get(cell, 0.0) + n
         return self._touch(new)
 
     def remove_points(self, gdf):
-        """Zdejmuje punkty (naprawa po czasie życia fali). Zwraca krawędzie, których koszt się zmienił."""
+        """Zdejmuje punkty (odgruzowanie). Zwraca krawędzie, których koszt się zmienił."""
         if len(gdf) == 0:
             return set()
         gone = self._cell_counts(gdf)
         for cell, n in gone.items():
             left = self.counts.get(cell, 0) - n
-            if left > 0:
+            if left > 1e-6:
                 self.counts[cell] = left
             else:
                 self.counts.pop(cell, None)

@@ -114,8 +114,8 @@ class Reporter:
                 "value": round(g["queue_min"].mean(), 1),
             })
             rows.append({
-                "metric": f"[{crossing}] p95 czas kolejki [min]",
-                "value": round(g["queue_min"].quantile(0.95), 1),
+                "metric": f"[{crossing}] Mediana czasu kolejki [min]",
+                "value": round(g["queue_min"].median(), 1),
             })
             rows.append({
                 "metric": f"[{crossing}] Max czas kolejki [min]",
@@ -127,7 +127,7 @@ class Reporter:
             {"metric": "Dowiezionych [%]", "value": round(100 * delivered / total, 1)},
             {"metric": "Niedowiezionych", "value": total - delivered},
             {"metric": "Śr. czas przejazdu [min]", "value": round(log["travel_min"].mean(), 1)},
-            {"metric": "p95 czas przejazdu [min]", "value": round(log["travel_min"].quantile(0.95), 1)},
+            {"metric": "Mediana czasu przejazdu [min]", "value": round(log["travel_min"].median(), 1)},
             {"metric": "Śr. długość trasy [km]", "value": round(log["route_km"].mean(), 1)},
             {"metric": "Ciężarówek ze zmianą trasy", "value": int((log["replans"] > 0).sum())},
             {"metric": "Ciężarówek czekających bez drogi", "value": int((log["stuck_min"] > 0).sum())},
@@ -153,14 +153,14 @@ class Reporter:
                 "crossing": crossing,
                 "trucks": len(g),
                 "queue_mean_min": round(g["queue_min"].mean(), 1),
-                "queue_p95_min": round(g["queue_min"].quantile(0.95), 1),
+                "queue_median_min": round(g["queue_min"].median(), 1),
                 "queue_max_min": round(g["queue_min"].max(), 1),
                 "service_mean_min": round(g["service_min"].mean(), 1),
                 "not_delivered": int((~g["delivered"]).sum()),
                 "stuck_pct": round(100 * (g["stuck_min"] > 0).mean(), 1),
                 "bottleneck_score": round(
-                    g["queue_min"].quantile(0.95) * len(g) / 1000, 1
-                ),  # heurystyczny wskaźnik: p95_queue * liczba ciężarówek
+                    g["queue_min"].mean() * len(g) / 1000, 1
+                ),  # heurystyczny wskaźnik: średnia kolejka * liczba ciężarówek / 1000
             })
         return (pd.DataFrame(rows)
                 .sort_values("bottleneck_score", ascending=False)
@@ -188,8 +188,8 @@ class Reporter:
             ax.hist(q, bins=40, color="#2171b5", edgecolor="white", linewidth=0.3)
             ax.axvline(q.mean(), color="#e31a1c", lw=1.5, linestyle="--",
                        label=f"śr. {q.mean():.0f} min")
-            ax.axvline(q.quantile(0.95), color="#ff7f00", lw=1.5, linestyle=":",
-                       label=f"p95 {q.quantile(0.95):.0f} min")
+            ax.axvline(q.median(), color="#ff7f00", lw=1.5, linestyle=":",
+                       label=f"mediana {q.median():.0f} min")
             ax.set_title(f"{crossing}", fontsize=11, weight="bold")
             ax.set_xlabel("Czas oczekiwania w kolejce [min]")
             ax.set_ylabel("Liczba ciężarówek")

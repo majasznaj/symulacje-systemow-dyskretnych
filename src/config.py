@@ -81,17 +81,23 @@ OVERPASS_URLS = [
 
 # --- zniszczenia (UNOSAT) ---
 USE_DAMAGE = True
-DAMAGE_CELL_M = 500        # bok oczka siatki zliczającej zniszczenia
-# None = zniszczenia zostają do końca symulacji (UNOSAT nie ma dat naprawy).
-# Liczba = po tylu dniach od zdjęcia punkty schodzą z dróg (ZAŁOŻENIE).
-DAMAGE_LIFETIME_DAYS = None
+DAMAGE_CELL_M = 100        # bok oczka siatki zliczającej zniszczenia (krawędź bierze maksimum z oczek, przez które przechodzi)
+# Waga punktu zależy od klasy uszkodzenia z UNOSAT: 1 zniszczony, 2 poważnie, 3 średnio, 4 możliwe uszkodzenie, 11 możliwe
+# uszkodzenie od sąsiedniego uderzenia. ZAŁOŻENIE: gruz robią głównie budynki zniszczone i poważnie uszkodzone, ale słabsze uszkodzenia też utrudniają przejazd (połowa wagi).
+DAMAGE_CLASS_WEIGHT = {1: 1.0, 2: 1.0, 3: 0.75, 4: 0.5, 11: 0.5}
+DAMAGE_DEFAULT_WEIGHT = 0.5
+# Odgruzowanie: punkt schodzi z dróg po losowym czasie od zdjęcia, U(min, max) dni. None = zniszczenia zostają.
+# ZAŁOŻENIE bez danych (w UNOSAT nie ma dat usunięcia gruzu). Głównie ciągi używane do transportu i pomocy odgruzowuje się szybko,
+# a mniej ważne drogi wolniej. Data zdjęcia jest tylko górnym ograniczeniem daty zniszczenia.
+DEBRIS_CLEAR_DAYS = (60, 180)
+DEBRIS_SEED = 7            # osobny generator, żeby czas odgruzowania nie zależał od ziarna symulacji
 
 # --- ruch ciężarówek (ZAŁOŻENIA) ---
 TRUCK_SPEED_KMH = 30.0
 MIN_SPEED_KMH = 5.0
-SLOWDOWN_PER_DAMAGE = 1 / 150   # prędkość = SPEED / (1 + SLOWDOWN * zniszczenia), nie mniej niż MIN_SPEED.
-                                # ZAŁOŻENIE (bez kalibracji na danych): przy 150 punktach w oczku prędkość spada o połowę.
-                                # Dla porównania w marcu 2024 mediana krawędzi ma ok. 190 punktów w oczku (czas x2,3), p99 ok. 750.
+SLOWDOWN_PER_DAMAGE = 1 / 6     # prędkość = SPEED / (1 + SLOWDOWN * ważone zniszczenia w oczku), nie mniej niż MIN_SPEED.
+                                # ZAŁOŻENIE (bez kalibracji na danych): przy 6 zniszczonych budynkach w oczku 100 m (1 ha) prędkość
+                                # spada o połowę. To ta sama gęstość co poprzednio (150 punktów w oczku 500 m = 6 na hektar).
 
 # --- przejścia: kolejka (ZAŁOŻENIA) ---
 OPEN_HOURS = (8, 18)        # Excel ma tylko datę; godzinę wjazdu losujemy z tego okna
@@ -103,7 +109,7 @@ OPEN_HOURS = (8, 18)        # Excel ma tylko datę; godzinę wjazdu losujemy z t
 # (rozładunek, przeniesienie przez "sterylne" ciężarówki, załadunek). Dla Rafah przyjmujemy to samo (przeładunek z ciężarówek
 # egipskich na palestyńskie, MSF 2024), więc to założenie. Uwaga: to czas fizyczny, a w praktyce o czekaniu decyduje też zgoda COGAT.
 # Liczba stanowisk NIE jest znana (Gisha: 11 komórek po 17-25 ciężarówek, ale to miejsce na postój, nie liczba równoległych odpraw).
-# c dobrane tak, żeby przy 45 min kolejka na Kerem Shalom w marcu-maju 2024 wychodziła rzędu godzin (średnio ok. 2-3 h, p95 ok. 10 h),
+# c dobrane tak, żeby przy 45 min kolejka na Kerem Shalom w marcu-maju 2024 wychodziła rzędu godzin (średnio ok. 2-3 h, maksimum ok. 16 h),
 # bo kierowcy opisywali ok. 11 h oczekiwania, a czasem do trzech dni (The World, VII 2024; Oxfam III 2024: do 20 dni w kolejkach,
 # głównie na trasie z Egiptu, czyli przed dniem z Excela). To jedyna kalibracja, wyłącznie rzędu wielkości, bez danych o czasach.
 SERVICE_DIST = "erlang"
