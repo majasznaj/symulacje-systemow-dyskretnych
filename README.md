@@ -9,24 +9,24 @@ Domyślnie maj 2024 (`config.MONTH`). Inny miesiąc wybierasz przez `--month`, n
 
 1. Każdy wiersz z `Commodities-Received.xlsx` to jedna ciężarówka wjeżdżająca przez przejście graniczne.
 2. Na przejściu ciężarówka czeka w kolejce i jest odprawiana (SimPy). Przejście ma skończoną pojemność K (odprawa plus kolejka). Gdy jest pełne, ciężarówka zawraca, wraca po dobie, a po trzech odmowach jest odrzucona na stałe.
-3. Potem jedzie po grafie dróg z OpenStreetMap do jednego z hubów. Trasę wyznacza D* Lite. Hub jest losowany z udziału wydań z całego miesiąca w `Commodities-Dispatching`. Przejście wjazdu pochodzi z `Received`, bo kolumna `Crossing` w `Dispatching` jest niespójna (patrz „Znane ograniczenia”, punkt 2).
+3. Potem jedzie po grafie dróg z OpenStreetMap do jednego z hubów. Trasę wyznacza D* Lite. Hub jest losowany spośród hubów tej samej części Strefy co przejście (północ: Erez, Western Erez, Gate 96, JLOTS; południe: Kerem Shalom, Rafah, Kissufim), z wagami z tonażu żywności wydanej w danym miesiącu w `Commodities-Dispatching`. Przejście wjazdu pochodzi z `Received`, bo kolumna `Crossing` w `Dispatching` jest niespójna (patrz „Znane ograniczenia”, punkt 2).
 4. Zniszczenia z UNOSAT spowalniają drogi. Stan na 1. dzień miesiąca jest punktem startu, a nowe fale wchodzą w dniach zdjęć. `--damage-lifetime N` zdejmuje falę po N dniach od zdjęcia. Zmiana trasy zapisuje się w `replan_causes` i w logu tekstowym.
 5. Opcjonalnie można zamknąć najruchliwszą drogę. Ciężarówki bez trasy czekają i po 72 h rezygnują.
 
 Warstwy dodatkowe (flagi w „Szybkim starcie”):
 
 - **Rozładunek (`--unloading`).** W hubie ciężarówka czeka na wolny dok i rozładowuje się średnio 30 min.
-- **Popyt na żywność (`--demand`).** Ładunek jest przeliczany na tony. Co dobę ludność hubu zjada zapas (do 2100 kcal na osobę), a z kalorii wychodzi uproszczona faza 1–5. Ludność hubu to liczba mieszkańców gubernatorstwa z raportów IPC (zmienia się z miesiąca na miesiąc), a nie wynik rozkładu pomocy.
+- **Popyt na żywność (`--demand`).** Ładunek jest przeliczany na tony. Co dobę ludność hubu zjada zapas (do 2100 kcal na osobę), a z kalorii wychodzi uproszczona faza 1–5. Ludność hubu to liczba mieszkańców gubernatorstwa z raportów IPC (osobna dla każdej doby), a nie wynik rozkładu pomocy. Szczegóły w „Ludność i żywność”.
 - **Zdarzenia losowe (`--stochastic`).** Incydenty drogowe, zamknięcia przejść i awarie ciężarówek. Mają osobny generator losowy, więc nie zmieniają pozostałych losowań.
 - **Analityka (`--analytics`), scenariusze (`--scenario`), wiele seedów (`--multi-seed`).**
 
-**Weryfikacja:** rozkład hubów w symulacji vs dane `Commodities-Dispatching`:
+**Weryfikacja:** rozkład hubów w symulacji vs rozkład oczekiwany (udziały hubów dla przejścia z `hub_shares_*.csv` ważone liczbą ciężarówek na przejściu):
 
 | Miesiąc | Ciężarówek | Maks. różnica | Szum próbkowania σ |
 |---|---|---|---|
-| 2023-11 | 2545 | 0,96 pp | 0,93 pp |
-| 2024-03 | 4993 | 0,68 pp | 0,45 pp |
-| 2024-05 | 4342 | 1,01 pp | 0,76 pp |
+| 2023-11 | 2545 | 0,72 pp | 0,97 pp |
+| 2024-03 | 4993 | 0,47 pp | 0,41 pp |
+| 2024-05 | 4342 | 0,58 pp | 0,66 pp |
 
 Różnice mieszczą się w szumie próbkowania. To sprawdza, czy losowanie hubów odtwarza dane, a nie czy dane są dobre.
 
@@ -71,20 +71,20 @@ Ciężarówka odrzucona przez K ma `final_state = odrzucona`, `delivered = False
 | Ścieżka | Do czego |
 |---|---|
 | `src/config.py` | wszystkie parametry i założenia w jednym miejscu |
-| `src/data.py` | Excel → ciężarówki, udziały hubów w miesiącu (`data/processed/`), ludność hubów z IPC (`hub_population`) |
+| `src/data.py` | Excel → ciężarówki, udziały hubów w miesiącu (`data/processed/`), ludność hubów z IPC (`hub_population_daily`) |
 | `src/network.py` | graf dróg (pobranie, wczytanie, przycięcie do Strefy), przypinanie punktów do węzłów, trasy bazowe |
 | `src/damage.py` | UNOSAT → liczba punktów w oczku 500 m → czas przejazdu krawędzi |
 | `src/dstar_lite.py`, `src/router.py` | D* Lite: po jednym polu kosztu na hub, ciężarówka czyta z niego następny krok |
 | `src/fsm.py` | maszyna stanów ciężarówki |
 | `src/events.py` | zdarzenia zmieniające drogi w czasie: fale UNOSAT i blokady |
 | `src/sim.py` | pętla SimPy: wjazd, kolejka, odprawa, jazda, rozładunek, doby popytu |
-| `src/demand.py` | ładunek → tony, zapas żywności, kalorie na osobę, faza 1–5 |
+| `src/demand.py` | ładunek → tony, zapas żywności, kalorie na osobę, faza kaloryczna 1–5 |
 | `src/stochastic.py` | incydenty drogowe, zamknięcia przejść, awarie |
 | `src/analytics.py` | wskaźniki, wąskie gardła, wykresy |
 | `src/run.py` | uruchamianie, scenariusze, wiele seedów, tabele |
 | `src/diagnose.py` | diagnostyka grafu, tras i zniszczeń |
 | `data/raw/` | Excele ONZ (Received, Dispatching) i archiwum UNOSAT |
-| `data/processed/` | graf `gaza_drive.graphml`, ciężarówki (`trucks_*.csv`), udziały hubów (`hub_shares_*.csv`), mapowanie odbiorców na huby (`hub_mapping_*.csv`) |
+| `data/processed/` | graf `gaza_drive.graphml`, ciężarówki (`trucks_*.csv`), udziały hubów (`hub_shares_*.csv`, plik `.method` unieważnia cache po zmianie reguły), mapowanie odbiorców na huby (`hub_mapping_*.csv`) |
 
 ## Modele
 
@@ -94,10 +94,55 @@ Ciężarówka odrzucona przez K ma `final_state = odrzucona`, `delivered = False
 | FSM | jest | wjazd → kolejka → odprawa → jazda ↔ bez drogi → rozładunek → dowiozła / zrezygnowała. Przy pełnym przejściu: zawrócona → wjazd albo odrzucona. Niedozwolone przejście zgłasza błąd |
 | D* Lite | jest | pole kosztu do każdego hubu naprawiane przyrostowo po zmianie dróg. Heurystyka wyłączona, więc w praktyce to przyrostowy Dijkstra liczony od hubu wstecz |
 | Rozładunek w hubie | jest (`--unloading`) | doki jako zasób SimPy, średnio 30 min |
-| Popyt i żywność | jest, uproszczone (`--demand`) | zapas, ludność z IPC, kalorie na osobę, faza 1–5 z progów 2100/1900/1700/1500 kcal. To nie jest oficjalny IPC, bo liczy tylko kalorie. Wody model nie uwzględnia, bo nie ma jej w danych |
+| Popyt i żywność | jest, uproszczone (`--demand`) | zapas, ludność z IPC, kalorie na osobę, faza kaloryczna 1–5 z progów 2100/1900/1700/1500 kcal. To nie jest klasyfikacja IPC, bo liczy tylko kalorie. Wody model nie uwzględnia, bo nie ma jej w danych. Opis w „Ludność i żywność” |
 | Zdarzenia losowe | jest (`--stochastic`) | częstości nieskalibrowane, dane ACLED nie są użyte |
 
 Możliwe rozszerzenia w przyszłości: Nagel-Schreckenberg (ruch przed bramką), model tłumu Helbinga, Utility AI, dane ACLED.
+
+## Ludność i żywność
+
+**Co to IPC.** IPC (Integrated Food Security Phase Classification) to skala ONZ, FAO i WFP do oceny braku żywności: faza 1 (minimalna), 2 (napięta), 3 (kryzys), 4 (zagrożenie), 5 (katastrofa lub głód). Raporty IPC dla Gazy podają też liczbę mieszkańców gubernatorstw. Używamy ich w dwóch miejscach. Liczby ludności to dane z raportów. Nazwy faz 1–5 pożyczamy do wskaźnika z kalorii, ale to **nie jest** klasyfikacja IPC, bo prawdziwe IPC bierze pod uwagę też strategie przetrwania, odżywienie dzieci i śmiertelność. Dlatego w plikach wyniku kolumny nazywają się `kcal_phase` i `kcal_phase_month`.
+
+**1. Ludność huba (`data.hub_population_daily`, osobno dla każdej doby miesiąca).**
+- Z raportów IPC mamy liczby w trzech grupach: północ (North Gaza + Gaza), środek (Deir al-Balah + Khan Younis) i Rafah. Punkty są w `IPC_POPULATION`, a ich źródła w tabeli niżej.
+- Między punktami interpolujemy liniowo po dniach. Przed pierwszym punktem (grudzień 2023) i po ostatnim wartość jest stała.
+- Grupę dzielimy na huby w stałej proporcji z tabeli IPC z kwietnia 2025 (`IPC_SPLIT`): North Gaza 310 : Gaza 740, Deir al-Balah 400 : Khan Younis 620.
+- Hub reprezentuje całe swoje gubernatorstwo. Ludność nie zależy od tego, ile pomocy tam jedzie.
+- Przykład, maj 2024, Rafah: 1,33 mln do 6 maja, ok. 200 tys. 26 maja, ok. 166 tys. 31 maja. Średnia z miesiąca to 760 tys.
+
+**2. Dokąd jedzie ciężarówka.** Hub jest losowany spośród hubów tej samej części Strefy co przejście (`CROSSING_HUBS` w `config.py`):
+- północ (Erez, Western Erez, Gate 96, JLOTS) → Gaza City, North Jabalia,
+- południe (Kerem Shalom, Rafah, Kissufim) → Deir al-Balah, Khan Younis, Rafah.
+
+Wagi to **tonaż żywności** wydanej w miesiącu w `Commodities-Dispatching` (tonaż to ilość razy przelicznik jednostki, kategoria `Food Items`). Z tego pliku bierzemy tylko rozkład, bo Dispatching zawiera ok. 38% żywności z Received (maj 2024: 19,5 tys. t wobec 51,7 tys. t). Gdy w części Strefy nie ma w miesiącu żadnych wydań, wagi wynikają z ludności hubów. Podział na północ i południe zgadza się z danymi: Dispatching kieruje przejście Western Erez wyłącznie do Gaza City (6,4 tys. t), a nic z niego na południe. Przypisanie Gate 96, JLOTS i Kissufim do stref to nasze założenie. Przykład, maj 2024: z Kerem Shalom 52% do Rafah, 31% do Deir al-Balah, 17% do Khan Younis, a z przejść północnych 99,6% do Gaza City, 0,4% do North Jabalia (w Dispatching prawie nic nie trafia do Jabalii, mimo że hub ma ok. 89 tys. mieszkańców według przyjętego podziału).
+
+**3. Ile żywności wiezie ciężarówka.** Ilość i jednostka z `Received` zamieniają się na tony: `MT` bez zmian, palety razy 0,64 t, jednostka `Truck` razy 14 t, pozostałe i brak ilości to 14 t, całość ograniczona do 0,1–40 t. Do zapasu trafia tylko kategoria `Food Items`. Medyczne, niespożywcze i mieszane nie liczą się jako żywność.
+
+**4. Zapas i zjadanie (raz na dobę).**
+- Po rozładunku zapas huba rośnie o tony ciężarówki.
+- Potrzeba doby = ludność doby × 2100 kcal / 3,3 mln kcal na tonę. Dla 760 tys. osób to 484 t na dobę.
+- Zapas jest wspólny w grupie IPC (północ: North Jabalia + Gaza City, środek: Deir al-Balah + Khan Younis, Rafah osobno; `FOOD_SHARED_WITHIN_IPC_GROUP`). Zjedzone grupy = min(zapas grupy, suma potrzeb hubów grupy). Zjedzone dzieli się na huby proporcjonalnie do potrzeb, więc huby jednej grupy mają to samo kcal na osobę. Zapas na koniec w tabeli to udział huba (według ludności) w zapasie grupy. Uzasadnienie: IPC podaje ludność tylko dla grupy, a podział na huby to nasze założenie, więc nie ma podstaw, by traktować huby oddalone o 6–13 km jako odcięte od siebie.
+- Kalorie na osobę = zjedzone × 3,3 mln / ludność.
+- Faza dobowa (`kcal_phase` w `demand_history.csv`): od 2100 kcal faza 1, od 1900 faza 2, od 1700 faza 3, od 1500 faza 4, poniżej faza 5.
+- Faza miesiąca (`kcal_phase_month` w `demand_summary.csv`): te same progi, ale dla średnich kcal na osobę z całego miesiąca (zjedzone razy 3,3 mln / suma ludności po dobach). `days_phase_4_5` to liczba dób z fazą 4 lub 5, a `stock_end_days` to zapas na koniec miesiąca wyrażony w dobach potrzeby.
+- Pokrycie huba = suma zjedzonego / suma potrzeb z całego miesiąca. Pokrycie łączne liczone jest tak samo po wszystkich hubach.
+- Symulacja liczy wszystkie doby miesiąca, także po ostatniej ciężarówce.
+- **Górne ograniczenie** to min(dostawy, potrzeby) / potrzeby. Tyle wyniosłoby pokrycie, gdyby żywność mogła płynąć także między grupami IPC. Różnica między pokryciem łącznym a górnym ograniczeniem to koszt nierównego rozdziału pomocy między grupami.
+
+**Czego to nie uwzględnia:** rynku, własnej produkcji i zapasów domowych (pokrycie liczy tylko pomoc z Excela), strat, przepływu żywności między grupami IPC, wody, różnic między grupami wiekowymi. Zapas startuje od zera.
+
+**Wynik, maj 2024 (seed 42, `--demand`):**
+
+| Hub (grupa IPC) | Ludność (średnio) | Potrzeba [t] | Dowieziono do huba [t] | Zjedzono [t] | Zapas na koniec [t] (doby potrzeby) | Pokrycie | kcal na osobę (średnio) | Faza miesiąca | Dób w fazie 4–5 |
+|---|---|---|---|---|---|---|---|---|---|
+| North_Jabalia (północ) | 88 571 | 1 747 | 61 | 1 596 | 1 799 (32) | 91,3% | 1918 | 2 | 3 |
+| Gaza_City (północ) | 211 429 | 4 171 | 11 438 | 3 809 | 4 295 (32) | 91,3% | 1918 | 2 | 3 |
+| Deir_al_Balah (środek) | 457 466 | 9 025 | 12 927 | 7 714 | 0 | 85,5% | 1795 | 3 | 6 |
+| Khan_Younis (środek) | 709 072 | 13 988 | 6 743 | 11 956 | 0 | 85,5% | 1795 | 3 | 6 |
+| Rafah (Rafah) | 760 006 | 14 993 | 20 563 | 11 539 | 9 025 (85) | 77,0% | 1616 | 4 | 7 |
+| **Razem** | 2 226 544 | 43 924 | 51 732 | 36 613 | 15 119 | **83,4%** | | | |
+
+Kolumna „Dowieziono do huba” pokazuje, gdzie ciężarówki rozładowały towar. Zjedzono więcej niż dowieziono do North_Jabalia, bo zapas północy jest wspólny z Gaza City, do którego jedzie niemal cała północna pomoc. Przy 5 seedach pokrycie łączne to 82,8% (odchylenie 0,4 pp), a górne ograniczenie 100%. Północ (grupa IPC) dostaje 11,5 tys. t przy potrzebie 5,9 tys. t, ale zapas pojawia się w trakcie miesiąca (start od zera), więc na początku są dni z fazą 4–5. Rafah ma w miesiącu 20,6 tys. t dostaw przy potrzebie 15 tys. t, a mimo to pokrycie 77%: zapas z pierwszych dni kończy się ok. 9. doby i do ok. 17. doby prawie nic nie dojeżdża (kcal na osobę 0–1300), a potem dostawy rosną, gdy ludność spada z 1,33 mln do 0,17 mln (Rafah po ewakuacji), więc zapas na koniec miesiąca wystarcza na 85 dób. Ten zapas nie pomaga środkowi, bo żywność nie płynie między grupami (ograniczenie 5).
 
 ## Założenia spoza danych
 
@@ -109,24 +154,26 @@ Wszystkie są w `src/config.py`, oznaczone słowem ZAŁOŻENIE. Najważniejsze:
 - spowolnienie od zniszczeń: połowa prędkości przy 150 punktach UNOSAT w oczku 500 m, wszystkie klasy zniszczeń liczone tak samo,
 - współrzędne przejść i hubów. Przy każdej oznaczono, czy sprawdzono je na stronie źródła ([W]), pochodzą z dokumentu Logistics Cluster ([P]) czy nie mają źródła ([?]),
 - przelicznik palety na tony 0,64 t (z median: 14 t na ciężarówkę przy 22 paletach), ciężarówka bez znanej ilości dostaje 14 t,
-- ludność hubów (`IPC_POPULATION`, `IPC_SPLIT`): liczby z raportów IPC (tabela niżej), interpolowane liniowo po dniach, a dla miesiąca uśrednione. IPC łączy gubernatorstwa (północ = North Gaza + Gaza, środek = Deir al-Balah + Khan Younis), więc dzielimy je w stałej proporcji z tabeli IPC z kwietnia 2025 (310 : 740 i 400 : 620). Dla grudnia 2023 – stycznia 2024 południe też jest podzielone na środek i Rafah w proporcji z marca 2024. Dla Rafah w maju i czerwcu 2024 użyliśmy dodatkowo dwóch liczb z raportów (ok. 200 tys. pod koniec maja, ok. 65 tys. w połowie czerwca). Przed grudniem 2023 (październik, listopad) zostaje stan z grudnia. Hub jest jednym punktem, więc cała ludność gubernatorstwa jest przypisana do jednego huba,
+- ludność hubów: punkty IPC, podział grup IPC na gubernatorstwa i dwie liczby dla Rafah z raportów (opis i źródła w „Ludność i żywność”),
+- zjadanie żywności: 2100 kcal na osobę na dobę, 3,3 mln kcal w tonie, zapas startuje od zera, brak strat, żywność jest wspólna w grupie IPC i nie płynie między grupami,
 - doki rozładunkowe (4/3/3/2/2) i czas rozładunku 30 min,
 - częstości zdarzeń losowych: incydenty 0,002 na krawędź na dobę, zamknięcia przejść 0,15 (Kerem Shalom) i 0,20 (Rafah) na dobę po 6 ± 2 h, awarie 3% na 100 km,
-- próg `MIN_CROSSING_SAMPLES = 30`: przy mniejszej liczbie wierszy dla przejścia używany jest rozkład globalny (działa tylko z `HUB_SHARE_BY_CROSSING = True`).
+- przypisanie przejść do stref północ / południe (`CROSSING_HUBS`): Western Erez wynika z Dispatching, Gate 96, JLOTS i Kissufim to założenie geograficzne,
+- przypisanie odbiorców z Dispatching do hubów po nazwie (`HUB_RULES`). Nazw bez miejscowości (np. „Miraj Stores”) nie zgadujemy.
 
 ## Znane ograniczenia
 
 1. **Graf w Rafah (naprawiony 12.11.2026).** Poprzedni graf miał w Rafah 460 krawędzi, a trasy do Hub_Rafah były 2,5–2,9 razy dłuższe niż linia prosta. Po ponownym pobraniu z OSM pas ma 3009 krawędzi, a graf 25 634 węzłów zamiast 14 002. Graf jest przycięty do granicy Strefy plus 500 m (`GAZA_CLIP_BUFFER_M`), bo prostokąt `GAZA_BBOX` obejmuje też Izrael. Trasa jest teraz 1,1–1,3 razy dłuższa niż linia prosta dla wszystkich par przejście-hub. Hub_Rafah (współrzędne z dokumentu z 2009, [P]) przypina się do węzła 783 m od punktu. Zamknięcie jednej krawędzi (`--block-main`) daje objazd ok. 0,5 km, więc scenariusz C prawie nic nie zmienia. Zamknięcie głównej drogi północ–południe wymaga zamknięcia całego przekroju korytarza.
-2. **Kolumna `Crossing` w Dispatching nie zgadza się z Received.** W 2024-03 wszystkie 5131 wierszy ma `Rafah`, a w Received 76,5% wjazdów jest przez Kerem Shalom. W 2024-05 Dispatching ma 62% wierszy z „Rafah”, a przez Rafah wjechało 5,5% ciężarówek. Nie wiemy, co ta kolumna oznacza. Dlatego hub jest losowany z rozkładu całego miesiąca i nie zależy od przejścia. Stary wariant włącza `HUB_SHARE_BY_CROSSING = True`.
+2. **Kolumna `Crossing` w Dispatching nie zgadza się z Received.** W 2024-03 wszystkie 5131 wierszy ma `Rafah`, a w Received 76,5% wjazdów jest przez Kerem Shalom. W 2024-05 Dispatching ma 62% wierszy z „Rafah”, a przez Rafah wjechało 5,5% ciężarówek. Nie wiemy, co ta kolumna oznacza. Dlatego nie przypisujemy hubów po przejściu z Dispatching. Hub zależy tylko od strefy przejścia z Received (północ / południe), a wagi w strefie to tonaż żywności z całego miesiąca.
 3. **Zniszczenia działają prawie jak równomierne spowolnienie.** 97% krawędzi ma jakieś zniszczenia, mediana to ok. 190 punktów w oczku (czas ×2,3). Datą zniszczenia jest data zdjęcia, nie ataku. W UNOSAT nie ma dat naprawy, więc domyślnie fale zostają. `--damage-lifetime` zakłada, że po N dniach droga wraca do poprzedniej prędkości.
 4. **Kolejka jest skalibrowana tylko co do rzędu wielkości.** Liczba stanowisk nie jest znana (11 komórek Kerem Shalom to miejsca postoju, nie równoległe odprawy). Doniesienia o czasie czekania są anegdotyczne: ok. 11 h, czasem do trzech dni (The World, lipiec 2024), średnio do 20 dni na trasie z Egiptu (Oxfam, marzec 2024). W maju 2024 na Kerem Shalom wychodzi średnio ok. 2,5 h, p95 ok. 10 h, maksimum ok. 16 h (seed 42, bez zdarzeń losowych). Przy 10 stanowiskach średnia spada do 1,3 h, przy 12 do 0,7 h. Czekanie przed dniem z danych (trasa z Egiptu, Al-Arisz, Nitzana) nie jest w modelu. Na małych przejściach (Erez, Western Erez, Gate 96, JLOTS) 4 stanowiska to zgadywanie.
-5. **Wyniki z warstwami dodatkowymi zależą od założeń bez danych.** Ludność hubów pochodzi z IPC i nie zależy od pomocy, więc pokrycie żywności różni się między hubami. W 2024-05 (seed 42, `--m2`): Hub_North_Jabalia 4%, Hub_Khan_Younis 38%, a Gaza City, Deir al-Balah i Rafah 100%. Pokrycie łączne to ok. 76% (odchylenie 1,1 pp przy 5 seedach, `--demand`). Zapas nie przepływa między hubami, więc nadwyżka w jednym hubie nie pomaga innemu. Ludność w maju 2024 szybko się zmieniała (Rafah z 1,3 mln do ok. 65 tys.), a model bierze średnią z miesiąca. Rozbicie grup IPC na gubernatorstwa to założenie. Średnia kolejka na przejściach to w 2024-05 ok. 126 min bez zdarzeń losowych i ok. 177 min z `--m2` (odchylenie 25 min), więc z `--m2` trzeba raportować średnią z wielu seedów.
+5. **Wyniki żywności zależą od założeń bez danych.** Podział grup IPC na gubernatorstwa jest stałą proporcją z kwietnia 2025. Rafah w maju i czerwcu 2024 ma dwie liczby z raportów zamiast tabeli IPC. Żywność jest wspólna w grupie IPC, ale nie płynie między grupami, więc nadwyżka w Rafah nie pomaga środkowi ani północy. Przypisanie przejść do stref jest założeniem, a w Dispatching od czerwca 2024 prawie nie ma wydań na północy, więc wagi North_Jabalia / Gaza City wynikają wtedy z ludności. Zapas startuje od zera, a pokrycie liczy tylko pomoc z Excela. Rozkład hubów pochodzi z Dispatching, które obejmuje ok. 38% tonażu z Received. W listopadzie 2023 12% odbiorców z Dispatching nie jest zmapowanych do hubów. Średnia kolejka na przejściach to w 2024-05 ok. 126 min bez zdarzeń losowych i ok. 177 min z `--m2` (odchylenie 25 min), więc z `--m2` trzeba raportować średnią z wielu seedów.
 6. **Graf zawiera drogi serwisowe i dojazdowe oraz Korytarz Filadelfijski.** Trasy mogą przechodzić przez drogi, których ciężarówki humanitarne nie używają.
 7. **Część odbiorców z Excela nie jest zmapowana do hubów.** W 2023-11 to 117 nazw (14% ruchu), głównie szpitale, magazyny ONZ i sklepy. Do rozszerzenia w `HUB_RULES` po sprawdzeniu lokalizacji.
 
 ## Plan
 
-- Kalibracja kolejki i doków, scenariusz zamknięcia całego przekroju korytarza, rozszerzenie `HUB_RULES`.
+- Kalibracja kolejki i doków, scenariusz zamknięcia całego przekroju korytarza, rozszerzenie `HUB_RULES`, przepływ żywności między grupami IPC.
 - Porównanie kierunku zmian z raportami IPC, walidacja, raport końcowy.
 
 ## Jak dodawać nowe rzeczy

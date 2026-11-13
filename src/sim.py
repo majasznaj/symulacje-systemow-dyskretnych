@@ -127,13 +127,11 @@ def run_simulation(trucks, G, router, crossing_nodes, hub_nodes, hub_shares, eve
                       f"(liczenie od zera: {full}) | w drodze {state['in_transit']}, bez drogi {state['stuck']}")
 
     def demand_process():
-        """Co dobę populacja zjada rację z zapasu hubu. Kończy się razem z ostatnią ciężarówką."""
+        """Co dobę populacja zjada rację z zapasu hubu, przez wszystkie doby miesiąca (także po ostatniej ciężarówce)."""
         day = 0
-        while state["remaining"] > 0:
+        while day < month_days:
             yield env.timeout(1440)
             day += 1
-            if day > month_days:
-                continue
             demand_model.daily_tick(day)
             snap = demand_model.snapshot()
             say_event(f"DOBA {day} | " + "; ".join(

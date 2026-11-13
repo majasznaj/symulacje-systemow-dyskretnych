@@ -144,7 +144,7 @@ def run_once(a, seed, double_trucks=False, quiet=False):
             print(f"Zdarzenia losowe: {n_st} (incydenty drogowe i zamknięcia przejść)")
 
     import demand as demand_mod
-    demand_model = demand_mod.DemandModel(data.hub_population(a.month)) if a.demand else None
+    demand_model = demand_mod.DemandModel(data.hub_population_daily(a.month)) if a.demand else None
     edge_usage = {} if a.analytics else None
 
     # --- symulacja ---
@@ -251,7 +251,8 @@ def main():
         if not history.empty:
             history.to_csv(outdir / "demand_history.csv", index=False)
         print("\nPopyt na żywność (pokrycie = zjedzone / zapotrzebowanie):\n", summary.to_string(index=False))
-        print(f"Pokrycie łącznie: {demand_model.total_coverage_pct()}%")
+        print(f"Pokrycie łącznie: {demand_model.total_coverage_pct()}% "
+              f"(górne ograniczenie, gdyby żywność mogła płynąć między hubami: {demand_model.pooled_coverage_pct()}%)")
     if a.analytics:
         import analytics
         analytics.Reporter(outdir, a.month).run(truck_log=log, demand_model=demand_model,
@@ -278,6 +279,7 @@ def multi_seed(a, double_trucks, outdir):
             row["unload_wait_mean_min"] = round(log.loc[log["delivered"], "unload_wait_min"].mean(), 1)
         if dm is not None:
             row["food_coverage_pct"] = dm.total_coverage_pct()
+            row["food_pooled_pct"] = dm.pooled_coverage_pct()
         rows.append(row)
         print(f"  ziarno {seed}: " + ", ".join(f"{k}={v}" for k, v in row.items() if k != "seed"))
     table = pd.DataFrame(rows).set_index("seed")

@@ -13,6 +13,7 @@ data/processed/unosat_extracted/
 data/processed/dispatch_daily_*.csv
 data/processed/trucks_*.csv
 data/processed/hub_shares_*.csv
+data/processed/hub_shares_*.method
 
 # Wyniki symulacji (generowane przez --month/--diagnose)
 output/.DS_Store

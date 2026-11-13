@@ -1,12 +1,14 @@
 """demand.py – Warstwa popytowa i wskaźnik bezpieczeństwa żywnościowego (opcjonalna warstwa, flaga --demand).
 
-Każdy hub obsługuje pewną populację (data.hub_population: ludność gubernatorstwa z raportów IPC, niezależna od wydań pomocy) i ma dzienne zapotrzebowanie na żywność.
-Dostawy zwiększają zapas w hubie, a co dobę populacja zjada tyle, ile jest w zapasie (do pełnej racji).
-Faza bezpieczeństwa żywnościowego jest liczona z kalorii faktycznie zjedzonych tego dnia na osobę.
+Każdy hub obsługuje ludność swojego gubernatorstwa (data.hub_population_daily: liczby z raportów IPC, osobna dla każdego dnia,
+niezależna od wydań pomocy) i ma dzienne zapotrzebowanie na żywność = ludność x 2100 kcal / kcal w tonie.
+Dostawy (tylko kategoria "Food Items") zwiększają zapas w hubie. Co dobę ludność zjada tyle, ile jest w zapasie (do pełnej racji).
+Zapas jest wspólny w obrębie grupy IPC (północ, środek, Rafah; config.FOOD_SHARED_WITHIN_IPC_GROUP), ale nie przepływa między grupami.
+Pokrycie liczy wyłącznie żywność z pomocy z Excela (bez rynku, własnej produkcji i zapasów domowych).
 
-UWAGA: faza 1–5 jest UPROSZCZONA i tylko wzorowana na skali IPC (oficjalne IPC łączy wiele wskaźników, m.in. ceny,
-śmiertelność i odżywienie dzieci). Nie nazywamy jej w raporcie "IPC", tylko wskaźnikiem pokrycia kalorii. Wody nie ma,
-bo w danych ONZ nie ma kategorii wody (Cargo Category: Food, Non-Food, Mixed, Medical).
+Wskaźnik fazy 1–5 (kcal_phase) jest UPROSZCZONY: tylko progi kalorii zjedzonych w dobie na osobę. Skala nazw faz jest wzięta z IPC,
+ale oficjalne IPC łączy wiele wskaźników (spożycie, strategie przetrwania, odżywienie dzieci, śmiertelność), więc to nie jest klasyfikacja IPC.
+Wody nie ma, bo w danych ONZ nie ma kategorii wody (Cargo Category: Food, Non-Food, Mixed, Medical).
 
 Integracja z sim.py (robi to sim.run_simulation, gdy podamy demand_model):
   - DemandModel.deliver(hub, minute, cargo_category, quantity_mt) przy każdym rozładunku,
@@ -56,6 +58,7 @@ def estimate_mt(quantity, unit):
 
 def food_phase(kcal_per_capita: float) -> int:
     """Uproszczona faza 1–5 (wzorowana na IPC) z kalorii zjedzonych na osobę w ciągu doby."""
+    kcal_per_capita = round(kcal_per_capita, 3)   # 2099.9999999 (błąd float) ma być pełną rację
     if kcal_per_capita >= KCAL_ADEQUATE:
         return 1   # minimalna
     if kcal_per_capita >= 1_900:
@@ -71,7 +74,7 @@ def food_phase(kcal_per_capita: float) -> int:
 class HubDemand:
     """Stan zapotrzebowania i zapasów dla jednego hubu."""
     name: str
-    population: int
+    population: int            # ludność w bieżącej dobie (zmienia się co dobę z tabeli IPC)
 
     stock_food_mt: float = 0.0
     stock_medical_mt: float = 0.0
@@ -90,11 +93,9 @@ class HubDemand:
     def phase(self) -> int:
         return food_phase(self.last_intake_kcal)
 
-    def consume_daily(self, day: int):
-        """Populacja zjada dobową rację z zapasu. Brak zapasu = niezaspokojony popyt."""
-        need = self.daily_food_need_mt
-        consumed = min(self.stock_food_mt, need)
-        self.stock_food_mt -= consumed
+    def record_day(self, day: int, need: float, consumed: float, stock_share: float):
+        """Zapisuje dobę: potrzeba i zjedzone [t] tego huba oraz jego udział w zapasie grupy."""
+        self.stock_food_mt = stock_share
         self.total_consumed_food += consumed
         self.total_need_food += need
         self.last_intake_kcal = consumed * KCAL_PER_MT_FOOD / self.population if self.population else 0.0
@@ -104,9 +105,9 @@ class HubDemand:
             "population": self.population,
             "food_need_mt": round(need, 2),
             "food_consumed_mt": round(consumed, 2),
-            "stock_food_mt": round(self.stock_food_mt, 2),
+            "stock_food_mt": round(stock_share, 2),
             "kcal_per_capita": round(self.last_intake_kcal, 0),
-            "ipc_phase": self.phase(),
+            "kcal_phase": self.phase(),
             "unmet_food_mt_cum": round(self.total_need_food - self.total_consumed_food, 2),
         })
 
@@ -114,10 +115,14 @@ class HubDemand:
 class DemandModel:
     """Zarządza stanem popytowym wszystkich hubów przez całą symulację."""
 
-    def __init__(self, populations: Dict[str, int]):
-        """populations: {hub: liczba mieszkańców}, patrz data.hub_population()."""
-        pops = populations
-        self.hubs: Dict[str, HubDemand] = {name: HubDemand(name=name, population=pop) for name, pop in pops.items()}
+    def __init__(self, population_daily: pd.DataFrame):
+        """population_daily: indeks = numer doby (1..N), kolumny = huby, patrz data.hub_population_daily()."""
+        self.population_daily = population_daily
+        self.hubs: Dict[str, HubDemand] = {
+            name: HubDemand(name=name, population=int(population_daily[name].iloc[0])) for name in population_daily.columns}
+        # grupa = hub sam (FOOD_SHARED_WITHIN_IPC_GROUP = False) albo grupa IPC (północ / środek / Rafah). Zapas jest wspólny w grupie.
+        self.group_of = {h: (config.IPC_SPLIT[h][0] if config.FOOD_SHARED_WITHIN_IPC_GROUP else h) for h in self.hubs}
+        self.group_stock: Dict[str, float] = {g: 0.0 for g in set(self.group_of.values())}
 
     def deliver(self, hub: str, minute: float, cargo_category: str, quantity_mt: float):
         """Rejestruje dostawę [tony] do danego hubu."""
@@ -126,14 +131,27 @@ class DemandModel:
             return
         kind = CARGO_TYPE.get(cargo_category, "other")
         if kind == "food":
-            hd.stock_food_mt += quantity_mt
+            self.group_stock[self.group_of[hub]] += quantity_mt
             hd.total_delivered_food += quantity_mt
         elif kind == "medical":
             hd.stock_medical_mt += quantity_mt
 
     def daily_tick(self, day: int):
+        """Raz na dobę: ludność z tabeli IPC, potem każda grupa zjada rację z wspólnego zapasu.
+        Zjedzone dzieli się na huby grupy proporcjonalnie do potrzeb, więc wszystkie huby w grupie mają to samo kcal na osobę."""
+        last = self.population_daily.index.max()
         for hd in self.hubs.values():
-            hd.consume_daily(day)
+            hd.population = int(self.population_daily.loc[min(day, last), hd.name])
+        for g in self.group_stock:
+            members = [hd for h, hd in self.hubs.items() if self.group_of[h] == g]
+            need_g = sum(hd.daily_food_need_mt for hd in members)
+            eaten_g = min(self.group_stock[g], need_g)
+            self.group_stock[g] -= eaten_g
+            pop_g = sum(hd.population for hd in members)
+            for hd in members:
+                share = hd.daily_food_need_mt / need_g if need_g else 0.0
+                hd.record_day(day, hd.daily_food_need_mt, eaten_g * share,
+                              self.group_stock[g] * (hd.population / pop_g if pop_g else 0.0))
 
     def snapshot(self) -> Dict[str, dict]:
         """Bieżący stan hubów (do logu w trakcie symulacji)."""
@@ -151,21 +169,36 @@ class DemandModel:
         return pd.DataFrame(rows).sort_values(["day", "hub"]).reset_index(drop=True)
 
     def summary(self) -> pd.DataFrame:
-        """Podsumowanie na hub: dostawy, spożycie, pokrycie zapotrzebowania [%] i faza z ostatniej doby."""
+        """Podsumowanie miesiąca na hub: dostawy, spożycie, pokrycie [%], średnie kcal na osobę i faza z całego miesiąca."""
         rows = []
         for hd in self.hubs.values():
+            h = pd.DataFrame(hd.history)
+            pop_days = h["population"].sum() if len(h) else 0
+            kcal_mean = hd.total_consumed_food * KCAL_PER_MT_FOOD / pop_days if pop_days else 0.0
             rows.append({
                 "hub": hd.name,
-                "population": hd.population,
+                "group": self.group_of[hd.name],
+                "population": round(h["population"].mean()) if len(h) else hd.population,
                 "food_need_mt": round(hd.total_need_food, 1),
                 "food_delivered_mt": round(hd.total_delivered_food, 1),
                 "food_consumed_mt": round(hd.total_consumed_food, 1),
                 "unmet_food_mt": round(hd.total_need_food - hd.total_consumed_food, 1),
+                "stock_end_mt": round(hd.stock_food_mt, 1),
+                "stock_end_days": round(hd.stock_food_mt / hd.daily_food_need_mt, 1) if hd.daily_food_need_mt else 0.0,
                 "food_coverage_pct": round(100 * hd.total_consumed_food / hd.total_need_food, 1)
                 if hd.total_need_food else 0.0,
-                "final_phase": hd.phase(),
+                "kcal_per_capita_mean": round(kcal_mean),
+                "kcal_phase_month": food_phase(kcal_mean),
+                "days_phase_4_5": int((h["kcal_phase"] >= 4).sum()) if len(h) else 0,
             })
         return pd.DataFrame(rows)
+
+    def pooled_coverage_pct(self) -> float:
+        """Górne ograniczenie: pokrycie, gdyby cała dostarczona żywność mogła trafić do dowolnego huba (min(dostawy, potrzeby) / potrzeby).
+        Różnica względem total_coverage_pct to koszt nierównego rozdziału pomocy między hubami."""
+        need = sum(h.total_need_food for h in self.hubs.values())
+        delivered = sum(h.total_delivered_food for h in self.hubs.values())
+        return round(100 * min(delivered, need) / need, 1) if need else 0.0
 
     def total_coverage_pct(self) -> float:
         need = sum(h.total_need_food for h in self.hubs.values())

@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 import config
+import demand
 
 
 def _read_sheet0(path):
@@ -46,6 +47,10 @@ def map_hub(name):
     return None
 
 
+# Zmiana reguły liczenia udziałów hubów unieważnia cache (pliki hub_shares_*.csv liczone inną metodą są liczone od nowa).
+SHARES_METHOD = "food_tonnes_by_zone_v3"
+
+
 def prepare_hub_mapping(month):
     """Dispatching -> tabela nazw odbiorców i macierz udziałów (przejście × hub)."""
     df = _read_sheet0(config.DISPATCH_XLSX)
@@ -70,20 +75,25 @@ def prepare_hub_mapping(month):
     config.DATA_PROC.mkdir(parents=True, exist_ok=True)
     daily.to_csv(config.DATA_PROC / f"dispatch_daily_{month}.csv")
 
+    # udział huba = udział w TONAŻU żywności wydanej w miesiącu (nie w liczbie wierszy). Jeśli w miesiącu nie ma
+    # zmapowanej żywności, bierzemy wszystkie kategorie.
+    df["mt"] = [demand.estimate_mt(q, u) for q, u in zip(df["Quantity"], df["Unit"])]
+    names["food_t"] = names["destination"].map(
+        df[df["Cargo Category"] == "Food Items"].groupby(col)["mt"].sum()).fillna(0.0).round(1)
     mapped = df.dropna(subset=["hub"])
-    global_share = mapped["hub"].value_counts(normalize=True)
+    food = mapped[mapped["Cargo Category"] == "Food Items"]
+    if len(food) == 0:
+        food = mapped
 
     shares = pd.DataFrame(0.0, index=list(config.CROSSINGS), columns=list(config.HUBS))
+    tons = food.groupby("hub")["mt"].sum().reindex(list(config.HUBS)).fillna(0.0)
+    pop = pd.Series(hub_population(month))
     for c in config.CROSSINGS:
-        sub = mapped[mapped["crossing"] == c]
-        if not config.HUB_SHARE_BY_CROSSING or len(sub) < config.MIN_CROSSING_SAMPLES:
-            for h in config.HUBS:
-                shares.loc[c, h] = global_share.get(h, 0.0)
-        else:
-            counts = sub["hub"].value_counts(normalize=True)
-            for h in config.HUBS:
-                shares.loc[c, h] = counts.get(h, 0.0)
-    shares = shares.div(shares.sum(axis=1), axis=0).fillna(0.0)
+        allowed = [h for h in config.CROSSING_HUBS.get(c, list(config.HUBS)) if h in shares.columns]
+        w = tons[allowed]
+        if w.sum() == 0:     # brak wydań w tej części Strefy: wagi z ludności hubów
+            w = pop[allowed]
+        shares.loc[c, allowed] = w / w.sum()
     return names, shares
 
 def prepare(month=None, force=False):
@@ -93,7 +103,9 @@ def prepare(month=None, force=False):
     f_trucks = config.DATA_PROC / f"trucks_{month}.csv"
     f_map = config.DATA_PROC / f"hub_mapping_{month}.csv"
     f_shares = config.DATA_PROC / f"hub_shares_{month}.csv"
-    if f_trucks.exists() and f_shares.exists() and not force:
+    f_method = config.DATA_PROC / f"hub_shares_{month}.method"
+    current = f_method.read_text().strip() if f_method.exists() else ""
+    if f_trucks.exists() and f_shares.exists() and current == SHARES_METHOD and not force:
         return load_prepared(month)
 
     trucks = prepare_trucks(month)
@@ -101,6 +113,7 @@ def prepare(month=None, force=False):
     trucks.to_csv(f_trucks, index=False)
     names.to_csv(f_map, index=False)
     shares.to_csv(f_shares)
+    f_method.write_text(SHARES_METHOD + "\n")
 
     n_rows = int(names["rows"].sum())
     n_map = int(names.dropna(subset=["hub"])["rows"].sum())
@@ -108,6 +121,7 @@ def prepare(month=None, force=False):
     print(trucks["crossing"].value_counts().to_string())
     print(f"Dispatching {month}: {n_rows} wierszy, {len(names)} nazw odbiorców, "
           f"zmapowano {n_map} ({n_map / n_rows:.1%})")
+    print(f"Żywność w Dispatching {month}: {names['food_t'].sum():.0f} t (udziały hubów liczone z tonażu żywności)")
     print("Udziały hubów:")
     print(shares.round(3).to_string())
     unmapped = names[names["hub"].isna()]
@@ -117,17 +131,25 @@ def prepare(month=None, force=False):
     return trucks, shares
 
 
-def hub_population(month=None):
-    """Ludność każdego huba w miesiącu z IPC (config.IPC_POPULATION, config.IPC_SPLIT): średnia z dni miesiąca
-    po interpolacji liniowej między punktami IPC. Nie zależy od wydań z Dispatching."""
+def hub_population_daily(month=None):
+    """Ludność każdego huba w każdym dniu miesiąca z IPC (config.IPC_POPULATION, config.IPC_SPLIT): interpolacja liniowa
+    między punktami IPC, potem podział grup IPC na huby. Zwraca DataFrame: indeks = numer dnia (1..N), kolumny = huby.
+    Nie zależy od wydań z Dispatching."""
     month = month or config.MONTH
     start, end = _month_bounds(month)
     days = pd.date_range(start, end - pd.Timedelta(days=1), freq="D")
     t = days.values.astype("datetime64[D]").astype(float)
     pts = pd.DataFrame(config.IPC_POPULATION, columns=["date", "north", "middle", "rafah"])
     tp = pd.to_datetime(pts["date"]).values.astype("datetime64[D]").astype(float)
-    group = {g: float(np.interp(t, tp, pts[g]).mean()) for g in ("north", "middle", "rafah")}
-    return {h: int(round(group[g] * share)) for h, (g, share) in config.IPC_SPLIT.items()}
+    group = {g: np.interp(t, tp, pts[g]) for g in ("north", "middle", "rafah")}
+    out = pd.DataFrame({h: np.round(group[g] * share).astype(int) for h, (g, share) in config.IPC_SPLIT.items()})
+    out.index = range(1, len(days) + 1)
+    return out
+
+
+def hub_population(month=None):
+    """Średnia ludność huba w miesiącu (do wyświetlania). Symulacja używa wartości dziennych: hub_population_daily."""
+    return {h: int(round(v)) for h, v in hub_population_daily(month).mean().items()}
 
 
 def load_prepared(month=None):
@@ -136,6 +158,6 @@ def load_prepared(month=None):
     shares = pd.read_csv(config.DATA_PROC / f"hub_shares_{month}.csv", index_col=0)
     if "share" in shares.columns:
         raise RuntimeError(
-            f"Stary format cache dla {month}. Uruchom: python src/run.py --prepare-data --force"
+            f"Stary format cache dla {month}. Uruchom: python src/run.py --prepare-data"
         )
     return trucks, shares

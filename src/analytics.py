@@ -4,7 +4,7 @@ Generuje na koniec symulacji:
   1. Tabele KPI (kolejki, czasy, pokrycie popytu, uproszczona faza bezpieczeństwa żywnościowego).
   2. Identyfikację wąskich gardeł sieci drogowej (najczęściej używane krawędzie).
   3. Mapę zatorów (mapa choropleth – czas przejazdu vs. długość trasy).
-  4. Wykres szeregu czasowego IPC dla każdego hubu.
+  4. Wykres szeregu czasowego fazy kalorycznej (1–5) dla każdego hubu.
   5. Raport bottleneck: ranking krawędzi i przejść granicznych wg obciążenia.
 
 Integracja:
@@ -34,11 +34,11 @@ except ImportError:
 
 IPC_COLORS = {1: "#1a9850", 2: "#fee08b", 3: "#fdae61", 4: "#d73027", 5: "#7b2d8b"}
 IPC_LABELS = {
-    1: "IPC 1 – Minimal",
-    2: "IPC 2 – Stressed",
-    3: "IPC 3 – Crisis",
-    4: "IPC 4 – Emergency",
-    5: "IPC 5 – Catastrophe",
+    1: "1 – minimalna",
+    2: "2 – napięta",
+    3: "3 – kryzys",
+    4: "4 – zagrożenie",
+    5: "5 – katastrofa",
 }
 
 
@@ -86,7 +86,7 @@ class Reporter:
                 summary.to_csv(self.outdir / "demand_summary.csv", index=False)
                 print("\nPodsumowanie popytu:")
                 print(summary.to_string(index=False))
-                self._plot_ipc_timeline(history)
+                self._plot_kcal_phase(history)
                 self._plot_supply_coverage(history)
 
         if hub_edge_usage and G is not None and HAS_OSMNX:
@@ -237,28 +237,28 @@ class Reporter:
         fig.savefig(self.outdir / "kpi_delivery_timeline.png", dpi=130)
         plt.close(fig)
 
-    def _plot_ipc_timeline(self, history: pd.DataFrame):
-        """Linia IPC dla każdego hubu przez cały miesiąc."""
+    def _plot_kcal_phase(self, history: pd.DataFrame):
+        """Faza kaloryczna każdego hubu przez cały miesiąc."""
         hubs = history["hub"].unique()
         fig, ax = plt.subplots(figsize=(11, 5))
         for hub in hubs:
             sub = history[history["hub"] == hub].sort_values("day")
-            ax.plot(sub["day"], sub["ipc_phase"], marker="o", ms=4, label=hub)
+            ax.plot(sub["day"], sub["kcal_phase"], marker="o", ms=4, label=hub)
 
         ax.set_yticks([1, 2, 3, 4, 5])
         ax.set_yticklabels([IPC_LABELS[i] for i in range(1, 6)], fontsize=8)
         ax.set_ylim(0.5, 5.5)
-        ax.invert_yaxis()  # IPC 1 na górze = dobry stan
+        ax.invert_yaxis()  # faza 1 na górze = dobry stan
         ax.set_xlabel("Dzień miesiąca")
-        ax.set_title("Faza bezpieczeństwa żywnościowego wg hubu (uproszczona, wzorowana na IPC)", weight="bold")
+        ax.set_title("Faza bezpieczeństwa żywnościowego wg hubu (uproszczona, tylko z kalorii, nie jest klasyfikacją IPC)", weight="bold")
         ax.legend(fontsize=8)
 
-        # Kolorowe pasy tła wg faz IPC
+        # Kolorowe pasy tła wg faz
         for phase, color in IPC_COLORS.items():
             ax.axhspan(phase - 0.5, phase + 0.5, alpha=0.08, color=color, lw=0)
 
         fig.tight_layout()
-        fig.savefig(self.outdir / "kpi_ipc_timeline.png", dpi=130)
+        fig.savefig(self.outdir / "kpi_kcal_phase.png", dpi=130)
         plt.close(fig)
 
     def _plot_supply_coverage(self, history: pd.DataFrame):

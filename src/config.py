@@ -55,9 +55,9 @@ HUB_RULES = [
     ("Hub_Rafah", r"rafah|rafa\b|al-mashroua|mashrou|sultan|geneina|musabah|musabeh|khirbet|mall al-ar"
                   r"|\brf?ah\b|رفح|السلطان"),
     ("Hub_Khan_Younis", r"khan\s*y[ou]+n[ie]?s|kytc"
-                        r"|k[ah]*n\s*y[ou]+n[ie]?s|kh\.?\s*/?\s*y[ou]+nis|خان يونس|خانيونس"),
+                        r"|k[ah]*n\s*y[ou]+n[ie]?s|kh\.?\s*/?\s*y[ou]+nis|european (gaza )?hospital|خان يونس|خانيونس"),
     ("Hub_Deir_al_Balah", r"deir|dair|middle|nuseirat|bureij|maghazi|zawaida"
-                          r"|\bdi?e?r\s*al|d[./\\]?\s*balah|dar\s*al|abalah|dier|nus[ae]?i?rat|nsyrat|nsirat|nusairat|buraj|bureij|دير البلح|النصيرات|البريج|المغازي"),
+                          r"|\bdi?e?r\s*al|d[./\\]?\s*balah|dar\s*al|abalah|dier|nus[ae]?i?rat|nsyrat|nsirat|nusairat|buraj|bureij|burij|دير البلح|النصيرات|البريج|المغازي"),
     ("Hub_North_Jabalia", r"north|jabal|beit lahi|beit hanoun|جباليا|بيت لاهيا|بيت حانون"),
     ("Hub_Gaza_City", r"gaza(?! strip)|gfo|(?<!دير )غزة"),
 ]
@@ -130,7 +130,6 @@ MAX_ATTEMPTS = 3            # po tylu odmowach ciężarówka jest odrzucona na s
 STUCK_GIVE_UP_H = 72         # ciężarówka bez drogi do hubu czeka tyle godzin, potem rezygnuje (delivered=False)
 STUCK_WAIT_MIN = 15         # ciężarówka bez drogi do hubu sprawdza ponownie co tyle minut
 BLOCK_HOURS = 12            # domyślny czas trwania blokady z --block-main
-MIN_CROSSING_SAMPLES = 30 # poniżej tego progu dla przejścia używamy globalnego rozkładu
 
 # =============================================================================
 # WARSTWY DODATKOWE: rozładunek w hubach, popyt na żywność, zdarzenia losowe
@@ -179,10 +178,22 @@ IPC_SPLIT = {
     "Hub_Rafah": ("rafah", 1.0),
 }
 
-# --- rozkład hubów ---
-# False: P(hub) z wszystkich wydań miesiąca. Kolumna Crossing w Dispatching nie zgadza się z Received (np. 2024-03: wszystkie
-# wydania "Rafah", a 76% wjazdów to Kerem Shalom), więc nie warunkujemy huba przejściem. True: P(hub | crossing) jak w M1.
-HUB_SHARE_BY_CROSSING = False
+# --- dokąd jedzie ciężarówka z danego przejścia ---
+# Ciężarówka z przejścia wybiera hub spośród hubów tej samej części Strefy (wg geografii). W Dispatching przejście Western Erez
+# prowadzi wyłącznie do Gaza City (6,4 tys. t żywności, żadnej na południe), więc podział jest zgodny z danymi. Przejścia nieuwzględnione
+# w słowniku mogą jechać do wszystkich hubów. ZAŁOŻENIE: Gate 96 i JLOTS (północ od korytarza Netzarim) obsługują północ, Kissufim środek.
+# Wagi hubów w grupie to ich udział w tonażu żywności z Dispatching w miesiącu. Gdy grupa nie ma w miesiącu żadnych wydań
+# (Dispatching od czerwca 2024 prawie nie ma północy), wagi wynikają z ludności hubów (IPC_SPLIT).
+# Kolumna Crossing w Dispatching jest przy tym niespójna z Received dla etykiety "Rafah" (patrz README), więc przejścia z niej nie bierzemy.
+NORTH_HUBS = ["Hub_North_Jabalia", "Hub_Gaza_City"]
+SOUTH_HUBS = ["Hub_Deir_al_Balah", "Hub_Khan_Younis", "Hub_Rafah"]
+CROSSING_HUBS = {
+    "Erez": NORTH_HUBS, "Western Erez": NORTH_HUBS, "Gate 96": NORTH_HUBS, "JLOTS": NORTH_HUBS,
+    "Kerem Shalom": SOUTH_HUBS, "Rafah": SOUTH_HUBS, "Kissufim": SOUTH_HUBS,
+}
+# Żywność dostarczona do któregokolwiek huba grupy IPC (północ / środek / Rafah) służy całej grupie. IPC podaje ludność tylko
+# dla grup, a podział na huby to nasze założenie (IPC_SPLIT). Huby w grupie leżą 6-13 km od siebie. False: każdy hub osobno.
+FOOD_SHARED_WITHIN_IPC_GROUP = True
 
 # --- rozładunek w hubie (--unloading) ---
 # Liczba równoległych stanowisk rozładunku (ZAŁOŻENIE: brak danych) i czas rozładunku, Erlang(k) o tej średniej.
